@@ -1,0 +1,1079 @@
+{
+    "success": true,
+    "jobsdata": [
+        {
+            "id": "1793676880",
+            "date_posted": "2025-07-03T13:21:11",
+            "date_created": "2025-07-03T13:36:17.699554",
+            "title": "Business Development Director",
+            "organization": "Jobot",
+            "organization_url": "https://www.linkedin.com/company/jobot",
+            "date_validthrough": "2025-08-02T13:21:11",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "US",
+                        "addressLocality": "Salt Lake City",
+                        "addressRegion": "UT",
+                        "streetAddress": null
+                    },
+                    "latitude": 40.758476,
+                    "longitude": -111.888145
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "Salt Lake City, Utah, United States"
+                }
+            ],
+            "salary_raw": {
+                "@type": "MonetaryAmount",
+                "currency": "USD",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 130000,
+                    "maxValue": 160000,
+                    "unitText": "YEAR"
+                }
+            },
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://www.linkedin.com/jobs/view/business-development-director-at-jobot-4258106364",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+            "cities_derived": [
+                "Salt Lake City"
+            ],
+            "regions_derived": [
+                "Utah"
+            ],
+            "countries_derived": [
+                "United States"
+            ],
+            "locations_derived": [
+                "Salt Lake City, Utah, United States"
+            ],
+            "timezones_derived": [
+                "America/Denver"
+            ],
+            "lats_derived": [
+                40.7776
+            ],
+            "lngs_derived": [
+                -111.9311
+            ],
+            "remote_derived": true,
+            "recruiter_name": null,
+            "recruiter_title": null,
+            "recruiter_url": null,
+            "linkedin_org_employees": 1257,
+            "linkedin_org_url": "http://Jobot.com",
+            "linkedin_org_size": "501-1,000 employees",
+            "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+            "linkedin_org_industry": "Staffing and Recruiting",
+            "linkedin_org_followers": 3254110,
+            "linkedin_org_headquarters": "Newport Beach, California",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2018",
+            "linkedin_org_specialties": [
+                "technology",
+                "recruiting",
+                "AI",
+                "artificial intelligence",
+                "construction",
+                "IT",
+                "tech recruiting",
+                "staffing",
+                "mortgage",
+                "healthcare",
+                "accountingfinance",
+                "accounting",
+                "jobot",
+                "staffing",
+                "sales",
+                "humanresources",
+                "tech",
+                "and engineering"
+            ],
+            "linkedin_org_locations": [
+                "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+            ],
+            "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+            "linkedin_org_recruitment_agency_derived": true,
+            "seniority": "Director",
+            "directapply": true,
+            "linkedin_org_slug": "jobot",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793670487",
+            "date_posted": "2025-07-03T13:21:10",
+            "date_created": "2025-07-03T13:33:13.549462",
+            "title": "Business Development Director",
+            "organization": "Jobot",
+            "organization_url": "https://www.linkedin.com/company/jobot",
+            "date_validthrough": "2025-08-02T13:21:10",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "US",
+                        "addressLocality": "Irvine",
+                        "addressRegion": "CA",
+                        "streetAddress": null
+                    },
+                    "latitude": 33.68591,
+                    "longitude": -117.82472
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "Irvine, California, United States"
+                }
+            ],
+            "salary_raw": {
+                "@type": "MonetaryAmount",
+                "currency": "USD",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 130000,
+                    "maxValue": 160000,
+                    "unitText": "YEAR"
+                }
+            },
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://www.linkedin.com/jobs/view/business-development-director-at-jobot-4258107211",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+            "cities_derived": [
+                "Irvine"
+            ],
+            "regions_derived": [
+                "California"
+            ],
+            "countries_derived": [
+                "United States"
+            ],
+            "locations_derived": [
+                "Irvine, California, United States"
+            ],
+            "timezones_derived": [
+                "America/Los_Angeles"
+            ],
+            "lats_derived": [
+                33.6772
+            ],
+            "lngs_derived": [
+                -117.7738
+            ],
+            "remote_derived": true,
+            "recruiter_name": null,
+            "recruiter_title": null,
+            "recruiter_url": null,
+            "linkedin_org_employees": 1257,
+            "linkedin_org_url": "http://Jobot.com",
+            "linkedin_org_size": "501-1,000 employees",
+            "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+            "linkedin_org_industry": "Staffing and Recruiting",
+            "linkedin_org_followers": 3254110,
+            "linkedin_org_headquarters": "Newport Beach, California",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2018",
+            "linkedin_org_specialties": [
+                "technology",
+                "recruiting",
+                "AI",
+                "artificial intelligence",
+                "construction",
+                "IT",
+                "tech recruiting",
+                "staffing",
+                "mortgage",
+                "healthcare",
+                "accountingfinance",
+                "accounting",
+                "jobot",
+                "staffing",
+                "sales",
+                "humanresources",
+                "tech",
+                "and engineering"
+            ],
+            "linkedin_org_locations": [
+                "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+            ],
+            "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+            "linkedin_org_recruitment_agency_derived": true,
+            "seniority": "Director",
+            "directapply": true,
+            "linkedin_org_slug": "jobot",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793692694",
+            "date_posted": "2025-07-03T13:21:08",
+            "date_created": "2025-07-03T13:41:29.24261",
+            "title": "Business Development Director",
+            "organization": "Jobot",
+            "organization_url": "https://www.linkedin.com/company/jobot",
+            "date_validthrough": "2025-08-02T13:21:08",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "US",
+                        "addressLocality": "Seattle",
+                        "addressRegion": "WA",
+                        "streetAddress": null
+                    },
+                    "latitude": 47.60323,
+                    "longitude": -122.33028
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "Seattle, Washington, United States"
+                }
+            ],
+            "salary_raw": {
+                "@type": "MonetaryAmount",
+                "currency": "USD",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 130000,
+                    "maxValue": 160000,
+                    "unitText": "YEAR"
+                }
+            },
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://www.linkedin.com/jobs/view/business-development-director-at-jobot-4258101850",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+            "cities_derived": [
+                "Seattle"
+            ],
+            "regions_derived": [
+                "Washington"
+            ],
+            "countries_derived": [
+                "United States"
+            ],
+            "locations_derived": [
+                "Seattle, Washington, United States"
+            ],
+            "timezones_derived": [
+                "America/Los_Angeles"
+            ],
+            "lats_derived": [
+                47.6211
+            ],
+            "lngs_derived": [
+                -122.3244
+            ],
+            "remote_derived": true,
+            "recruiter_name": null,
+            "recruiter_title": null,
+            "recruiter_url": null,
+            "linkedin_org_employees": 1257,
+            "linkedin_org_url": "http://Jobot.com",
+            "linkedin_org_size": "501-1,000 employees",
+            "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+            "linkedin_org_industry": "Staffing and Recruiting",
+            "linkedin_org_followers": 3254110,
+            "linkedin_org_headquarters": "Newport Beach, California",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2018",
+            "linkedin_org_specialties": [
+                "technology",
+                "recruiting",
+                "AI",
+                "artificial intelligence",
+                "construction",
+                "IT",
+                "tech recruiting",
+                "staffing",
+                "mortgage",
+                "healthcare",
+                "accountingfinance",
+                "accounting",
+                "jobot",
+                "staffing",
+                "sales",
+                "humanresources",
+                "tech",
+                "and engineering"
+            ],
+            "linkedin_org_locations": [
+                "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+            ],
+            "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+            "linkedin_org_recruitment_agency_derived": true,
+            "seniority": "Director",
+            "directapply": true,
+            "linkedin_org_slug": "jobot",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793746624",
+            "date_posted": "2025-07-03T13:21:08",
+            "date_created": "2025-07-03T13:56:44.794166",
+            "title": "Business Development Director",
+            "organization": "Jobot",
+            "organization_url": "https://www.linkedin.com/company/jobot",
+            "date_validthrough": "2025-08-02T13:21:08",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "US",
+                        "addressLocality": "Los Angeles",
+                        "addressRegion": "CA",
+                        "streetAddress": null
+                    },
+                    "latitude": 34.05224,
+                    "longitude": -118.24335
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "Los Angeles, California, United States"
+                }
+            ],
+            "salary_raw": {
+                "@type": "MonetaryAmount",
+                "currency": "USD",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 130000,
+                    "maxValue": 160000,
+                    "unitText": "YEAR"
+                }
+            },
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://www.linkedin.com/jobs/view/business-development-director-at-jobot-4258102713",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+            "cities_derived": [
+                "Los Angeles"
+            ],
+            "regions_derived": [
+                "California"
+            ],
+            "countries_derived": [
+                "United States"
+            ],
+            "locations_derived": [
+                "Los Angeles, California, United States"
+            ],
+            "timezones_derived": [
+                "America/Los_Angeles"
+            ],
+            "lats_derived": [
+                34.1141
+            ],
+            "lngs_derived": [
+                -118.4068
+            ],
+            "remote_derived": true,
+            "recruiter_name": null,
+            "recruiter_title": null,
+            "recruiter_url": null,
+            "linkedin_org_employees": 1257,
+            "linkedin_org_url": "http://Jobot.com",
+            "linkedin_org_size": "501-1,000 employees",
+            "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+            "linkedin_org_industry": "Staffing and Recruiting",
+            "linkedin_org_followers": 3254110,
+            "linkedin_org_headquarters": "Newport Beach, California",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2018",
+            "linkedin_org_specialties": [
+                "technology",
+                "recruiting",
+                "AI",
+                "artificial intelligence",
+                "construction",
+                "IT",
+                "tech recruiting",
+                "staffing",
+                "mortgage",
+                "healthcare",
+                "accountingfinance",
+                "accounting",
+                "jobot",
+                "staffing",
+                "sales",
+                "humanresources",
+                "tech",
+                "and engineering"
+            ],
+            "linkedin_org_locations": [
+                "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+            ],
+            "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+            "linkedin_org_recruitment_agency_derived": true,
+            "seniority": "Director",
+            "directapply": true,
+            "linkedin_org_slug": "jobot",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793670308",
+            "date_posted": "2025-07-03T13:20:46",
+            "date_created": "2025-07-03T13:33:03.145471",
+            "title": "Automation Implementation & Development Manager",
+            "organization": "Jobot",
+            "organization_url": "https://www.linkedin.com/company/jobot",
+            "date_validthrough": "2025-08-02T13:20:46",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "US",
+                        "addressLocality": "Winston-Salem",
+                        "addressRegion": "NC",
+                        "streetAddress": null
+                    },
+                    "latitude": 36.09626,
+                    "longitude": -80.24374
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "Winston-Salem, North Carolina, United States"
+                }
+            ],
+            "salary_raw": {
+                "@type": "MonetaryAmount",
+                "currency": "USD",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 150000,
+                    "maxValue": 180000,
+                    "unitText": "YEAR"
+                }
+            },
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://www.linkedin.com/jobs/view/automation-implementation-development-manager-at-jobot-4258107625",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+            "cities_derived": [
+                "Winston-Salem"
+            ],
+            "regions_derived": [
+                "North Carolina"
+            ],
+            "countries_derived": [
+                "United States"
+            ],
+            "locations_derived": [
+                "Winston-Salem, North Carolina, United States"
+            ],
+            "timezones_derived": [
+                "America/New_York"
+            ],
+            "lats_derived": [
+                36.1029
+            ],
+            "lngs_derived": [
+                -80.261
+            ],
+            "remote_derived": true,
+            "recruiter_name": null,
+            "recruiter_title": null,
+            "recruiter_url": null,
+            "linkedin_org_employees": 1257,
+            "linkedin_org_url": "http://Jobot.com",
+            "linkedin_org_size": "501-1,000 employees",
+            "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+            "linkedin_org_industry": "Staffing and Recruiting",
+            "linkedin_org_followers": 3254110,
+            "linkedin_org_headquarters": "Newport Beach, California",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2018",
+            "linkedin_org_specialties": [
+                "technology",
+                "recruiting",
+                "AI",
+                "artificial intelligence",
+                "construction",
+                "IT",
+                "tech recruiting",
+                "staffing",
+                "mortgage",
+                "healthcare",
+                "accountingfinance",
+                "accounting",
+                "jobot",
+                "staffing",
+                "sales",
+                "humanresources",
+                "tech",
+                "and engineering"
+            ],
+            "linkedin_org_locations": [
+                "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+            ],
+            "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+            "linkedin_org_recruitment_agency_derived": true,
+            "seniority": "Mid-Senior level",
+            "directapply": true,
+            "linkedin_org_slug": "jobot",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793671340",
+            "date_posted": "2025-07-03T13:20:39",
+            "date_created": "2025-07-03T13:33:44.280444",
+            "title": "Dental Business Development Manager -REMOTE",
+            "organization": "Jobot",
+            "organization_url": "https://www.linkedin.com/company/jobot",
+            "date_validthrough": "2025-08-02T13:20:39",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "US",
+                        "addressLocality": "Naperville",
+                        "addressRegion": "IL",
+                        "streetAddress": null
+                    },
+                    "latitude": 41.771496,
+                    "longitude": -88.148
+                }
+            ],
+            "location_type": null,
+            "location_requirements_raw": null,
+            "salary_raw": {
+                "@type": "MonetaryAmount",
+                "currency": "USD",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 100000,
+                    "maxValue": 120000,
+                    "unitText": "YEAR"
+                }
+            },
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://www.linkedin.com/jobs/view/dental-business-development-manager-remote-at-jobot-4258110260",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+            "cities_derived": [
+                "Naperville"
+            ],
+            "regions_derived": [
+                "Illinois"
+            ],
+            "countries_derived": [
+                "United States"
+            ],
+            "locations_derived": [
+                "Naperville, Illinois, United States"
+            ],
+            "timezones_derived": [
+                "America/Chicago"
+            ],
+            "lats_derived": [
+                41.748
+            ],
+            "lngs_derived": [
+                -88.1659
+            ],
+            "remote_derived": true,
+            "recruiter_name": "Jaclyn D'Amore",
+            "recruiter_title": "Director of Recruiting at Jobot",
+            "recruiter_url": "https://www.linkedin.com/in/jaclyn-d-amore-b335461b",
+            "linkedin_org_employees": 1257,
+            "linkedin_org_url": "http://Jobot.com",
+            "linkedin_org_size": "501-1,000 employees",
+            "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+            "linkedin_org_industry": "Staffing and Recruiting",
+            "linkedin_org_followers": 3254110,
+            "linkedin_org_headquarters": "Newport Beach, California",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2018",
+            "linkedin_org_specialties": [
+                "technology",
+                "recruiting",
+                "AI",
+                "artificial intelligence",
+                "construction",
+                "IT",
+                "tech recruiting",
+                "staffing",
+                "mortgage",
+                "healthcare",
+                "accountingfinance",
+                "accounting",
+                "jobot",
+                "staffing",
+                "sales",
+                "humanresources",
+                "tech",
+                "and engineering"
+            ],
+            "linkedin_org_locations": [
+                "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+            ],
+            "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+            "linkedin_org_recruitment_agency_derived": true,
+            "seniority": "Not Applicable",
+            "directapply": true,
+            "linkedin_org_slug": "jobot",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793687964",
+            "date_posted": "2025-07-03T13:20:32",
+            "date_created": "2025-07-03T13:39:26.94935",
+            "title": "Automation Implementation & Development Manager",
+            "organization": "Jobot",
+            "organization_url": "https://www.linkedin.com/company/jobot",
+            "date_validthrough": "2025-08-02T13:20:32",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "US",
+                        "addressLocality": "Tinley Park",
+                        "addressRegion": "IL",
+                        "streetAddress": null
+                    },
+                    "latitude": 41.573246,
+                    "longitude": -87.78429
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "Tinley Park, Illinois, United States"
+                }
+            ],
+            "salary_raw": {
+                "@type": "MonetaryAmount",
+                "currency": "USD",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 150000,
+                    "maxValue": 180000,
+                    "unitText": "YEAR"
+                }
+            },
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://www.linkedin.com/jobs/view/automation-implementation-development-manager-at-jobot-4258113029",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+            "cities_derived": [
+                "Tinley Park"
+            ],
+            "regions_derived": [
+                "Illinois"
+            ],
+            "countries_derived": [
+                "United States"
+            ],
+            "locations_derived": [
+                "Tinley Park, Illinois, United States"
+            ],
+            "timezones_derived": [
+                "America/Chicago"
+            ],
+            "lats_derived": [
+                41.567
+            ],
+            "lngs_derived": [
+                -87.8049
+            ],
+            "remote_derived": true,
+            "recruiter_name": null,
+            "recruiter_title": null,
+            "recruiter_url": null,
+            "linkedin_org_employees": 1257,
+            "linkedin_org_url": "http://Jobot.com",
+            "linkedin_org_size": "501-1,000 employees",
+            "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+            "linkedin_org_industry": "Staffing and Recruiting",
+            "linkedin_org_followers": 3254110,
+            "linkedin_org_headquarters": "Newport Beach, California",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2018",
+            "linkedin_org_specialties": [
+                "technology",
+                "recruiting",
+                "AI",
+                "artificial intelligence",
+                "construction",
+                "IT",
+                "tech recruiting",
+                "staffing",
+                "mortgage",
+                "healthcare",
+                "accountingfinance",
+                "accounting",
+                "jobot",
+                "staffing",
+                "sales",
+                "humanresources",
+                "tech",
+                "and engineering"
+            ],
+            "linkedin_org_locations": [
+                "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+            ],
+            "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+            "linkedin_org_recruitment_agency_derived": true,
+            "seniority": "Not Applicable",
+            "directapply": true,
+            "linkedin_org_slug": "jobot",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793672837",
+            "date_posted": "2025-07-03T13:04:46",
+            "date_created": "2025-07-03T13:34:23.60118",
+            "title": "GCP AI/ML",
+            "organization": "Ubique Systems",
+            "organization_url": "https://www.linkedin.com/company/ubique-systems",
+            "date_validthrough": "2025-08-02T13:04:45",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "GB",
+                        "addressLocality": "London Area",
+                        "addressRegion": null,
+                        "streetAddress": null
+                    },
+                    "latitude": 51.51649,
+                    "longitude": -0.128427
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "London Area, United Kingdom"
+                }
+            ],
+            "salary_raw": null,
+            "employment_type": [
+                "CONTRACTOR"
+            ],
+            "url": "https://uk.linkedin.com/jobs/view/gcp-ai-ml-at-ubique-systems-4258110278",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "uk.linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/D4D0BAQEd_bFQczBzXQ/company-logo_200_200/company-logo_200_200/0/1666702484646/ubique_systems_logo?e=2147483647&v=beta&t=ELuEDxLX6cJDCRpiIH6i5NcwphOiTHdieVoYArhjKLU",
+            "cities_derived": null,
+            "regions_derived": [
+                "London, City of"
+            ],
+            "countries_derived": [
+                "United Kingdom"
+            ],
+            "locations_derived": [
+                "London, City of, United Kingdom"
+            ],
+            "timezones_derived": [
+                "Europe/London"
+            ],
+            "lats_derived": [
+                51.5072
+            ],
+            "lngs_derived": [
+                -0.1275
+            ],
+            "remote_derived": true,
+            "recruiter_name": "Anirban Deb",
+            "recruiter_title": "Senior Talent Acquisition | Client Management | | UK & Europe Recruitment | 10+ years experience",
+            "recruiter_url": "https://in.linkedin.com/in/anirban-deb-4b7747aa",
+            "linkedin_org_employees": 313,
+            "linkedin_org_url": "https://www.ubique-systems.com",
+            "linkedin_org_size": "501-1,000 employees",
+            "linkedin_org_slogan": "All you need is the Best and the Best is there with us.... Be with us for the Best for You.  ",
+            "linkedin_org_industry": "IT Services and IT Consulting",
+            "linkedin_org_followers": null,
+            "linkedin_org_headquarters": "London",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2000",
+            "linkedin_org_specialties": [
+                "IT Recruitment",
+                "Academic",
+                "Software Development",
+                "Enterprise Integration",
+                "Business Inteligence",
+                "IT Staffing",
+                "and International Mobility"
+            ],
+            "linkedin_org_locations": [
+                "Suite 13, Beaufort Court, Admirals Way, Canary Wharf, London, E14 9XL, GB",
+                "Ubique House, 768, Purbachal Road, Kalikapur, Kolkata, West Bengal 700 107, IN",
+                "33 UBI Avenue 3 #08-68, Vertex, Tower A, Singapore, 408868, SG",
+                "Gammel Koge Landevej 890, DK-2665,, Vallensbaek Strand, Denmark., Copenhagen, DK",
+                "Al Swan - Amberjem Tower E1, Office E1-1521 E, Shiek Khalifa Bin Zayed St, Ajman - United Arab Emirates, Dubai, AE"
+            ],
+            "linkedin_org_description": "Ubique Systems is a fast growing multifaceted organization which offers a comprehensive array of outsourcing and consulting services for its customers, including recruitment, human resource management, vendor management, and outplacement services and software development on a global basis, with an objective to adopt the flexible global business practices that today enable companies to operate more efficiently and produce more value.\n\nWe’re a global leader in business and technology services, helping our clients bring the future of work to life. Ubique is one of the world’s leading organizations providing management consulting, technology and outsourcing services. Our team, selected by a rigorous process of monitoring academic excellence and work experience, is led by strong global management individuals, to fulfill demands put forward to us, and consistently deliver in adherence to our value proposition. A scientific process oriented approach helps augment the delivery and quality.\n\nUbique Systems commenced operations in 2000, when the IT services industry was deemed to be well established and the offshore concept was gaining ground. Today relying on their belief about collaboration and professional integrity the group has managed to grow to strength of more than 1500 consultants. Now, with a multinational presence and a comprehensive range of services across diverse industries, Ubique Systems is one of the reliable consulting partners with a growth rate of more than 80 % year on year.",
+            "linkedin_org_recruitment_agency_derived": false,
+            "seniority": "Mid-Senior level",
+            "directapply": true,
+            "linkedin_org_slug": "ubique-systems",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793652933",
+            "date_posted": "2025-07-03T12:55:59",
+            "date_created": "2025-07-03T13:09:39.990201",
+            "title": "Business Development Manager",
+            "organization": "REAKT Recruitment Ltd",
+            "organization_url": "https://www.linkedin.com/company/reakt-recruitment-ltd",
+            "date_validthrough": "2025-08-02T12:55:59",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "GB",
+                        "addressLocality": "England",
+                        "addressRegion": null,
+                        "streetAddress": null
+                    },
+                    "latitude": 52.36963,
+                    "longitude": -1.2451695
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "England, United Kingdom"
+                }
+            ],
+            "salary_raw": {
+                "@type": "MonetaryAmount",
+                "currency": "GBP",
+                "value": {
+                    "@type": "QuantitativeValue",
+                    "minValue": 45000,
+                    "maxValue": 55000,
+                    "unitText": "YEAR"
+                }
+            },
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://uk.linkedin.com/jobs/view/business-development-manager-at-reakt-recruitment-ltd-4261489852",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "uk.linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/C4E0BAQHB8RbP5etZyg/company-logo_200_200/company-logo_200_200/0/1633344387112/reakt_recruitment_ltd_logo?e=2147483647&v=beta&t=LXC3Zk5UnRS45tClRnkldwhUNx770S2HMZPteuJ9QDo",
+            "cities_derived": null,
+            "regions_derived": null,
+            "countries_derived": [
+                "United Kingdom"
+            ],
+            "locations_derived": [
+                "United Kingdom"
+            ],
+            "timezones_derived": [
+                "Europe/London"
+            ],
+            "lats_derived": [
+                51.5072
+            ],
+            "lngs_derived": [
+                -0.1275
+            ],
+            "remote_derived": true,
+            "recruiter_name": "Karen Edwards",
+            "recruiter_title": "Document Automation, Managed Print & SaaS Director at REAKT Recruitment Ltd - info@reaktltd.com",
+            "recruiter_url": "https://uk.linkedin.com/in/karen-edwards-292a2464",
+            "linkedin_org_employees": 3,
+            "linkedin_org_url": "https://reaktltd.com/",
+            "linkedin_org_size": "2-10 employees",
+            "linkedin_org_slogan": "Trusted recruitment partner to the Managed Print, Document Solutions, Records Management & ECM marketplace ",
+            "linkedin_org_industry": "Staffing and Recruiting",
+            "linkedin_org_followers": null,
+            "linkedin_org_headquarters": "Greater Manchester",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2021",
+            "linkedin_org_specialties": [
+                "Managed Print",
+                "Document Solutions",
+                "ECM",
+                "Digital Transformation",
+                "Document Management",
+                "Records Management",
+                "SaaS",
+                "RPA",
+                "AI",
+                "and Recruitment"
+            ],
+            "linkedin_org_locations": [
+                "Greater Manchester , GB"
+            ],
+            "linkedin_org_description": "REAKT was created after forging a successful reputation in the Managed Print & Document Solutions market for almost 10years. \n\nBeing clients & candidates first port of call for their recruitment needs, it was time to create something specifically for this marketplace. \n\nReputation, Experience Knowledge & Trust is paramount in this industry and helped to form the REAKT Recruitment brand \n\n▪️Reputation\n▪️Experience\n▪️Accountability\n▪️Knowledge\n▪️Trust \n\nSpecifically recruiting talent Globally within our focus areas:- \n\n• Document Management/Workflow Automation/ECM/ Information Management IIM / Data Capture \n• RPA / AI \n• Managed Document Services\n• Managed Print Services\n• BPO / KPO \n• Digital Transformation \n• Legal Document Services\n• SaaS\n• Managed Services\n\nTypical vacancies that we have succession in filling include:\n\n⭐Sales – New Business & Account Management ranging from Telesales up to Director level \n\n⭐Technical & Professional Services – Pre/Post Sales, Field Engineers, Analyst, Software Engineers, Solutions Architect, Consultant, Project Managers\n\n⭐Permanent & Freelance / Contract \n\nWe recognise that it’s not always about just ‘filling a vacancy’ but also, about finding the candidate the right opportunity. \n\n🙋‍♀️ Get in touch to discuss how we can help you 📩 info@reaktltd.com / +(0) 7850 162 686",
+            "linkedin_org_recruitment_agency_derived": true,
+            "seniority": "Mid-Senior level",
+            "directapply": true,
+            "linkedin_org_slug": "reakt-recruitment-ltd",
+            "no_jb_schema": null,
+            "external_apply_url": null
+        },
+        {
+            "id": "1793520602",
+            "date_posted": "2025-07-03T12:23:08",
+            "date_created": "2025-07-03T12:32:11.30607",
+            "title": "Entry Level Sales Development Rep - Remote",
+            "organization": "REVGEN",
+            "organization_url": "https://www.linkedin.com/company/revgen",
+            "date_validthrough": "2025-08-02T12:23:08",
+            "locations_raw": [
+                {
+                    "@type": "Place",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressCountry": "US",
+                        "addressLocality": "North Carolina",
+                        "addressRegion": "United States",
+                        "streetAddress": null
+                    },
+                    "latitude": 35.539375,
+                    "longitude": -79.18542
+                }
+            ],
+            "location_type": "TELECOMMUTE",
+            "location_requirements_raw": [
+                {
+                    "@type": "Country",
+                    "name": "North Carolina, United States"
+                }
+            ],
+            "salary_raw": null,
+            "employment_type": [
+                "FULL_TIME"
+            ],
+            "url": "https://www.linkedin.com/jobs/view/entry-level-sales-development-rep-remote-at-revgen-4260116980",
+            "source_type": "jobboard",
+            "source": "linkedin",
+            "source_domain": "linkedin.com",
+            "organization_logo": "https://media.licdn.com/dms/image/v2/C4E0BAQGTK6HNxa6ExA/company-logo_200_200/company-logo_200_200/0/1631375903434?e=2147483647&v=beta&t=aq281NiJy2Vr5dxLraE3moa9HcmH3TcFkbohiIHNHSU",
+            "cities_derived": null,
+            "regions_derived": [
+                "North Carolina"
+            ],
+            "countries_derived": [
+                "United States"
+            ],
+            "locations_derived": [
+                "North Carolina, United States"
+            ],
+            "timezones_derived": [
+                "America/New_York"
+            ],
+            "lats_derived": [
+                35.8324
+            ],
+            "lngs_derived": [
+                -78.6429
+            ],
+            "remote_derived": true,
+            "recruiter_name": null,
+            "recruiter_title": null,
+            "recruiter_url": null,
+            "linkedin_org_employees": 105,
+            "linkedin_org_url": "http://www.revgennc.com",
+            "linkedin_org_size": "51-200 employees",
+            "linkedin_org_slogan": null,
+            "linkedin_org_industry": "Software Development",
+            "linkedin_org_followers": 7784,
+            "linkedin_org_headquarters": "Raleigh, NC",
+            "linkedin_org_type": "Privately Held",
+            "linkedin_org_foundeddate": "2014",
+            "linkedin_org_specialties": [
+                "Lead Generation",
+                "Sales",
+                "Outsourced Sales",
+                "Staffing",
+                "Employment Opportunity",
+                "Personal Growth",
+                "Sales Development",
+                "Revenue Growth",
+                "and Business Development"
+            ],
+            "linkedin_org_locations": [
+                "3210 Hillsborough Street, Raleigh, NC 27607, US"
+            ],
+            "linkedin_org_description": "We work with our clients to apply a proven system in a way that represents our customers through unique and enjoyable interactions. Which, in turn, results in additional sales-qualified-leads. Our mission is to develop skilled sales individuals who represent our customers through unique and enjoyable interactions.  \n\nWant to jumpstart your sales career? Visit www.revgennc.com/careers and apply today!",
+            "linkedin_org_recruitment_agency_derived": false,
+            "seniority": "Internship",
+            "directapply": false,
+            "linkedin_org_slug": "revgen",
+            "no_jb_schema": null,
+            "external_apply_url": "https://revgen.breezy.hr/p/6e425918c9ba-sales-development-rep-remote"
+        }
+    ],
+    "jobs": [],
+    "totalJobs": 0,
+    "searchParams": {
+        "limit": "10",
+        "offset": "0",
+        "location_filter": "\"United States\" OR \"United Kingdom\" OR \"Saudi Arabia\" OR \"United Arab Emirates\"",
+        "remote": "true",
+        "advanced_title_filter": "(Development | SQA | 'Test Automation'| AI/ML | UI/UX)"
+    }
+}

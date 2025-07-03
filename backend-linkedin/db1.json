@@ -1,0 +1,2090 @@
+[
+  {
+    "id": "1793304645",
+    "date_posted": "2025-07-03T09:40:28",
+    "date_created": "2025-07-03T10:08:00.68214",
+    "title": "React Native Developer",
+    "organization": "Sanderson",
+    "organization_url": "https://www.linkedin.com/company/sandersonrecruitmentplc",
+    "date_validthrough": "2025-08-02T09:40:28",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "GB",
+          "addressLocality": "London Area",
+          "addressRegion": null,
+          "streetAddress": null
+        },
+        "latitude": 51.51649,
+        "longitude": -0.128427
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "London Area, United Kingdom"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "GBP",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 55,
+        "maxValue": 60,
+        "unitText": "HOUR"
+      }
+    },
+    "employment_type": [
+      "CONTRACTOR"
+    ],
+    "url": "https://uk.linkedin.com/jobs/view/react-native-developer-at-sanderson-4261408110",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "uk.linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D4E0BAQGjGXOmBd8S6w/company-logo_200_200/company-logo_200_200/0/1712748196615/sandersonrecruitmentplc_logo?e=2147483647&v=beta&t=cf91gGMG57Ri0duVXOTySKiSqfzy-ft1LrDK6pPtZ14",
+    "cities_derived": null,
+    "regions_derived": [
+      "London, City of"
+    ],
+    "countries_derived": [
+      "United Kingdom"
+    ],
+    "locations_derived": [
+      "London, City of, United Kingdom"
+    ],
+    "timezones_derived": [
+      "Europe/London"
+    ],
+    "lats_derived": [
+      51.5072
+    ],
+    "lngs_derived": [
+      -0.1275
+    ],
+    "remote_derived": true,
+    "recruiter_name": "Lewis T.",
+    "recruiter_title": "",
+    "recruiter_url": "https://uk.linkedin.com/in/lewis-t-5a60b5133",
+    "linkedin_org_employees": 441,
+    "linkedin_org_url": "http://www.sandersonplc.com",
+    "linkedin_org_size": "201-500 employees",
+    "linkedin_org_slogan": null,
+    "linkedin_org_industry": "Staffing and Recruiting",
+    "linkedin_org_followers": 100485,
+    "linkedin_org_headquarters": "Bristol, Bristol",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "",
+    "linkedin_org_specialties": [
+      "Procurement",
+      "Cyber Security",
+      "Accounting",
+      "Finance",
+      "Actuarial",
+      "Business Change",
+      "Digital",
+      "HR ",
+      "Talent acquisition",
+      "Marketing",
+      "Risk and compliance",
+      "Technology",
+      "RPO",
+      "MSP",
+      "Executive search",
+      "Professional Advisory",
+      "Change & Transformation",
+      "and Business Services"
+    ],
+    "linkedin_org_locations": [
+      "First Floor, Clifton Down House, 54a Whiteladies Road, Bristol, Bristol BS8 2NH, GB",
+      "3rd Floor, 38 Thistle Street, Edinburgh, EH2 1EN, GB",
+      "6th Floor, 69 Leadenhall Street, London, England EC3A 2BG, GB",
+      "3rd Floor, 31 Booth Street, Manchester, England M2 2FE, GB",
+      "15th Floor, Brunel House,, 2 Fitzalan Road, Cardiff, CF24 0EB, GB",
+      "44a Westland Row, Dublin 2, Dublin 2 D02 W274, IE",
+      "Turnberry House, 175 West George Street, Glasgow, Scotland G2 2LB, GB",
+      "Bonham Strand, Unit 701 – 3, Sheung Wan, HK",
+      "#10-01, No 5 Shenton Way UIC Building, Singapore,  068808, SG",
+      "5, Martin Place, Level 15, Sydeny, NSW 2000, AU"
+    ],
+    "linkedin_org_description": "We are a global recruitment solutions company with four decades of experience. The idea of partnership is at the heart of everything we do at Sanderson. \nWorking with clients and candidates alike, we deliver permanent or contract hires, executive search assignments, fully outsourced recruitment solutions, including RPO and MSP and deploy high-performing project teams. We strive to deliver with personality and a passion for service excellence. \nOur services are built on collaboration, understanding and flexibility. Our breadth of experience and the skillsets of our people enable us to deliver against any recruitment goal our clients have. ",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Mid-Senior level",
+    "directapply": true,
+    "linkedin_org_slug": "sandersonrecruitmentplc",
+    "no_jb_schema": null,
+    "external_apply_url": null,
+    "description_text": "Role: Lead React Native Developer\nRate: Up to £500 p/d Outside IR35\nLocation: Fully Remote – Must be based in the UK\nDuration: 1 month – extensions and further engagements very likely\nThis is a critical role for an individual who thrives under pressure, excels in fast-paced environments, and possesses deep expertise in React Native architecture, performance optimization, and the entire iOS app deployment process. \n\nExperience Required:\nDemonstrable experience in successfully deploying multiple React Native iOS applications to the App Store.\nExpert-level knowledge of React Native iOS development concepts.\nProfound understanding of mobile application architecture, performance optimization techniques, and best practices.\nDeep familiarity with the iOS ecosystem, including Xcode, App Store Connect, certificates, provisioning profiles, and debugging tools.\nStrong experience with CI/CD pipelines for mobile applications.\nExcellent problem-solving skills and the ability to work independently to overcome technical challenges.\nProven ability to work under tight deadlines and prioritize effectively.\nStrong communication skills, capable of clearly articulating technical concepts and progress to stakeholders and development teams."
+  },
+  {
+    "id": "1792940736",
+    "date_posted": "2025-07-03T07:26:04",
+    "date_created": "2025-07-03T07:32:48.366216",
+    "title": "React Native Mobile Developer",
+    "organization": "TEKsystems",
+    "organization_url": "https://www.linkedin.com/company/teksystems",
+    "date_validthrough": "2025-08-02T07:26:04",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Rochester",
+          "addressRegion": "NY",
+          "streetAddress": null
+        },
+        "latitude": 43.087063,
+        "longitude": -77.596176
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Rochester, New York, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 50,
+        "maxValue": 80,
+        "unitText": "HOUR"
+      }
+    },
+    "employment_type": [
+      "CONTRACTOR"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/react-native-mobile-developer-at-teksystems-4261388836",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D4D0BAQEGWkPukExqDw/company-logo_200_200/company-logo_200_200/0/1737653799737/teksystems_logo?e=2147483647&v=beta&t=snIKLF7VvF58HhKdl4xCI-T4uPACUMln9ZOcnZ6M63A",
+    "cities_derived": [
+      "Rochester"
+    ],
+    "regions_derived": [
+      "New York"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Rochester, New York, United States"
+    ],
+    "timezones_derived": [
+      "America/New_York"
+    ],
+    "lats_derived": [
+      43.168
+    ],
+    "lngs_derived": [
+      -77.6162
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 25944,
+    "linkedin_org_url": "https://www.teksystems.com",
+    "linkedin_org_size": "10,001+ employees",
+    "linkedin_org_slogan": "Partners in Transformation",
+    "linkedin_org_industry": "IT Services and IT Consulting",
+    "linkedin_org_followers": 1173634,
+    "linkedin_org_headquarters": "Hanover, MD",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "1983",
+    "linkedin_org_specialties": [
+      "IT Services",
+      "IT Talent Management Expertise",
+      "Staffing Services",
+      "Digital Services",
+      "Advisory Services",
+      "Co-led Services",
+      "Enterprise Services",
+      "DevOps and Automation",
+      "Risk & Security",
+      "Cloud Enablement and Migration",
+      "Enterprise Applications",
+      "Telecom Design and Implementation",
+      "and Technology Operations"
+    ],
+    "linkedin_org_locations": [
+      "7437 Race Road, Hanover, MD 21076, US",
+      "Western Road, Maxis 2, Bracknell, Berkshire RG12 1RT, GB",
+      "Taikoo Place, 979 Kings Road, Level 18, Cambridge House, Quarry Bay, Hong Kong, HK"
+    ],
+    "linkedin_org_description": "We’re TEKsystems and TEKsystems Global Services. We accelerate business transformation for our customers, so they can capitalize on change and master the momentum of technology. Our expertise in strategy, design, execution and operations unlocks business value through a range of solutions. We’re building tomorrow by delivering business outcomes and making positive impacts in our global communities.\n\nTEKsystems and TEKsystems Global Services are Allegis Group companies.  ",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "teksystems",
+    "no_jb_schema": null,
+    "external_apply_url": "https://jsv3.recruitics.com/redirect?rx_cid=3435&rx_jobId=JP-005388963&rx_url=https://ars2.equest.com/?icid=linkedin_recruitics&response_id=ccb5f171df03f785e8560996863193ab&rx_campaign=Linkedin1&rx_ch=connector&rx_group=123600&rx_id=4f8f236a-57a0-11f0-8a03-f308fef82f83&rx_job=JP-005388963&rx_medium=post&rx_r=none&rx_source=Linkedin&rx_ts=20250703T061202Z&rx_vp=slots",
+    "description_text": "This position requires the development of cross-platform mobile apps using React Native. The following proficiencies are desired:\n\nSolid understanding of mobile design principles, patterns, and best practices.\nInterpret business requirements and effectively interact with business users to obtain details/clarification.\nProduce clear, concise communications and documentation.\nWork effectively both independently and within a team.\nWork effectively with vendor/contractor partners.\n\n\nSkills \n\nIos, Android, Swift, React native, Mobile app development, Mobile application, Agile, android development, ios development, Mobile, Native mobile, Development, Ios mobile, Rest api, Restful web services, Typescript\n\nTop Skills Details \n\nIos,Android,Swift,React native,Mobile app development,Mobile application,Agile,android development,ios development\n\nAdditional Skills & Qualifications \n\nHighly competent hands-on experience in the following:\n\nReact Native Proficiency: Build cross-platform mobile apps using React Native.\nTypeScript and React Skills: Strong command over TypeScript and React.\nThird-Party Libraries: Familiarity with commonly used React Native libraries like react-navigation, zustand, etc.\nMobile App Architecture: Understand components, navigation, and state management.\nUI/UX Design Principles: Create user-friendly interfaces.\nAccessibility: Be an advocate for accessible and highly usable software.\nRESTful APIs: Work with APIs for data communication.\nState Management (e.g., Redux, Zustand): Knowledge of state management tools.\nTesting Frameworks: Familiarity with Jest and Detox/Cypress/Appium.\nCross-Platform Development: Experience working on both iOS and Android platforms is very beneficial.\nCI/CD Tools: Experience working with automated pipeline / continuous integration tools like GitHub Actions, CircleCI, Gitlab, etc.\n\n\nExperience Level \n\nExpert Level\n\nPay And Benefits \n\nThe pay range for this position is $50.00 - $80.00/hr.\n\nEligibility requirements apply to some benefits and may depend on your job\n\nclassification and length of employment. Benefits are subject to change and may be\n\nsubject to specific elections, plan, or program terms. If eligible, the benefits\n\nAvailable For This Temporary Role May Include The Following \n\nMedical, dental & vision\nCritical Illness, Accident, and Hospital\n401(k) Retirement Plan – Pre-tax and Roth post-tax contributions available\nLife Insurance (Voluntary Life & AD&D for the employee and dependents)\nShort and long-term disability\nHealth Spending Account (HSA)\nTransportation benefits\nEmployee Assistance Program\nTime Off/Leave (PTO, Vacation or Sick Leave)\n\n\nWorkplace Type \n\nThis is a fully remote position.\n\nApplication Deadline \n\nThis position is anticipated to close on Jul 11, 2025.\n\nh4>About TEKsystems:\n\nWe're partners in transformation. We help clients activate ideas and solutions to take advantage of a new world of opportunity. We are a team of 80,000 strong, working with over 6,000 clients, including 80% of the Fortune 500, across North America, Europe and Asia. As an industry leader in Full-Stack Technology Services, Talent Services, and real-world application, we work with progressive leaders to drive change. That's the power of true partnership. TEKsystems is an Allegis Group company.\n\nThe company is an equal opportunity employer and will consider all applications without regards to race, sex, age, color, religion, national origin, veteran status, disability, sexual orientation, gender identity, genetic information or any characteristic protected by law.\n\nAbout TEKsystems And TEKsystems Global Services \n\nWe’re a leading provider of business and technology services. We accelerate business transformation for our customers. Our expertise in strategy, design, execution and operations unlocks business value through a range of solutions. We’re a team of 80,000 strong, working with over 6,000 customers, including 80% of the Fortune 500 across North America, Europe and Asia, who partner with us for our scale, full-stack capabilities and speed. We’re strategic thinkers, hands-on collaborators, helping customers capitalize on change and master the momentum of technology. We’re building tomorrow by delivering business outcomes and making positive impacts in our global communities. TEKsystems and TEKsystems Global Services are Allegis Group companies. Learn more at TEKsystems.com.\n\nThe company is an equal opportunity employer and will consider all applications without regard to race, sex, age, color, religion, national origin, veteran status, disability, sexual orientation, gender identity, genetic information or any characteristic protected by law."
+  },
+  {
+    "id": "1792915977",
+    "date_posted": "2025-07-03T06:56:18",
+    "date_created": "2025-07-03T07:02:07.735499",
+    "title": "TypeScript Engineer (React or Node.js)",
+    "organization": "We Make Change",
+    "organization_url": "https://www.linkedin.com/company/we-make-change-now",
+    "date_validthrough": "2025-12-30T06:56:18",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "GB",
+          "addressLocality": "London Area",
+          "addressRegion": null,
+          "streetAddress": null
+        },
+        "latitude": 51.51649,
+        "longitude": -0.128427
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "London Area, United Kingdom"
+      }
+    ],
+    "salary_raw": null,
+    "employment_type": [
+      "VOLUNTEER"
+    ],
+    "url": "https://uk.linkedin.com/jobs/view/typescript-engineer-react-or-node-js-at-we-make-change-4261383932",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "uk.linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D4E0BAQEwxtjWWjO6iA/company-logo_200_200/company-logo_200_200/0/1706818535175/we_make_change_now_logo?e=2147483647&v=beta&t=s1pOjhxsd9HvyShCCw-nFyugECvYmtqYdZLiuVD887k",
+    "cities_derived": null,
+    "regions_derived": [
+      "London, City of"
+    ],
+    "countries_derived": [
+      "United Kingdom"
+    ],
+    "locations_derived": [
+      "London, City of, United Kingdom"
+    ],
+    "timezones_derived": [
+      "Europe/London"
+    ],
+    "lats_derived": [
+      51.5072
+    ],
+    "lngs_derived": [
+      -0.1275
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 52,
+    "linkedin_org_url": "http://www.wemakechange.org",
+    "linkedin_org_size": "11-50 employees",
+    "linkedin_org_slogan": "Volunteer remotely with top impact startups matching your causes, skills, and schedule.",
+    "linkedin_org_industry": "Software Development",
+    "linkedin_org_followers": null,
+    "linkedin_org_headquarters": "",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2020",
+    "linkedin_org_specialties": [
+      "Technology",
+      "Innovation",
+      "Social Enterprise",
+      "Volunteering",
+      "Volunteer",
+      "CSR",
+      "Corporate Social Responsibility",
+      "employee volunteering",
+      "ESG",
+      "Startups",
+      "and Impact"
+    ],
+    "linkedin_org_locations": [
+      "",
+      "London, GB"
+    ],
+    "linkedin_org_description": "We make impact easy for everyone. We enable individuals and teams to volunteer remotely with startups changing the world. Our 40,000+ ChangeMakers supercharge 1,300+ impact startups supporting the UN SDGs. Start your Impact journey here today.",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Not Applicable",
+    "directapply": false,
+    "linkedin_org_slug": "we-make-change-now",
+    "no_jb_schema": null,
+    "external_apply_url": "https://app.wemakechange.org/role-details?recordId=recWg0J3tYBwv8U0U",
+    "description_text": "Support a startup making solar energy even more sustainable ☀️\n\nThe Solar Manager\nSolar Manager is building the platform to operate and scale the world’s solar infrastructure.\n\nSolar is breaking global deployment records every year — yet asset performance and reporting remain stuck in the past. $10B+ in value is lost annually due to underperformance, rising interest rates, and outdated tools. At the same time, compliance is becoming more complex, with new regulations like the UK's Biodiversity Net Gain and the US IRA-linked reporting.\n\nWe’re building a unified, AI-powered platform to automate reporting, optimize performance, and simplify compliance for solar asset owners — from pension funds to independent operators.\n\nOur goal is simple: accelerate clean energy with smarter infrastructure.\n\nRole (Volunteer): TypeScript Engineer (React or Node.js).\n\nRole Description: We’re looking for a TypeScript Engineer (frontend or backend) to help us build the foundations of our product. You’ll work directly with the founder on features that transform how asset owners manage and report on solar infrastructure.\n\nThis is an opportunity to build a climate product from the ground up — and help shape both the codebase and product direction.\n\n🔧 What You’ll Help Us Build\nCore functionality for solar reporting workflows\nA clean, intuitive user interface (if frontend-focused)\nRobust APIs and service logic (if backend-focused)\nSimple, scalable architecture that’s easy to extend\nIntegrations with third-party APIs and datasets (e.g. MeterOnline, regulatory data)\n\n⚙️ Tech We’re Using\nTypeScript across the stack\nReact + Tailwind on the frontend\nNode.js, Express, Drizzle ORM, and Supabase on the backend\nPostgreSQL, JWT auth, GraphQL (planned)\nYou don’t need to know all of this — just be excited to learn and build.\n\n🧠 About You\nYou’ve worked with TypeScript, either in React or Node.js\nYou enjoy building from 0–1 and solving messy, real-world problems\nYou’re excited about the climate tech space or want to get involved\n\nTime Commitment: Volunteer 2-3 hours per week for 1-2 months remotely 💻\n\nIf you want to make change, apply to volunteer with The Solar Manager!"
+  },
+  {
+    "id": "1792803904",
+    "date_posted": "2025-07-03T06:08:28",
+    "date_created": "2025-07-03T06:23:38.583422",
+    "title": "React / PHP Developer",
+    "organization": "Jobs via Dice",
+    "organization_url": "https://www.linkedin.com/company/jobs-via-dice",
+    "date_validthrough": "2025-08-02T06:08:28",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Kaysville",
+          "addressRegion": "UT",
+          "streetAddress": null
+        },
+        "latitude": 41.034878,
+        "longitude": -111.938644
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Kaysville, Utah, United States"
+      }
+    ],
+    "salary_raw": null,
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/react-php-developer-at-jobs-via-dice-4259974689",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFwOT1y-MRTFQ/company-logo_200_200/B56ZVEKZkcHsAI-/0/1740605332130/jobs_via_dice_logo?e=2147483647&v=beta&t=ItuthDpih45En6x_7Lse_G78cn8jTcnIwXNaxfl8zqM",
+    "cities_derived": [
+      "Kaysville"
+    ],
+    "regions_derived": [
+      "Utah"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Kaysville, Utah, United States"
+    ],
+    "timezones_derived": [
+      "America/Denver"
+    ],
+    "lats_derived": [
+      41.029
+    ],
+    "lngs_derived": [
+      -111.9456
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 9,
+    "linkedin_org_url": "https://www.dice.com",
+    "linkedin_org_size": "1 employee",
+    "linkedin_org_slogan": "Dice: Where tech connects.™",
+    "linkedin_org_industry": "Software Development",
+    "linkedin_org_followers": null,
+    "linkedin_org_headquarters": "",
+    "linkedin_org_type": "Public Company",
+    "linkedin_org_foundeddate": "",
+    "linkedin_org_specialties": [
+      ""
+    ],
+    "linkedin_org_locations": [],
+    "linkedin_org_description": "Welcome to Jobs via Dice, the go-to destination for discovering the tech jobs you want.\n\nThis page is dedicated to sharing job opportunities with tech professionals at every stage of their careers. When you see a job posted by Jobs via Dice, it’s a job for one of our many clients seeking to hire tech professionals like you.\n\nAt Dice, we understand that your career in technology is more than just a job; it’s a journey of growth, innovation and continuous learning. Stay connected with us to explore the latest job opportunities, industry trends and career tips tailored for tech professionals. Your future in tech starts here.\n\nWhat You’ll Find on Dice.com:\n\nTailored Tech Opportunities - Connect with the right tech companies and roles that match your skills and ambitions. Whether you're looking to land your first job or elevate your career, Dice is here to help.\n\nCareer Resources - Utilize our tools to build your skills, enhance your visibility, and get noticed by top employers.\n\nEasy Apply - Find and apply to your perfect tech role in just a few clicks with our Easy Apply feature. Simplify your job search and get hired faster.\n\nIndustry Insights - Stay ahead with our expert career advice and industry insights. From resume tips to interview prep, we provide the resources you need to succeed.\n\nEmployer Profiles - Get a firsthand look at a company’s culture to make informed decisions about where you want to work.\n\nJoin the community of tech professionals who trust Dice to help them find and apply to their next job in tech.\n\nTo follow our company page on LinkedIn, visit: https://www.linkedin.com/company/dice\n",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Entry level",
+    "directapply": false,
+    "linkedin_org_slug": "jobs-via-dice",
+    "no_jb_schema": null,
+    "external_apply_url": "https://click.appcast.io/t/VcFN69r1R2Q5LGjiu2eQ7yM6blY0N5qU92jgasC9vxc=",
+    "description_text": "RESPONSIBILITIES:\n\nKforce has a client that is seeking a React/PHP Developer in Kaysville, UT.\n\nSummary:\n\nOur client is seeking a candidate to help with their leading innovative healthcare software to improve patient care and streamline medical processes. They would prefer a Utah candidate however, for the right fit, they will be open to remote candidates.\n\nResponsibilities:\n\nReact/PHP Developer will develop and maintain web applications using React and PHP\nCollaborate with cross-functional teams to define, design, and ship new features\nEnsure performance, quality, and responsiveness of applications\nIdentify and correct bottlenecks and fix bugs\nAs a React/PHP Developer, you will help maintain code quality, organization, and automation\nStay up to date with the latest industry trends and technologies\n\nREQUIREMENTS:\n\nProven experience as a React Developer\nStrong proficiency in PHP and experience with back-end development\nFamiliarity with AWS\nExcellent problem-solving skills and attention to detail\nStrong communication and teamwork skills\n\nThe pay range is the lowest to highest compensation we reasonably in good faith believe we would pay at posting for this role. We may ultimately pay more or less than this range. Employee pay is based on factors like relevant education, qualifications, certifications, experience, skills, seniority, location, performance, union contract and business needs. This range may be modified in the future.\n\nWe offer comprehensive benefits including medical/dental/vision insurance, HSA, FSA, 401(k), and life, disability & ADD insurance to eligible employees. Salaried personnel receive paid time off. Hourly employees are not eligible for paid time off unless required by law. Hourly employees on a Service Contract Act project are eligible for paid sick leave.\n\nNote: Pay is not considered compensation until it is earned, vested and determinable. The amount and availability of any compensation remains in Kforce's sole discretion unless and until paid and may be modified in its discretion consistent with the law.\n\nThis job is not eligible for bonuses, incentives or commissions.\n\nKforce is an Equal Opportunity/Affirmative Action Employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, pregnancy, sexual orientation, gender identity, national origin, age, protected veteran status, or disability status.\n\nBy clicking ?Apply Today? you agree to receive calls, AI-generated calls, text messages or emails from Kforce and its affiliates, and service providers. Note that if you choose to communicate with Kforce via text messaging the frequency may vary, and message and data rates may apply. Carriers are not liable for delayed or undelivered messages. You will always have the right to cease communicating via text by using key words such as STOP. \nShow more Show less"
+  },
+  {
+    "id": "1792580105",
+    "date_posted": "2025-07-03T04:11:16",
+    "date_created": "2025-07-03T04:32:07.271255",
+    "title": "Founding Engineer (Golang, Agentic AI, Full-Stack)",
+    "organization": "Reforged Labs (YC W22)",
+    "organization_url": "https://www.linkedin.com/company/reforged-labs",
+    "date_validthrough": "2025-08-02T04:11:16",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "San Francisco",
+          "addressRegion": "CA",
+          "streetAddress": null
+        },
+        "latitude": 37.78008,
+        "longitude": -122.42016
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "San Francisco, California, United States"
+      }
+    ],
+    "salary_raw": null,
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/founding-engineer-golang-agentic-ai-full-stack-at-reforged-labs-yc-w22-4259961219",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFfJ7PFTik54A/company-logo_200_200/company-logo_200_200/0/1694111031194/reforged_labs_logo?e=2147483647&v=beta&t=7QATRmxpytjbYFJs_bRaTKrYhUImpr_rqDHQ0MIdUYU",
+    "cities_derived": [
+      "San Francisco"
+    ],
+    "regions_derived": [
+      "California"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "San Francisco, California, United States"
+    ],
+    "timezones_derived": [
+      "America/Los_Angeles"
+    ],
+    "lats_derived": [
+      37.7558
+    ],
+    "lngs_derived": [
+      -122.4449
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 22,
+    "linkedin_org_url": "https://reforgedlabs.com/",
+    "linkedin_org_size": "2-10 employees",
+    "linkedin_org_slogan": "The world's first AI co-pilot built for mobile game marketers.",
+    "linkedin_org_industry": "Technology, Information and Media",
+    "linkedin_org_followers": 1781,
+    "linkedin_org_headquarters": "San Francisco, CA",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2023",
+    "linkedin_org_specialties": [
+      ""
+    ],
+    "linkedin_org_locations": [
+      "San Francisco, CA 94110, US"
+    ],
+    "linkedin_org_description": "Reforged Labs empowers game studios to supercharge their performance marketing. Our AI copilot, the first platform built for mobile game marketing, enables UA managers to achieve results 10x faster and more cost-effectively.\n\nBy analyzing thousands of top-performing ads, our platform uncovers what makes an ad effective. Backed by real-world data, it transforms how UA managers brainstorm ideas, create video ads, and launch high-performing campaigns—delivering a competitive edge in the evolving gaming industry. With Reforged Labs, you don’t just keep up with trends—you set them.",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Mid-Senior level",
+    "directapply": true,
+    "linkedin_org_slug": "reforged-labs",
+    "no_jb_schema": null,
+    "external_apply_url": null,
+    "description_text": "About Us\nReforged Labs is a YC-backed, Sandhill Road funded AI startup revolutionizing how the world's top mobile gaming studios market themselves to hundreds of millions of players. We're building cutting-edge AI technology that powers sophisticated ad analysis and generation pipelines for elite global gaming companies.\n\nWe don't follow trends; we set them. As a founding engineer, you'll be instrumental in establishing our technical culture and building solutions that rival the best Silicon Valley has to offer.\n\nThe Role\nWe're seeking an exceptional Founding Engineer to join our core team in San Francisco and Vietnam. This is not just a senior engineering role—you'll be a part of the founding team helping define our entire technology stack, engineering culture, and product direction.\n\nYou'll own major technical initiatives from conception to deployment, directly collaborating with founders on strategic decisions while building the foundational systems that will scale to serve hundreds of millions of users.\n\nCore Responsibilities\nTechnical Leadership: Drive architectural decisions and establish engineering best practices as we scale from startup to scale-up\nFull Ownership: Take complete ownership of core platform components, from agentic AI systems to user-facing applications\nFounding Impact: Help shape product direction, technical strategy, and company culture as an early team member\nSystem Architecture: Design and build intelligent agent systems, scalable data pipelines, and high-performance APIs\nCross-functional Collaboration: Work directly with founders, design, and business teams to translate vision into technical reality\nTeam Building: Help recruit and mentor the next wave of engineers as we grow the team\nCustomer Impact: Build features that directly generate millions in value for top gaming studios globally\n\nRequired Experience\n5+ Years of backend development with complex distributed systems\nAgentic AI Systems: Hands-on experience building and deploying agentic workflows in production\nExpert-level Golang: Demonstrated mastery of concurrency, performance optimization, and production systems\nCloud Platform Expertise: Deep experience with AWS or GCP production environments\nFull-Stack Capability: Comfortable working across the entire stack when needed\nStartup Experience: Previous experience at early-stage companies (seed to Series A preferred)\nTechnical Leadership: History of leading technical initiatives and mentoring other engineers\n\nFounding Engineer Qualities\nOwnership Mindset: You think like an owner, not just an employee—willing to do whatever it takes to make the company successful\nVersatility: Comfortable wearing multiple hats and jumping between different technical challenges\nStrategic Thinking: Ability to balance immediate needs with long-term architectural decisions\nCustomer-First: Understanding that great engineering serves great customer outcomes\nCultural Builder: Help establish the engineering culture and values that will define our team\nRisk-Comfortable: Thrives in uncertainty and ambiguity typical of early-stage startups\nMission-Driven: Genuinely excited about our vision and willing to commit years to building something extraordinary\n\nInterview Process\n1. Founder Interview (60 mins)\nVision alignment and founding team chemistry\nTechnical background and leadership experience\nDiscussion of equity, role expectations, and startup life\n2. Technical Deep Dive (90 mins)\nArchitecture and system design challenge\nLive coding session\nDiscussion of previous technical leadership experiences\n3. Take-Home Project (1 week)\nBuild a foundational component for our platform\nDemonstrate full-stack capabilities and technical judgment\n4. Final Round (2 hours)\nPresent and defend your project to the full founding team\nStrategic technical planning discussion\nCulture fit and long-term vision alignment\nWe move quickly—expect the entire process to complete within 1-2 weeks.\n\nWhy Join as a Founding Engineer\n1. Financial Upside\nSignificant equity package: Founding engineer equity allocation (0.5-2%+ depending on experience)\nCompetitive salary for SF market rates\n2. Impact & Growth\nDirect founder access: Work closely with founders on strategy and vision\nTechnical autonomy: Freedom to make architectural decisions and choose technologies\nCareer acceleration: Founding engineer experience opens doors throughout Silicon Valley\nGlobal impact: Build technology used by studios reaching hundreds of millions of players\nLearning opportunity: Gain deep experience in cutting-edge AI/ML applications\n3. Culture & Environment\nY Combinator centric: Heart of the tech ecosystem with access to top talent and investors\nTechnical excellence: High engineering standards with adequate time to build things right\nRapid iteration: Ship meaningful features and see immediate customer impact\nDiverse perspectives: Build an inclusive culture from the ground up\nWork-life integration: Sustainable pace that recognizes founding engineer commitment\n\nOur Engineering Philosophy\nAs a founding engineer, you'll help establish our core engineering principles:\nQuality over speed: We move fast, but never at the expense of fundamental quality\nOwnership culture: Each engineer owns their domain completely, from architecture to customer success\nContinuous learning: Stay at the forefront of AI/ML developments and engineering best practices\nCustomer obsession: Every technical decision ultimately serves our customers' success\nOpen communication: Direct, honest feedback and collaborative decision-making\n\nLocation & Logistics\nFull Remote: This role is fully remote, though San Francisco is preferred\n\nNote: This role is designed for exceptional engineering talent who want to build something transformative from the ground up. If you're not ready for the intensity, uncertainty, and ownership that comes with being a founding engineer at a fast-growing startup, this position isn't the right fit.\nIf you're an exceptional engineer who wants to help build the next generation of AI-powered gaming technology and are excited about the founding engineer journey, we want to talk to you.\n\nWe are an equal opportunity employer and value diversity at our company."
+  },
+  {
+    "id": "1792321383",
+    "date_posted": "2025-07-03T01:12:59",
+    "date_created": "2025-07-03T02:05:08.244068",
+    "title": "Senior Platform DevEx Engineer (DevOps)",
+    "organization": "AGILIOUS",
+    "organization_url": "https://www.linkedin.com/company/agilious",
+    "date_validthrough": "2025-07-19T14:03:52",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Bethesda",
+          "addressRegion": "MD",
+          "streetAddress": null
+        },
+        "latitude": 38.984856,
+        "longitude": -77.09269
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Bethesda, Maryland, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 150000,
+        "maxValue": 200000,
+        "unitText": "YEAR"
+      }
+    },
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/senior-platform-devex-engineer-devops-at-agilious-4257648000",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D4E0BAQEBhQJ8ODxoYw/company-logo_200_200/B4EZWkNNjiHMAI-/0/1742216681962/agilious_logo?e=2147483647&v=beta&t=3mXBeXg3-D6t1cRhYjAeZtEOuGO-XAyq_wrsziVqC6o",
+    "cities_derived": [
+      "Bethesda"
+    ],
+    "regions_derived": [
+      "Maryland"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Bethesda, Maryland, United States"
+    ],
+    "timezones_derived": [
+      "America/New_York"
+    ],
+    "lats_derived": [
+      38.9866
+    ],
+    "lngs_derived": [
+      -77.1188
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 21,
+    "linkedin_org_url": "http://www.agilious.com",
+    "linkedin_org_size": "11-50 employees",
+    "linkedin_org_slogan": "Making digital solutions simple, seamless, and accessible.",
+    "linkedin_org_industry": "IT Services and IT Consulting",
+    "linkedin_org_followers": 688,
+    "linkedin_org_headquarters": "Bethesda, MD",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2013",
+    "linkedin_org_specialties": [
+      "Application Development",
+      "IT Modernization",
+      "DevSecOps",
+      "Agile Development",
+      "Case Management Systems",
+      "Grants Management Systems",
+      "Agile Transformation & Adoption",
+      "Agile Coaching & Training",
+      "and Health Sciences"
+    ],
+    "linkedin_org_locations": [
+      "10411 Motor City Drive, Suite 750, Bethesda, MD 20817, US"
+    ],
+    "linkedin_org_description": "We accelerate our Federal customer mission by creating modern, innovative technology solutions that serve the needs of all Americans.\n\nOur solutions:\n\nApplication Development & IT Modernization >>> We leverage the best practices of user- and human-centered design to deliver high-quality, and high performing innovative technology software applications/products.\n\nAdvisory & Consulting Services >>> We develop and deliver tailored consulting solutions that are designed to empower an organization to achieve the highest levels of mission and business agility.",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "agilious",
+    "no_jb_schema": null,
+    "external_apply_url": "https://careerpage.co/agilious/senior-platform-devex-engineer-devops-ag132?tk=37",
+    "description_text": "Build What Matters, Simply And Efficiently\n\nAgilious leads with a singular purpose - to empower organizations to build digital solutions that truly serve people by simplifying software delivery and eliminating waste. With over 20 years of experience in strategy, design, engineering, and data, our clients count on us not just to deliver technology but to strengthen your teams with the skills, training, and strategy they need to create real, user-focused impact at scale.\n\nAbout The Role\n\nAgilious is seeking a skilled Senior Platform DevEx/DevOps Engineer to support our work for the National Center for Biotechnology Information (NCBI) at the National Library of Medicine (NLM), an institute of the National Institutes of Health. NCBI advances science and public health by providing free access to biomedical literature and genomic data over the web, making it one of the 400 top most-visited sites in the world. NCBI's diverse staff of smart, talented, and deeply technical people collaborate to build critically valuable services for researchers, physicians, educators, students, and the general public. For example, NCBI develops and delivers PubMed, an index of over 29 million biomedical research abstracts, often with links to full-text literature and supporting data.\n\nThe Platform Services team builds and maintains the systems that software developers use to ensure that they are consistently pushing and deploying high quality code that complies with Federal Standards for application security and mature code practices.\n\nTools for creating and setting up new projects consistently across the org.\nCI pipelines and build tools for consistent expectations across languages and application frameworks\nTesting frameworks and metrics to assure only quality and secure code can be sent to production.\nDeployment and publishing pipelines to bring applications to their users in on-premises and cloud environments, and to provide public access to open-source projects.\nIntegrations for the secure management of deployment parameters, credentials, and more.\nTooling to allow applications to communicate asynchronously, monitor performance metrics, debug live applications and much more.\n\nLocation/Remote: This position is full-time and is primarily remote, with select day(s) working from a location in the DC-MD-VA metro region.\n\nWhat You’ll Do\n\nAs a Senior Platform DevEx engineer, you'll be a part of a highly experienced cross-functional team of around 20, building and maintaining tools and systems that allow developers across NCBI to build, deploy, and maintain software and web services that are used around the world.\n\nGitLab CI pipeline configuration, templates, and components to build a standardized ecosystem for developers across the organization to use for their applications, in many languages, from C++ to Scala, Kotlin, and Python.\nPython applications, scripts, and libraries to provide interfaces for DevOps and customer tools to manage builds, deployments, and more.\nKubernetes configuration templates using the YTT templating language to create and maintain customizable patterns for consistent deployments across application teams\nDebugging deployments on Kubernetes distributions like OpenShift and Anthos and using plugins like ArgoCD, Istio, and more.\nDocumentation knowledge bases for each component project and the DevEx platform as a whole, in READMEs and on Confluence.\nLeading smaller projects within the DevEx teams to add new capabilities to the platform.\nOther similar professional duties may be assigned as needed\n\nQualifications\n\nClearance: Public Trust Clearance must be obtainable\n\nRequired Skills\n\n7+ years of direct experience\nStrong coding fluency in at least one programming language. NCBI uses Python, C++, JavaScript/Typescript, some Kotlin & Scala, and small amounts of Golang and Rust.\nA working knowledge of Linux systems and the command line\nFamiliarity with source control, CI/CD pipelines, package publishing, and containerization\n\nPreferred Skills And Experience\n\nExperience developing CLI applications\nExperience building and deploying web APIs to cloud services or Kubernetes\nFamiliarity with container orchestration tools like Kubernetes or Nomad, and Kubernetes distributions like OpenShift Container Platform, Anthos, GKE, AKS, EKS, etc.\nFamiliarity with observability tools like Prometheus, the EFK (ElasticSearch, fluentd, Kibana) or TIGK (Telegraph InfluxDB, Grafana, Kapacitor) stacks, DataDog, Sensu, Jaeger, Sentry, or OpsGenie.\nFamiliarity with GitLab CI/CD pipelines\n\nBonus Skills And Experience\n\nExperience building high-availability applications\nExperience configuring multi-tenent Kubernetes clusters\nFamiliarity with Service Mesh technologies like Istio or Linkerd\nFamiliarity with event bus technologies like Kafka, RabbitMQ, AWS Kenesis, etc.\nFamiliarity with data processing and distributed computing tools like Apache Spark or Airflow\nFamiliarity with secret management tools like Hashicorp Vault, Azure KeyVault, Google Secret Manager, etc.\n\nWhy Work at Agilious \n\nAt Agilious, we put our people first. As a team-focused company, we foster a collaborative environment where every employee has a voice, opportunities to develop professionally, and the support to thrive. If you’re looking for a career where you can learn, contribute, and grow, we’d love to hear from you.\n\nOur Benefits\n\nHealth, dental, and vision insurance to take care of your health needs\nSupplemental Benefits: Life Insurance, Long and Short-Term Disability\n401(k) plan with contributions and annual profit sharing\nGenerous paid time off, federal & floating holidays to maintain balance\nRobust Professional Development to continue your education\nEmployee Assistance Program Support for a wide range of life events and experiences\n\nWe are an equal opportunity employer and value diversity at our company. We do not discriminate based on race, religion, color, national origin, gender, sexual orientation, age, marital status, veteran status, or disability status. \n\nAt this time, Agilious will not sponsor a new applicant for employment authorization for this position.\n\nThe minimum and maximum full-time annual salaries for this role are listed below. \n\nSalary Range: $150,000 - $200,000"
+  },
+  {
+    "id": "1792075505",
+    "date_posted": "2025-07-03T00:07:38",
+    "date_created": "2025-07-03T00:32:57.891908",
+    "title": "DevOps Architect (Remote)",
+    "organization": "Lensa",
+    "organization_url": "https://www.linkedin.com/company/lensa",
+    "date_validthrough": "2025-08-02T00:07:38",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Lakeland",
+          "addressRegion": "FL",
+          "streetAddress": null
+        },
+        "latitude": 28.044155,
+        "longitude": -81.94897
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Lakeland, Florida, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 10195,
+        "maxValue": 198770,
+        "unitText": "YEAR"
+      }
+    },
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/devops-architect-remote-at-lensa-4261091306",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D4D0BAQEkHa-0Aki9XQ/company-logo_200_200/B4DZaKylu7GsAI-/0/1746085240184/lensa_logo?e=2147483647&v=beta&t=uWeVCpbXYyRN0ASrTAkroLlijETQQufn9qquZHoZTfo",
+    "cities_derived": [
+      "Lakeland"
+    ],
+    "regions_derived": [
+      "Florida"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Lakeland, Florida, United States"
+    ],
+    "timezones_derived": [
+      "America/New_York"
+    ],
+    "lats_derived": [
+      28.0557
+    ],
+    "lngs_derived": [
+      -81.9545
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 255,
+    "linkedin_org_url": "https://lensa.com",
+    "linkedin_org_size": "51-200 employees",
+    "linkedin_org_slogan": "Make your move. Building careers that matter for job seekers and professionals.",
+    "linkedin_org_industry": "Internet Publishing",
+    "linkedin_org_followers": 94671,
+    "linkedin_org_headquarters": "West Chester, Pennsylvania",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2015",
+    "linkedin_org_specialties": [
+      "Recruitment",
+      "eRecruitment",
+      "Online Recruitment",
+      "Talent Acquisition HR Platform",
+      "Hiring platform",
+      "Job search",
+      "Jobs",
+      "Employment",
+      "and job advertising"
+    ],
+    "linkedin_org_locations": [
+      "17 W Gay St, Suite 50, West Chester, Pennsylvania 19380, US",
+      "Kapás utca, 6-12., Budapest, Budapest 1027, HU"
+    ],
+    "linkedin_org_description": "Lensa is a U.S. job search platform with over 20 million registered users.\n\nWe connect jobseekers to a wide range of opportunities from employers, staffing firms, recruitment agencies and job boards. Lensa also offers tools to help users understand their career options and make informed decisions throughout their job search journey — from exploration to application.",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "lensa",
+    "no_jb_schema": null,
+    "external_apply_url": "https://lensa.com/cgw/0baf8c63a1ad4f76ab0f27b580efe5a6tjo1?jpsi=directemployers&publisher_preference=easier_apply&utm_campaign=Computer Occupations&utm_medium=slot&utm_source=linkedin&utm_term=jse",
+    "description_text": "Lensa is a career site that helps job seekers find great jobs in the US. We are not a staffing firm or agency. Lensa does not hire directly for these jobs, but promotes jobs on LinkedIn on behalf of its direct clients, recruitment ad agencies, and marketing partners. Lensa partners with DirectEmployers to promote this job for Publix Super Markets, Inc..\n\n33386BR\n\nPosition Title\n\nDevOps Architect (Remote)\n\nDepartment\n\nPublix Technology\n\nLocation:\n\nLakeland, FL\n\nDescription\n\n_Publix can offer virtual/remote employment for this position in the following states: FL, GA, AL, TN, SC, NC, VA, KY. _\n\nWelcome to Publix Technology, the award-winning technical group for Publix Super Markets, Inc., the largest employee-owned company in the nation. Our technology teams of 2100+ associates provide innovative, modern solutions to nearly 1400 retail stores and 200,000+ internal team members across 8 states. We offer positions at all levels – summer internships, individual contributor roles, to technical leadership across a broad range of technical disciplines. So, whether you’re interested in IT security, platform engineering, architecture, software development, or infrastructure – we have a career path for you! See for yourself why Publix Super Markets, Inc. is a constant on Fortune Magazine’s Best Companies to Work list.\n\nJoin the Technology Architecture team! As a DevOps Architect, you will be an integral part in ensuring that the DevOps framework aligns with the organization's goals and business objectives and that it promotes a culture of continuous improvement and innovation. You will be responsible for designing and supporting continuous integration / continuous deployment pipelines, providing leadership and education on DevOps processes and tools to application, infrastructure, and operational teams.\n\nJob Responsibilities\n\nResponsible for designing, developing, writing, and implementing software solutions for our continuous integration and continuous deployment processes. \nDefine and govern DevOps processes, quality guidelines, and standards. \nLead efforts in collaborating and educating delivery teams on building CI/CD pipelines using best practices. \nLead efforts in defining and developing practices for automated testing including unit, integration, functional and end-to-end. \nWork closely with delivery, infrastructure, and operational teams to ensure systems are secure, scalable, and reliable. \nOwn the creation and governing of continuous integration automation with platforms like Azure DevOps Server, Jenkins, Gitlab CI \nCollaborate closely with solution architects to promote DevOps practices. \n\nReq ID\n\n33386BR\n\nFacility\n\nLak Information Systems/DTO2 B015\n\nState\n\nFlorida\n\nFrequency Of Pay\n\nMonthly\n\nMinimum Base Pay\n\n10,195\n\nAdditional Information\n\nYour application may have additional steps that you will need to complete in order to remain eligible for consideration. Please be sure to monitor your email, including your spam folder, on a daily basis for critical, time-sensitive emails that could require action within 24-48 hours.\n\nPlease do not use your Publix email address when applying. Once your application has been successfully submitted you will receive a confirmation email.\n\nRelocation/Household Good Shipment Allowance will NOT be provided.\n\nAddress\n\n331 S. Florida Ave\n\nPotential Annual Pay With Bonus\n\n132,535 - 198,770\n\nCity\n\nLakeland\n\nYear End Bonus\n\nAs a year-end bonus to associates, Publix issues one month’s extra pay (pro-rated in the first year) each year if associate remains employed through issue date of the bonus check that year. This is calculated as a 13th month of pay in the Potential Annual Pay with Bonus line above.\n\nMaximum Base Pay\n\n15,290\n\nRequired Qualifications\n\nBachelor’s degree in computer science or a related analytical field, or equivalent experience, \n8+ years of development experience \n5+ years working with source control systems (GitHub, Bitbucket, Azure DevOps) \n5+ years of experience working with Jenkins, Azure DevOps, GitHub, and/or Gitlab. \n2+ years of systems engineering expertise, with knowledge of hardware, networking, software, applications, cloud, and systems engineering. \n2+ years of supporting DevOps practices \n2+ years of public cloud experience (AWS or Azure) \nHands-on experience with provision tools such as Terraform. \n\nPreferred Qualifications\n\nExperience designing, implementing, and documenting CI/CD pipelines using Azure DevOps \nStrong Automation skills and the ability to drive initiatives to automate processes. \nExperience with containers and container orchestration such as Kubernetes \nExperience with Octopus Deploy \nExperience developing cloud-based applications that run in Microsoft Azure \nExperience with Platform Engineering and/or Internal Developer Platform \nLinux administration and scripting skills \nExperience performing automated/load tests. \nExperience developing metrics to measure improvements using DevOps practices \n\nZip Code\n\n33801\n\nBenefits Information\n\nEmployee stock ownership plan that contributes Publix stock to associates each year at no cost \nAn opportunity to purchase additional shares of our privately-held stock \n401(k) retirement savings plan \nGroup health, dental and vision plans \nPaid Time Off \nPaid Parental Leave \nShort- and long-term disability insurance \nTuition reimbursement \nFree hot lunches (buffet-style) at facilities with a cafeteria \nVisit our website to see all of our benefits: Benefits - Jobs (publix.com) (https://jobs.publix.com/benefits/) \n\nIf you have questions about this posting, please contact support@lensa.com"
+  },
+  {
+    "id": "1792051144",
+    "date_posted": "2025-07-02T23:53:35",
+    "date_created": "2025-07-03T00:12:58.777763",
+    "title": "DevOps Cloud Architect, Digital Engineering Solutions (Remote)",
+    "organization": "Lensa",
+    "organization_url": "https://www.linkedin.com/company/lensa",
+    "date_validthrough": "2025-08-01T23:53:35",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Watertown",
+          "addressRegion": "SD",
+          "streetAddress": null
+        },
+        "latitude": 44.898846,
+        "longitude": -97.10645
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Watertown, South Dakota, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 121368,
+        "maxValue": 212368,
+        "unitText": "YEAR"
+      }
+    },
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/devops-cloud-architect-digital-engineering-solutions-remote-at-lensa-4259919950",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D4D0BAQEkHa-0Aki9XQ/company-logo_200_200/B4DZaKylu7GsAI-/0/1746085240184/lensa_logo?e=2147483647&v=beta&t=uWeVCpbXYyRN0ASrTAkroLlijETQQufn9qquZHoZTfo",
+    "cities_derived": [
+      "Watertown"
+    ],
+    "regions_derived": [
+      "South Dakota"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Watertown, South Dakota, United States"
+    ],
+    "timezones_derived": [
+      "America/Chicago"
+    ],
+    "lats_derived": [
+      44.9094
+    ],
+    "lngs_derived": [
+      -97.1532
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 255,
+    "linkedin_org_url": "https://lensa.com",
+    "linkedin_org_size": "51-200 employees",
+    "linkedin_org_slogan": "Make your move. Building careers that matter for job seekers and professionals.",
+    "linkedin_org_industry": "Internet Publishing",
+    "linkedin_org_followers": 94615,
+    "linkedin_org_headquarters": "West Chester, Pennsylvania",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2015",
+    "linkedin_org_specialties": [
+      "Recruitment",
+      "eRecruitment",
+      "Online Recruitment",
+      "Talent Acquisition HR Platform",
+      "Hiring platform",
+      "Job search",
+      "Jobs",
+      "Employment",
+      "and job advertising"
+    ],
+    "linkedin_org_locations": [
+      "17 W Gay St, Suite 50, West Chester, Pennsylvania 19380, US",
+      "Kapás utca, 6-12., Budapest, Budapest 1027, HU"
+    ],
+    "linkedin_org_description": "Lensa is a U.S. job search platform with over 20 million registered users.\n\nWe connect jobseekers to a wide range of opportunities from employers, staffing firms, recruitment agencies and job boards. Lensa also offers tools to help users understand their career options and make informed decisions throughout their job search journey — from exploration to application.",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "lensa",
+    "no_jb_schema": null,
+    "external_apply_url": "https://lensa.com/cgw/3915ced14f984740a55da2495271f0a0tjo1?jpsi=directemployers&publisher_preference=easier_apply&utm_campaign=Computer Occupations&utm_medium=slot&utm_source=linkedin&utm_term=manual",
+    "description_text": "Lensa is a career site that helps job seekers find great jobs in the US. We are not a staffing firm or agency. Lensa does not hire directly for these jobs, but promotes jobs on LinkedIn on behalf of its direct clients, recruitment ad agencies, and marketing partners. Lensa partners with DirectEmployers to promote this job for CDM Smith.\n\n41354BR\n\nRequisition ID\n\n41354BR\n\nBusiness Unit\n\nCOR\n\nJob Description\n\nCDM Smith is seeking a DevOps Cloud Architect to join our Digital Engineering Solutions team. This individual will be part of the Development group within the Digital Engineering Solutions team, helping design and implementation of cloud-based solutions facilitates CI/CD practices, utilizing infrastructure as code (IaC) tools and ensuring that software development and operations teams work collaboratively. This individual must showcase exceptional abilities in implementing cloud technology solutions for AEC initiatives that involve cutting-edge technologies. As a member of the Digital Engineering Solutions team, the Development group will also engage in research and development and provide guidance and oversight to the AEC practices at CDM Smith, engaging in new product research, testing, and the incubation of innovative ideas that arise from around the company. The ideal candidate should possess an extensive background in cloud architecture, that includes security, scaling, integration, and application migration, along with a commitment to continuous advancement and interest that drives measurable results.\n\nThe following are the Key responsibilities for this position\n\nA thorough understanding of cloud technologies, including design patterns, planning, configuration, and resource management in Microsoft Azure and other cloud platforms.\nDevelop DevSecOps culture implementation, integration, pipeline automation as well as high- and low-level architectural analysis. Mentor development teams on pipeline best practices.\nDesign and develop the infrastructure and CICD pipeline for a range of projects in a various environment in an agile way.\nSpearhead infrastructure automation using Bicep, ARM templates, and scripting languages (PowerShell), promoting Infrastructure as Code (IaC) as a core team capability.\nDrive adoption of infrastructure as code practices to create reusable solution patterns and templates.\nDevelop and implement monitoring, logging, and alerting systems that ensure the performance and health of the system.\nEstablish standards and guidelines across cloud platforms in accordance with industry standards.\nEstablish guidelines for Azure Active Directory (AAD), RBAC, IAM configuring role assignments, conditional access, and identity management.\nIncorporate security best practices into cloud architecture and ensure compliance with appropriate industry standards.\nAnalyze the cloud service's business needs, investigate the necessary framework, design and implement enterprise-class cloud service providing secure, scalable, and efficient solutions.\nEngage in multidisciplinary research on complex systems including serverless, endpoints, networks, disaster recovery management system and hardware/software.\nCollaborate with the IT operations, security and other architect teams to ensure that best practices are followed.\nCommunicate verbally and in writing with non-technical cross-functional teams.\nImplement cost-saving measures and analyze resource utilization to optimize cloud costs.\nWork with multi-cultural teams across different time zones.\n\nJob Title\n\nDevOps Cloud Architect, Digital Engineering Solutions (Remote)\n\nGroup\n\nCOR\n\nEmployment Type\n\nRegular\n\nMinimum Qualifications\n\nBachelor’s degree.\n8 years of relevant experience.\nEquivalent additional directly related experience will be considered in lieu of a degree.\n\nDomestic and/or international travel may be required. The frequency of travel is contingent on specific duties, responsibilities, and the essential functions of the position, which may vary depending on workload and project demands.\n\nPreferred Qualifications\n\nMicrosoft Certified: Azure Solutions Architect Expert AZ-304/AZ-500 highly preferred.\nBachelor’s degree in software development, engineering, or a related specialization highly preferred.\n\nEEO Statement\n\nWe attract the best people in the industry, supporting their efforts to learn and grow. We strive to create a challenging and progressive work environment. We provide career opportunities that span a variety of disciplines and geographic locations, with projects that our employees plan, design, build and operate as diverse as the needs of our clients. CDM Smith is an Equal Opportunity/Affirmative Action employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex (including pregnancy, pregnancy related conditions, childbirth and related medical conditions, sexual orientation, gender identity or gender expression), national origin, age, marital status, disability, veteran status, citizenship status, genetic information or any other characteristic protected by applicable law.\n\nWhy CDM Smith?:\n\nCheck out this video and find out why our team loves to work here! (https://www.cdmsmith.com/en/Video/Meet-CDM-Smith)\n\nJoin Us! CDM Smith – where amazing career journeys unfold.\n\nImagine a place committed to offering an unmatched employee experience. Where you work on projects that are meaningful to you. Where you play an active part in shaping your career journey. Where your co-workers are invested in you and your success. Where you are encouraged and supported to do your very best and given the tools and resources to do so. Where it’s a priority that the company takes good care of you and your family.\n\nOur employees are the heart of our company. As an employer of choice, our goal is to provide a challenging, progressive and inclusive work environment which fosters personal leadership, career growth and development for every employee. We value passionate individuals who challenge the norm, deliver world-class solutions and bring diverse perspectives. Join our team, and together we will make a difference and change the world.\n\nJob Site Location:\n\nUnited States - Nationwide\n\nAgency Disclaimer\n\nAll vendors must have a signed CDM Smith Placement Agreement from the CDM Smith Recruitment Center Manager to receive payment for your placement. Verbal or written commitments from any other member of the CDM Smith staff will not be considered binding terms. All unsolicited resumes sent to CDM Smith and any resume submitted to any employee outside of CDM Smith Recruiting Center Team (RCT) will be considered property of CDM Smith. CDM Smith will not be held liable to pay a placement fee.\n\nAmount Of Travel Required\n\n0%\n\nAssignment Category\n\nFulltime-Regular\n\nVisa Sponsorship Available\n\nNo - We will not support sponsorship, i.e. H-1B or TN Visas for this position\n\nSkills And Abilities\n\nProficient in Microsoft Azure, with a strong foundation in system and solution design.\nProficient at creating high and low-level architectural diagrams for cloud environments to share with enterprise IT teams.\nWorking experience in the agile deployment of Azure resources in landing zones using Infrastructure as Code (IaC) methodologies.\nWorking knowledge of Git and version control systems, as well as the ability to configure CICD pipelines using Azure DevOps using Infrastructure as code.\nExperience in recommending cost-effective Azure services depending on project requirements while maintaining performance.\nWorking knowledge of high availability system architecture, including both horizontal and vertical scaling.\nExperience with Container Orchestration, Azure networking services such as content delivery, load balancing, network security, and cloud-native microservices architecture.\nProficient in the development and management of data lakes and data bricks within a sharable environment.\nHave a solid understanding of data residency, data isolation, and data retention policies.\nExcellent written, verbal, and diagrammatic communication skills.\nSolid understanding of Azure Active Directory (AAD), RBAC, PIM and IAM principles, with experience in configuring role assignments, conditional access, and identity management.\nWorking knowledge of cybersecurity and networking, as well as automated security tools such as intrusion detection and prevention and vulnerability scanning.\nExperience in creating disaster recovery strategies using industry standards and requirements for the project.\nStrong expertise deploying, configuring, and managing Azure resources using Bicep, ARM Templates, and Terraform, as well as programming with Python, Bash, and PowerShell.\nProficient in critical thinking, accurate analysis, and effective decision-making.\n\nBackground Check And Drug Testing Information\n\nCDM Smith Inc. and its divisions and subsidiaries (hereafter collectively referred to as “CDM Smith”) reserves the right to require background checks including criminal, employment, education, licensure, etc. as well as credit and motor vehicle when applicable for certain positions. In addition, CDM Smith may conduct drug testing for designated positions. Background checks are conducted after an offer of employment has been made in the United States. The timing of when background checks will be conducted on candidates for positions outside the United States will vary based on country statutory law but in no case, will the background check precede an interview. CDM Smith will conduct interviews of qualified individuals prior to requesting a criminal background check, and no job application submitted prior to such interview shall inquire into an applicant's criminal history. If this position is subject to a background check for any convictions related to its responsibilities and requirements, employment will be contingent upon successful completion of a background investigation including criminal history. Criminal history will not automatically disqualify a candidate. In addition, during employment individuals may be required by CDM Smith or a CDM Smith client to successfully complete additional background checks, including motor vehicle record as well as drug testing.\n\nPay Range Minimum\n\n$121,368\n\nPay Range Maximum\n\n$212,368\n\nAdditional Compensation\n\nAll bonuses at CDM Smith are discretionary and may or may not apply to this position.\n\nWork Location Options:\n\nFully Remote or Hybrid Work Options may be considered for successful candidate.\n\nAdditional Pay Range Information\n\nThe pay range for this position is listed above. This pay range is a good faith estimate representative of all experience levels for this position based on the geographic location assigned to the position. Please note that pay ranges vary based on geographic location. In addition to geographic location, the company considers several other factors when extending an offer including but not limited to the role, function and associated responsibilities, the candidate’s work experience, education/training and key skills.\n\nMassachusetts Applicants\n\nIt is unlawful in Massachusetts to require or administer a lie detector test as a condition of employment or continued employment. An employer who violates this law shall be subject to criminal penalties and civil liability.\n\nIf you have questions about this posting, please contact support@lensa.com"
+  },
+  {
+    "id": "1792076746",
+    "date_posted": "2025-07-02T23:50:35",
+    "date_created": "2025-07-03T00:33:24.357451",
+    "title": "Principal DevOps Automation Engineer",
+    "organization": "Broadcom",
+    "organization_url": "https://www.linkedin.com/company/broadcom",
+    "date_validthrough": "2025-08-01T23:50:35",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "North Carolina",
+          "addressRegion": "United States",
+          "streetAddress": null
+        },
+        "latitude": 35.539375,
+        "longitude": -79.18542
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "North Carolina, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 106900,
+        "maxValue": 171000,
+        "unitText": "YEAR"
+      }
+    },
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/principal-devops-automation-engineer-at-broadcom-4259924182",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/C4E0BAQGDwy-AGAu-Hg/company-logo_200_200/company-logo_200_200/0/1631307574919?e=2147483647&v=beta&t=t6ILtIr0_kgfMqhVF8HC-V-4fq9CwLAaI2Dmqxou-Jg",
+    "cities_derived": null,
+    "regions_derived": [
+      "North Carolina"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "North Carolina, United States"
+    ],
+    "timezones_derived": [
+      "America/New_York"
+    ],
+    "lats_derived": [
+      35.8324
+    ],
+    "lngs_derived": [
+      -78.6429
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 57948,
+    "linkedin_org_url": "http://www.broadcom.com",
+    "linkedin_org_size": "10,001+ employees",
+    "linkedin_org_slogan": null,
+    "linkedin_org_industry": "Semiconductor Manufacturing",
+    "linkedin_org_followers": 539144,
+    "linkedin_org_headquarters": "Palo Alto, California",
+    "linkedin_org_type": "Public Company",
+    "linkedin_org_foundeddate": "",
+    "linkedin_org_specialties": [
+      "Bluetooth® Solutions",
+      "Cable Modems",
+      "Knowledge-based Processors",
+      "Satellite & IPTV STBs",
+      "xDSL",
+      "EPON",
+      "Enterprise/SMB/Core Switching",
+      "GbE",
+      "GPS",
+      "Mobile Communications",
+      "Network Infrastructure",
+      "PowerLine Communications",
+      "NFC",
+      "Wireless Networks",
+      "GPON",
+      "and Software"
+    ],
+    "linkedin_org_locations": [
+      "3401 Hillview Ave, Palo Alto, California 94304, US"
+    ],
+    "linkedin_org_description": "A global infrastructure technology leader built on more than 60 years of innovation, collaboration and engineering excellence.",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "broadcom",
+    "no_jb_schema": null,
+    "external_apply_url": "https://broadcom.wd1.myworkdayjobs.com/External_Career/job/USA-NC-Remote-Location/Senior-DevOps-Automation-Engineer_R023071?source=LinkedIn",
+    "description_text": "Job Description:\n\nPrimary Requirement:\n\nMust have some prior experience on the Mainframe.\n\nMust have 12+ years in DEV/Ops\n\nOverview:\n\nSeeking a Sr Professional Dev/Ops Engineer responsible to provide subject-matter expertise in the automation of Dev/Ops environments utilizing CI/CD (continuous integration and continuous deployment) methodologies and practices to speed up and improve software development on a mainframe environment. The ideal candidate should possess Senior level expertise to assist designing the system, participate in installation, monitor its functioning, and provide guidance to the team on its use. A foundational understanding of Mainframes is essential. Also required to have experience with one or more scripting languages like Python, Perl and Shell. Encouraged to have experience with source code management tools like GitLab, CI/CD pipeline tools like GitHub Actions or Jenkins and particularly Linux/Unix experience. The successful candidate should possess a strong willingness to learn emerging technologies including Zowe, API ML and CLI.\n\nPrimary Function:\n\nDuties include but are not limited to the following:\n\nInstallation, configuration, and support an advanced Dev/Ops automation environment.\n\nUtilize CI/CD methodologies in support in a Dev/Ops automation environment\n\nIntegration of mainframe and current CI/CD using scripting languages\n\nDiagnostics analysis within DEV/Ops automation software and the platforms where they exits.\n\nTechnical Skills and Experience:\n\n\n84 months of experience as a Dev/Ops automation engineer\n60+ months experience of Installation and configuration of Dev/Ops software.\n60+ months experience of support and administration of CI/CD Methodologies.\n60+ months experience of integration of software into a Distributed or Mainframe environment.\n60+ months experience with Application Program Interface implementation and support.\n48+ months of supporting software requiring security compliance and audit readiness methodologies.\n48+ months of practical experience using a scripting language like GitHub or Jenkins.\n48+ months of experience with Linux/Unix operating systems\n24+ months of experience with hands on work in a Mainframe environment\nPossess in-depth knowledge of a given computing platform and relevant marketplace; can speak with authority, e.g., on trends, best practices, compliance practices, etc.\n\n\nPeople and Communication Skills:\n\n\nAbility to listen to client requirements and organize them into a list of business needs and objectives\nAbility to provide written communication back to the project manager and customer regarding build and integrate instructions, assigned task status, and ability to communicate through channels such as knowledge transfer instructions to run the solution after implementation is complete.\nAbility to follow a communication plan established by the project manager\nAbility to document clearly all the aspects listed above and ability to clearly communicate in writing project statuses, task status and communicate in writing build and integration results.\nDesire to learn emerging technologies including API ML, CLI and integrating in multiple Operating systems and apply them to customer environments.\n\n\nKey Requirements:\n\nA senior consultant will have a bachelor’s degree with a minimum of 12 years of experience in IT. Minimum Education: bachelor’s degree or equivalent experience.\n\nYou must have some documentable mainframe experience.\n\nAdditional Job Description:\n\nCompensation And Benefits\n\nThe annual base salary range for this position is $106,900 - $171,000\n\nThis position is also eligible for a discretionary annual bonus in accordance with relevant plan documents, and equity in accordance with equity plan documents and equity award agreements.\n\nBroadcom offers a competitive and comprehensive benefits package: Medical, dental and vision plans, 401(K) participation including company matching, Employee Stock Purchase Program (ESPP), Employee Assistance Program (EAP), company paid holidays, paid sick leave and vacation time. The company follows all applicable laws for Paid Family Leave and other leaves of absence."
+  },
+  {
+    "id": "1791876422",
+    "date_posted": "2025-07-02T22:38:20",
+    "date_created": "2025-07-02T23:03:15.042673",
+    "title": "DevOps Engineer",
+    "organization": "ConsultNet Technology Services and Solutions",
+    "organization_url": "https://www.linkedin.com/company/consultnet",
+    "date_validthrough": "2025-08-01T22:38:20",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Scottsdale",
+          "addressRegion": "AZ",
+          "streetAddress": null
+        },
+        "latitude": 33.494907,
+        "longitude": -111.92606
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Scottsdale, Arizona, United States"
+      }
+    ],
+    "salary_raw": null,
+    "employment_type": [
+      "CONTRACTOR"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/devops-engineer-at-consultnet-technology-services-and-solutions-4261073099",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQHsrqObE604tw/company-logo_200_200/company-logo_200_200/0/1709914318368/consultnet_logo?e=2147483647&v=beta&t=5P9pnX-eyrakvlQ_CTTYnlmmYGMtGYWavuNyQW7eyaA",
+    "cities_derived": [
+      "Scottsdale"
+    ],
+    "regions_derived": [
+      "Arizona"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Scottsdale, Arizona, United States"
+    ],
+    "timezones_derived": [
+      "America/Phoenix"
+    ],
+    "lats_derived": [
+      33.6872
+    ],
+    "lngs_derived": [
+      -111.8651
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 206,
+    "linkedin_org_url": "http://www.consultnet.com",
+    "linkedin_org_size": "201-500 employees",
+    "linkedin_org_slogan": "Delivering IT expertise with critical tech talent and solutions.  ",
+    "linkedin_org_industry": "Staffing and Recruiting",
+    "linkedin_org_followers": 122151,
+    "linkedin_org_headquarters": "Salt Lake City, Utah",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "1996",
+    "linkedin_org_specialties": [
+      "Project Management",
+      "AppDev",
+      "Mobile",
+      "Software/Application Development",
+      "Data Management",
+      "Data Analytics",
+      "Banking and Finance",
+      "Digital Media and Advertising",
+      "Manufacturing",
+      "Healthcare",
+      "Federal Sector",
+      "Technology",
+      "Nearshore",
+      "Salesforce Solutions",
+      "Direct Placement",
+      "Omni Media",
+      "and Tech Talent and Solutions"
+    ],
+    "linkedin_org_locations": [
+      "10813 South River Front Parkway, Suite 150, Salt Lake City, Utah 84095, US",
+      "875 6th Ave. (on 31st St.), 24th Floor, New York, New York 10001, US",
+      "23332 Mill Creek Dr, Laguna Hills, California 92653, US",
+      "8200 Greensboro Drive, Suite 300, McLean, VA 22102, US"
+    ],
+    "linkedin_org_description": "ConsultNet has seamlessly integrated talent and technology to serve our clients nationwide for over twenty-five years. In addition to providing contract, contract to hire and direct hire talent, we specialize in executive search, media, tech projects and managed services. Additionally, we operate a cutting-edge tech center in Guadalajara, Mexico, providing nearshore expertise.\n\nKnown for our expertise, deep relationships, custom technology solutions, and expansive network spanning various industries such as banking, financial services, retail, healthcare, public sector, automotive, aerospace, and manufacturing, ConsultNet stands as a trusted strategic partner for both clients and consultants. Our commitment to the core values of teamwork, integrity, and professionalism, underscore every interaction, and our industry recognition attests to the value we place on relationships and people.\n\nAt ConsultNet, we thrive in a culture of empowerment, continually surpassing expectations. Our dedication involves going the extra mile to understand client needs, developing personalized services and solutions to ensure optimal fit, and consistently driving exceptional success.",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "consultnet",
+    "no_jb_schema": null,
+    "external_apply_url": "https://www2.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=z1jdnwue8plenclbxjwmb1znhwsjog010f4agfwq5l1l4mq2gwf1s1xl73rlub4o&SearchString=&StatesString=&source=linkedin.com&id=25828411&compid=-1",
+    "description_text": "Title: DevOps Engineer\nLocation: Remote, MX\nTarget Start Date: 7/14\nType: (C, CTH, D) : C\nPay Rate / Salary (Ranges OK): $450/day\nWe are seeking a Senior DevOps Engineer with deep expertise in Microsoft Azure to lead the design, deployment, and continuous improvement of infrastructure and automation across cloud-native environments. This role is pivotal in driving best-in-class practices in Infrastructure as Code (IaC), CI/CD, and Azure platform services, while collaborating across engineering, QA, and product teams.\nIf you're passionate about leveraging Azure's full suite of capabilities to create scalable, secure, and highly available infrastructure&mdash;this role is for you.\nKey Responsibilities\nArchitect, deploy, and manage scalable, secure Azure environments across IaaS, PaaS, and SaaS offerings.\nLead and maintain robust Azure DevOps CI/CD pipelines and automate delivery of infrastructure and applications.\nDevelop and manage IaC solutions using Terraform and Azure-native tools (ARM, Bicep).\nServe as the Azure SME for infrastructure setup, release strategies, and platform improvements.\nMaintain and enhance Azure DevOps components, including Repos, Pipelines, Artifacts, and Boards.\nDocument and standardize infrastructure configurations, CI/CD workflows, and operational procedures.\nCollaborate with engineering and QA teams to troubleshoot issues and optimize cloud performance.\nDrive adoption of best practices in Azure governance, cost management, and security (RBAC, Azure AD, Key Vault, etc.).\nImplement Azure-native monitoring solutions (Azure Monitor, Application Insights, Log Analytics) for proactive alerting and diagnostics.\nMentor teams on cloud architecture, containerization (AKS, Docker), and modern DevOps principles.\nContinuously research and implement innovative ways to improve automation, scalability, and reliability.\nRequired Qualifications\nBachelor's Degree in Computer Science, Engineering, IT, or equivalent experience.\n5+ years of hands-on experience with Microsoft Azure, including PaaS services like App Services, SQL, Functions, and Container Apps.\nDeep knowledge of Azure DevOps Services and CI/CD pipeline automation.\nStrong experience with Infrastructure as Code, preferably Terraform and Azure-native templates (ARM/Bicep).\nExpertise in containerization and orchestration using Docker and Kubernetes (AKS).\nProven ability to lead and deliver cloud infrastructure projects end-to-end.\nStrong understanding of Azure identity and access management (IAM, RBAC, Azure AD).\nExperience implementing DevSecOps practices across the full software development lifecycle.\nKnowledge of monitoring and logging tools within Azure ecosystem.\nExcellent written and verbal communication skills; ability to collaborate with cross-functional teams.\nPreferred Qualifications\nExperience with additional DevOps tools like Ansible, Jenkins, Chef, or Puppet.\nExposure to multi-cloud environments, particularly Google Cloud Platform (GCP).\nMicrosoft Azure certifications (e.g., Azure Solutions Architect, DevOps Engineer Expert).\nWelcome to ConsultNet and the family of companies, Tekne, SaltClick, TechBridge, and OmniMedia. As a premier national provider of technology talent and solutions, our expertise spans across project services, contract-to-hire, direct placement, and managed services both onshore and nearshore.\n\nCelebrating more than 25 years of partnership with a diverse client base, we've crafted rewarding opportunities for our consultants, fostering high-performing teams that deliver impactful results. \nOver the last few years thousands of consultants have found their calling with us in roles that have made a meaningful impact on their lives, enhanced their career, challenged them, and propelled them towards achieving their personal and professional goals. At the ConsultNet family of companies, we believe effective communication is crucial in aligning the right job with your unique skills and professional aspirations. To us, it's all about the personal approach we take and the values we uphold. \nOur comprehensive service offerings cover a wide range of technology positions across key markets nationwide. Client more at www.consultnet.com. \nWe champion equality and inclusivity, proudly supporting an Equal Opportunity Employer policy. We welcome applicants regardless of Race, Color, Religion, Sex, Sexual Orientation, Gender Identity, National Origin, Age, Genetic Information, Disability, Protected Veteran Status, or any other status protected by law."
+  },
+  {
+    "id": "1791804289",
+    "date_posted": "2025-07-02T22:24:45",
+    "date_created": "2025-07-02T22:32:32.831897",
+    "title": "Full Stack Engineer – Python, React, AI Integration",
+    "organization": "Vettura AI",
+    "organization_url": "https://www.linkedin.com/company/vettura-ai",
+    "date_validthrough": "2025-08-01T22:24:45",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "New York",
+          "addressRegion": "United States",
+          "streetAddress": null
+        },
+        "latitude": 42.939243,
+        "longitude": -75.620056
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "New York, United States"
+      }
+    ],
+    "salary_raw": null,
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/full-stack-engineer-%E2%80%93-python-react-ai-integration-at-vettura-ai-4259912538",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQHKp7aW9pjSkg/company-logo_200_200/company-logo_200_200/0/1731306934698/vettura_ai_logo?e=2147483647&v=beta&t=_3gGwN6YtXKT_9Nl-ctfEzHLN1hG3HLKtvcKcwn9cSE",
+    "cities_derived": [
+      "New York"
+    ],
+    "regions_derived": [
+      "New York"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "New York, New York, United States"
+    ],
+    "timezones_derived": [
+      "America/New_York"
+    ],
+    "lats_derived": [
+      40.6943
+    ],
+    "lngs_derived": [
+      -73.9249
+    ],
+    "remote_derived": true,
+    "recruiter_name": "Harsha C",
+    "recruiter_title": "Talent acquisition specialist at Vettura",
+    "recruiter_url": "https://www.linkedin.com/in/harshavettura",
+    "linkedin_org_employees": 10,
+    "linkedin_org_url": "https://www.vettura.ai/",
+    "linkedin_org_size": "11-50 employees",
+    "linkedin_org_slogan": "Empowering Smarter Business Decisions with AI-Driven Innovation",
+    "linkedin_org_industry": "Software Development",
+    "linkedin_org_followers": 6664,
+    "linkedin_org_headquarters": "Naperville, Illinois",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "",
+    "linkedin_org_specialties": [
+      ""
+    ],
+    "linkedin_org_locations": [
+      "50 S Main St Ste 200, Naperville, Illinois 60540, US"
+    ],
+    "linkedin_org_description": "Vettura.ai, where cutting-edge artificial intelligence meets operational efficiency. Our platform leverages advanced machine learning and data analytics to help businesses optimize their processes, improve performance, and drive smarter decision-making.\n\nAt Vettura.ai, we focus on providing intelligent, scalable solutions that reduce costs, enhance productivity, and foster sustainability across industries. Whether you're looking to streamline operations, enhance data-driven insights, or tackle complex challenges, our technology is designed to empower businesses to thrive in a rapidly evolving landscape.\n\nExplore more about how we're transforming industries with AI at www.vettura.ai and join us on the journey to drive the future of intelligent solutions! 🌐✨\n\n#AI #MachineLearning #Innovation #DataAnalytics #Efficiency #Sustainability #VetturaAI #TechForGood\n\n",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Entry level",
+    "directapply": true,
+    "linkedin_org_slug": "vettura-ai",
+    "no_jb_schema": null,
+    "external_apply_url": null,
+    "description_text": "We’re looking for a Full Stack Engineer to join our team at Vettura. You’ll work on both the front-end and back-end of our applications, and help bring AI-powered features to life. If you enjoy solving real problems, writing clean code, and working with smart people, this could be a great fit.\n\nWhat You’ll Do\nBuild and improve web apps using React (front-end) and Python (back-end)\nWork with our AI team to connect machine learning models and APIs into the app\nUse cloud tools like AWS, Azure, or GCP to deploy and scale applications\nWrite clean, well-tested code and review code from other developers\nWork closely with design, product, and AI teams to deliver features users will love\nWhat We’re Looking For\nExperience building full stack applications using Python and React\nComfortable integrating AI or ML APIs (or excited to learn)\nExperience with cloud platforms, CI/CD, and tools like Docker/Kubernetes\nGreat communication and team skills—able to mentor others and work well with non-engineers\nNice to Have\nInterest in UX or product design\nWorked on real-time or large-scale apps\nBuilt side projects or contributed to open source"
+  },
+  {
+    "id": "1791516883",
+    "date_posted": "2025-07-02T20:16:03",
+    "date_created": "2025-07-02T20:32:09.766164",
+    "title": "Lead dot Net Full Stack Developer (Preferred US Citizen's Candidates Only) // Client is Looking for Pure Lead .Net Developer's with Azure Function and React Experience Candidates",
+    "organization": "Neo Prism Solutions LLC",
+    "organization_url": "https://www.linkedin.com/company/neo-prism-solutions",
+    "date_validthrough": "2025-08-01T20:16:03",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Minneapolis",
+          "addressRegion": "MN",
+          "streetAddress": null
+        },
+        "latitude": 44.977486,
+        "longitude": -93.264366
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Minneapolis, Minnesota, United States"
+      }
+    ],
+    "salary_raw": null,
+    "employment_type": [
+      "CONTRACTOR"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/lead-dot-net-full-stack-developer-preferred-us-citizen-s-candidates-only-client-is-looking-for-pure-lead-net-developer-s-with-azure-function-and-react-experience-candidates-at-neo-prism-solutions-llc-4259906416",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQHO_2kWQfa6Hw/company-logo_200_200/company-logo_200_200/0/1666246799545/neo_prism_solutions_logo?e=2147483647&v=beta&t=PxalMAlvYGczeZ3KbtHJdCi-ABAhXvvpnWc93zvalxQ",
+    "cities_derived": [
+      "Minneapolis"
+    ],
+    "regions_derived": [
+      "Minnesota"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Minneapolis, Minnesota, United States"
+    ],
+    "timezones_derived": [
+      "America/Chicago"
+    ],
+    "lats_derived": [
+      44.9635
+    ],
+    "lngs_derived": [
+      -93.2678
+    ],
+    "remote_derived": true,
+    "recruiter_name": "Pruthvi M",
+    "recruiter_title": "Senior Talent Acquisition Specialist NEO PRISM SOLUTIONS LLC",
+    "recruiter_url": "https://in.linkedin.com/in/pruthvi-matla-60795a173",
+    "linkedin_org_employees": 113,
+    "linkedin_org_url": "http://www.neoprisminc.com",
+    "linkedin_org_size": "501-1,000 employees",
+    "linkedin_org_slogan": "\"Inspiring 5000+ clients with cutting-edge IT solutions,\nEmpowering success through Innovation and Dedication.\"",
+    "linkedin_org_industry": "IT Services and IT Consulting",
+    "linkedin_org_followers": 16177,
+    "linkedin_org_headquarters": "Frisco, Texas",
+    "linkedin_org_type": "Partnership",
+    "linkedin_org_foundeddate": "2011",
+    "linkedin_org_specialties": [
+      "Business Intelligence",
+      "Computer Systems Validation",
+      "Big Data",
+      "and DataStage"
+    ],
+    "linkedin_org_locations": [
+      "8501 Wade Blvd, Suite 550, Frisco, Texas 75034, US",
+      "8000 CORPORATE CENTER DR, SUITE 201, Charlotte, NC 28226, US"
+    ],
+    "linkedin_org_description": "NEO PRISM SOLUTIONS LLC,\n\nNeo Prism is dedicated to providing sophisticated IT and business solutions characterized by a proactive, reliable, innovative, sustainable, and meticulous approach. Our commitment to excellence has attracted top-tier talent, fostering a corporate culture prioritizing professional growth.\n\nCore focuses include Business Intelligence & Data Warehousing, Database Management Systems, Application Packaging, and Virtualization. Services are meticulously designed to meet evolving client needs.\n\nIn Business Intelligence & Data Warehousing, we excel in optimizing data collection, organization, and dissemination. Our expertise extends to meticulous assessment services, enhancing information management initiatives for informed decision-making and operational efficiency.\n\nProficiency in Database Management Systems ensures robust solutions, streamlining data processes for reliable and secure infrastructure.\n\nApplication Packaging and Virtualization expertise optimizes software deployment and system performance, empowering clients with enhanced agility and scalability.\n\nIn summary, Neo Prism remains steadfast in its commitment to delivering tailored solutions that empower organizations to thrive amidst the complexities of the modern business landscape. Our proactive, reliable, innovative, sustainable, and meticulous ethos underscores our role as a trusted partner in driving sustained success and innovation for our valued clients.\n\n\n\n\n\n",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Not Applicable",
+    "directapply": true,
+    "linkedin_org_slug": "neo-prism-solutions",
+    "no_jb_schema": null,
+    "external_apply_url": null,
+    "description_text": "Hi ,\nHope you are doing great.\nMy name is Pruthvi ,I am a Staffing Specialist at Neo Prism LLC. I am reaching out to you on an exciting job opportunity with one of our clients.\nby sharing your updated resume and expected hourly rate.\n\nJob Title : Fullstack .Net Developer (Preferred EST / CST Profiles)\nLocation : Dallas, TX (Remote)\nNote: Doesn't require any sponsorship now or in Future\nExperience : 14-15 Years must USA experience. \nLinkedIn Profile is must:(2007-2018 Created LinkedIn profile's Accepted )\nSKILLS/EXPERIENCE REQUIREMENTS\n12 - 15 years application development experience with the Microsoft .NET platform\nStrong .NET Core (C#) experience with Web Services/API's, HTML/CSS (Bootstrap)\nStrong background on Azure Functions Apps and React.js.\n\nThanks & Regards,\nPruthvi M | Sr. Technical Recruiter\nNeo Prism Solutions LLC,\nRedefining Your Spectrum,\n8501, Wade Blvd, Suite 550, Frisco, TX-75034\nPhone: | 469-5475-878 x 221\nE mail: pruthvi@neoprisminc.com\nURL: www.neoprisminc.com"
+  },
+  {
+    "id": "1791483274",
+    "date_posted": "2025-07-02T19:13:14",
+    "date_created": "2025-07-02T20:04:40.602804",
+    "title": "DevOps Engineer (3 month contract)",
+    "organization": "NeuroFlow",
+    "organization_url": "https://www.linkedin.com/company/neuroflow",
+    "date_validthrough": "2025-08-01T19:13:14",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Philadelphia",
+          "addressRegion": "PA",
+          "streetAddress": null
+        },
+        "latitude": 39.95106,
+        "longitude": -75.16562
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Philadelphia, Pennsylvania, United States"
+      }
+    ],
+    "salary_raw": null,
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/devops-engineer-3-month-contract-at-neuroflow-4261042942",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/C4E0BAQH7s0JnR6LryA/company-logo_200_200/company-logo_200_200/0/1630599595431/neuroflow_logo?e=2147483647&v=beta&t=7lL9RYK09zylWvl6ieaSdFOYQCPSu1GN88LNMAmAfX4",
+    "cities_derived": [
+      "Philadelphia"
+    ],
+    "regions_derived": [
+      "Pennsylvania"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Philadelphia, Pennsylvania, United States"
+    ],
+    "timezones_derived": [
+      "America/New_York"
+    ],
+    "lats_derived": [
+      40.0077
+    ],
+    "lngs_derived": [
+      -75.1339
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 180,
+    "linkedin_org_url": "http://www.neuroflow.com",
+    "linkedin_org_size": "51-200 employees",
+    "linkedin_org_slogan": "Promoting behavioral health access and engagement in all care settings",
+    "linkedin_org_industry": "Mental Health Care",
+    "linkedin_org_followers": 8876,
+    "linkedin_org_headquarters": "Philadelphia, PA",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2017",
+    "linkedin_org_specialties": [
+      "mental health",
+      "behavioral health",
+      "digital health",
+      "patient engagement",
+      "health and wellness",
+      "depression",
+      "mental health",
+      "digital behavioral health",
+      "integrated behavioral health",
+      "CBT",
+      "DBT",
+      "integrated mental health",
+      "mental health integration",
+      "behavioral health integration",
+      "data and analytics",
+      "data sharing",
+      "population health",
+      "resilience",
+      "risk adjustment",
+      "and quality measures"
+    ],
+    "linkedin_org_locations": [
+      "1601 Market St, Philadelphia, PA 19103, US"
+    ],
+    "linkedin_org_description": "NeuroFlow helps risk-bearing healthcare organizations improve outcomes and cost of care in complex populations by surfacing and supporting behavioral health needs that typically go undetected and under-addressed. Across payors, providers, and the federal government, NeuroFlow’s scalable technology and analytics capabilities empower organizations with actionable intelligence from real-time data collection and risk stratification, enabling them to manage populations in a financially sustainable way. Powered by deep expertise in whole-person care, NeuroFlow offers a path to risk predictability and proactive care that helps overcome the systemic challenges in today’s healthcare ecosystem.",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "neuroflow",
+    "no_jb_schema": null,
+    "external_apply_url": "https://grnh.se/aupv2hfj3us",
+    "description_text": "Who We Are \n\nNeuroFlow CEO and West Point graduate Christopher Molaro served in the army for five years, including a tour in Iraq as a platoon leader. Coming back home, he experienced firsthand the gaps in the behavioral health system and how veterans and civilians alike face too many barriers when it comes to receiving appropriate, timely care.\n\nWhile pursuing his MBA at Wharton, Chris met his future co-founder Adam Pardes, and the two agreed – even the most engaging digital mental health apps in the world wouldn't truly change the problem; only a solution that systematically integrated behavioral health into the full healthcare ecosystem could create meaningful change. And so they created NeuroFlow.\n\nWhat We Do:\n\nWe pride ourselves on partnering with healthcare leaders to assist in driving better outcomes, lowering total cost of care, and making behavioral health risk more predictable and transparent. NeuroFlow exists to make sure no one who needs behavioral health support falls through the cracks.\n\nWe build more than just engaging digital health tools for self-care: we create platforms that identify population behavioral health risk early, engage individuals with acuity-specific resources, and enable care teams to make smarter and more efficient decisions. Together, NeuroFlow's solutions arm healthcare organizations with the insights they need to overcome the systemic challenges in today's healthcare ecosystem.\n\nHow We Do It:\n\nThe award-winning culture at NeuroFlow is one built around encouragement and daring to be great. Our core values have been displayed in our office since day one, and each team member is responsible for carrying out these values and keeping each other accountable to them. We succeed through our flexibility and agility, navigating and transforming an industry ripe for change where \"no\" or \"can't\" is too often the default. NeuroFlow offers unique opportunities to work in a fun and challenging fast-paced environment with direct, meaningful impact on helping to close the divide between mental and physical health.\n\nWhat You'll Do\n\nThe Neuroflow Platform Engineering team is looking for a Sr. DevOps Engineer familiar with AWS, Terraform, and general CI/CD knowledge to augment our staff to assist in Terraform module development, container deployments and service updates in Elastic Container Service (ECS), and small-scope feature requests in AWS. While you'll have a strong point-of-contact partner to work with, we value the ability to work independently and propose solutions.\n\nWhat You Should Have\n\nA high level of expertise with AWS products and deploying them through Infrastructure-as-Code (IaC). Ideally, 5+ years working daily with cloud architecture and IaC.\nExperience working with RDS, as well as Serverless deployments such as AWS Lambda\nA thorough understanding of HashiCorp Terraform implementation, deployment principles, and methodology.\nConfidence working with CI/CD pipeline tooling and associated concepts. We use GitLab Pipelines and GitHub Actions, but familiarity with adjacent tooling like Travis, Circle, JenkinsPipeline should translate.\nStrong understanding of a container deployment platform. Ideally ECS on Fargate, but familiarity with Kubernetes+Helm or HashiCorp Nomad will work.\n\nPotential Projects You'll Work On:\n\nAssist with Terraform Modules Updates, Refactors, and Bugfixes.\nCI/CD Pipeline Development for an Upcoming Platform.\nPerformance Tuning of Existing Build Pipeline.\nRDS and Lambda Performance Tuning and Evaluation\nMigration of Docker-On-EC2 Services to ECS Fargate Cluster\nUpgrading Development Tooling in ECS to Current Release\n\nWhat We Believe:\n\nNeuroFlow is a proud equal opportunity employer. Every day we are working to tackle the mental health crisis in America, and in order to do that well, we need diverse voices, experiences, and perspectives at the table. As an equal opportunity employer, we prohibit any unlawful discrimination against a job applicant on the basis of their race, color, religion, gender, gender identity, gender expression, sexual orientation, national origin, family or parental status, disability*, age, veteran status, or any other status protected by the laws or regulations in the locations where we operate. We respect the laws enforced by the EEOC and are dedicated to going above and beyond in fostering diversity across our workplace.\n\nApplicants with disabilities may be entitled to reasonable accommodation under the terms of the Americans with Disabilities Act and certain state or local laws. A reasonable accommodation is a change in the way things are typically done which will ensure an equal employment opportunity without imposing undue hardship on NeuroFlow. Please inform our Talent team if you need any assistance completing any forms or to otherwise participate in the application process.\n\nAs a HIPAA compliant organization \n\nAll team members shall:\n\nAct in accordance with NeuroFlow's Information Security Policies. \nProtect organizational assets from unauthorized access, disclosure, modification, destruction or interference. \nReport security events or other risks to the organization \nExecute organizational security processes or activities \nPerform security responsibilities that defined and communicated for their role \nBe responsible for their actions regarding the security of organization"
+  },
+  {
+    "id": "1791388741",
+    "date_posted": "2025-07-02T19:02:20",
+    "date_created": "2025-07-02T19:32:25.771407",
+    "title": "Full-Stack React Developer, Remote Heavy Machinery Platform",
+    "organization": "AIM",
+    "organization_url": "https://www.linkedin.com/company/aim-intelligent-machines",
+    "date_validthrough": "2025-08-01T19:02:19",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Greater Seattle Area",
+          "addressRegion": null,
+          "streetAddress": null
+        },
+        "latitude": 47.591396,
+        "longitude": -122.33279
+      }
+    ],
+    "location_type": null,
+    "location_requirements_raw": null,
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 150000,
+        "maxValue": 200000,
+        "unitText": "YEAR"
+      }
+    },
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/full-stack-react-developer-remote-heavy-machinery-platform-at-aim-4261045505",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQE_yGAXDe1z0A/company-logo_200_200/company-logo_200_200/0/1696953301522/aim_intelligent_machines_logo?e=2147483647&v=beta&t=4__Yndww1AfrLFdj8NW6yheBVbBLGW2tk4n9y0wE9tw",
+    "cities_derived": [
+      "Seattle"
+    ],
+    "regions_derived": [
+      "Washington"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Seattle, Washington, United States"
+    ],
+    "timezones_derived": [
+      "America/Los_Angeles"
+    ],
+    "lats_derived": [
+      47.6211
+    ],
+    "lngs_derived": [
+      -122.3244
+    ],
+    "remote_derived": true,
+    "recruiter_name": "Mike Martinsen",
+    "recruiter_title": "AIM",
+    "recruiter_url": "https://www.linkedin.com/in/mike-martinsen-22288b8",
+    "linkedin_org_employees": 65,
+    "linkedin_org_url": "https://aim.vision",
+    "linkedin_org_size": "11-50 employees",
+    "linkedin_org_slogan": "Move earth at scale",
+    "linkedin_org_industry": "Technology, Information and Internet",
+    "linkedin_org_followers": 6589,
+    "linkedin_org_headquarters": "Redmond, WA",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2021",
+    "linkedin_org_specialties": [
+      ""
+    ],
+    "linkedin_org_locations": [
+      "Redmond, WA  98052, US",
+      "Bellevue, WA 98007, US"
+    ],
+    "linkedin_org_description": "Unlock the ultimate level of safety and productivity in your operations\n\nThe AIM platform provides a rugged plug-and-play solution for a wide range of heavy equipment fleets in the field today. We take customers from their current mode of operation to autonomous operation with a rigorous 3-step process.\n\nThis solution enables mining and earthmoving equipment to run continuously at peak performance across weather conditions—thereby unlocking operational and CapEx value across fuel savings, duty cycle, fleet availability, optimal AI site planning and more. The result is maximally safe zero-entry sites, where all ground staff is out of harm’s way.\n\nAIM technology has been built by a team of earth works managers and operators together with engineers who developed autonomous products at Waymo, SpaceX, Google & Tesla. We bring deep combined expertise across mining, earthmoving, robotics, hardware, and advanced AI deployed at scale.",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Mid-Senior level",
+    "directapply": true,
+    "linkedin_org_slug": "aim-intelligent-machines",
+    "no_jb_schema": null,
+    "external_apply_url": null,
+    "description_text": "About the Company \n\nAIM is a mission driven company focused on terraforming this planet – reverse negative effects of climate change. We are growing the team with people passionate about landing a groundbreaking product category. If you enjoy a fast paced entrepreneurial environment and want to advance a cutting edge embodied AI technology that is enabling the next industrial revolution, we’re excited to meet you! AIM has been built by a team of engineers who landed cutting-edge systems at Google, Waymo, SpaceX, Tesla, Apple, Dropbox, Stripe, Google[x] and Microsoft, and are backed by General Catalyst, Elad Gil, Human Capital, Ironspring Ventures, Mantis, DCVC, among other great allies. AIM is terraforming this planet with cutting-edge autonomy. We're seeking talented and passionate engineers to join our team and advance the \"eyes\" of our next-generation earthmoving robots. You will play a critical role in endowing these machines with the ability to perceive and understand their complex environments, ensuring safe and efficient operation in challenging real-world conditions.\n\nSummary\n\nSeeking a Full-Stack React Developer to join our team developing a browser-based tool for controlling heavy machinery remotely. The role requires strong React skills, experience in data visualization, and familiarity with Python for backend work. Knowledge of ThreeJS is a plus. Our company specializes in retrofitting heavy construction and mining equipment with hardware kits to enable remote control and autonomous operation. We are like the Tesla of off-road machinery, aiming to revolutionize safety and efficiency in the industry.\n\nResponsibilities\n\nDevelop and enhance features for the browser-based control tool. \nImplement data visualization techniques using React. \nCollaborate on backend work using Python and FastAPI. \nWork on robotics positioning and 3D environments for heavy machinery.\n\nRequired\n\nStrong proficiency in React for front-end development. \nExperience with Python and FastAPI for backend work."
+  },
+  {
+    "id": "1791357897",
+    "date_posted": "2025-07-02T18:53:56",
+    "date_created": "2025-07-02T19:04:53.356038",
+    "title": "DevOps Engineer II - IntelliScript (Remote)",
+    "organization": "Milliman",
+    "organization_url": "https://www.linkedin.com/company/milliman",
+    "date_validthrough": "2025-08-01T18:53:56",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Brookfield",
+          "addressRegion": "WI",
+          "streetAddress": null
+        },
+        "latitude": 43.060787,
+        "longitude": -88.11922
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Brookfield, Wisconsin, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 78800,
+        "maxValue": 151440,
+        "unitText": "YEAR"
+      }
+    },
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/devops-engineer-ii-intelliscript-remote-at-milliman-4257621128",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D4E0BAQHbYmsi5IRCHg/company-logo_200_200/company-logo_200_200/0/1689343555797/milliman_logo?e=2147483647&v=beta&t=cVglwHZoZbOSuCJlq0ZDep-DdPHbIDTts5iflk1nXRM",
+    "cities_derived": [
+      "Brookfield"
+    ],
+    "regions_derived": [
+      "Wisconsin"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Brookfield, Wisconsin, United States"
+    ],
+    "timezones_derived": [
+      "America/Chicago"
+    ],
+    "lats_derived": [
+      43.064
+    ],
+    "lngs_derived": [
+      -88.1231
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 4378,
+    "linkedin_org_url": "http://www.milliman.com",
+    "linkedin_org_size": "1,001-5,000 employees",
+    "linkedin_org_slogan": "Solutions for a world at risk™",
+    "linkedin_org_industry": "Business Consulting and Services",
+    "linkedin_org_followers": 88218,
+    "linkedin_org_headquarters": "Seattle, WA",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "1947",
+    "linkedin_org_specialties": [
+      "Healthcare consulting",
+      "Life insurance and investment consulting",
+      "P&C/general insurance consulting",
+      "and Employee Benefits consulting"
+    ],
+    "linkedin_org_locations": [
+      "1301 Fifth Avenue, Suite 3800, Seattle, WA 98101-2605, US",
+      "71 S Wacker Drive, Suite 3100, Chicago, IL 60606, US",
+      "17335 Golf Pkwy, Suite 100, Brookfield, Wisconsin 53045, US",
+      "1921 Gallows Rd, Suite 710, Vienna, VA 22182, US",
+      "Tower South The Towers, Crnr Heerengracht and Hertzog Boulevard, 21st Floor, Cape Town, 8001, ZA",
+      "22 Magwa Crescent, Johannesburg, 2066, ZA",
+      "15/F NCI Tower, No. 12A Jianguomenwai Avenue, Unit 1544, Beijing, 100022, CN",
+      "291/24C, Havelock Terrace, Colombo , 5, LK",
+      "183 Electric Road, Unit 3901-02, Hong Kong, CN",
+      "Jl. Prof. Dr. Satrio No. 164, 18th Floor, Jakarta, 12930, ID",
+      "2A Jalan Stesen Sentral 2, Suite 22-03, Level 22, Q Sentral, Kuala Lumpur, 50470, MY",
+      "Chakala, Andheri-Kurla Road, Andheri (East), B/712, 215 ATRIUM, Mumbai, 400 059, IN",
+      "AIPL Business Club, 11th floor, Sector-62, Golf Course Extension Road, Gurgaon , Haryana 122 011, IN",
+      "7 Saechang-ro, Mapo-gu, 18th Floor, Seoul, 121-815, KR",
+      "1106D No.288 Xiang Cheng Road, Pudong, Shanghai  200122, CN",
+      "133 Cecil Street, #12-02, Singapore , 069535, SG",
+      "32 Walker Street, Level 5, Sydney NSW, 2060, AU",
+      "No.1 Song Zhi Road, Unit A, 10 Floor, Taipei, 110, TW",
+      "1-6-2 Kojimachi, Chiyoda-ku, 8F, Tokyo, 102-0083, JP",
+      "Haaksbergweg 75, Amsterdam , 1101 BR, NL",
+      "Hoogoorddreef 56, Amsterdam , 1101 BE, NL",
+      "Leonardo da Vincilaan 19, Diegem, Brussels 1831, BE",
+      "Calea 13 Septembrie, 4th Floor, Room 4.13, Bucharest , 050726, RO",
+      "7 Grand Canal, Grand Canal Street Lower, Dublin 2, D02 KW81, IE",
+      "Königsallee 92a, Düsseldorf, North Rhine-Westphalia 40212, DE",
+      "Victory House, Prospect Hill, Douglas, 6th Floor, Isle of Man, IM1 1EQ, IM",
+      "11 Old Jewry, Third Floor, London, EC2R 8DU, GB",
+      "16A Avenue de la Liberté, Luxembourg, L-1930, LU",
+      "Paseo de la Castellana, 93, Floor 11, Madrid, 28046, ES",
+      "Via San Clemente 1, Milan , 20122, IT",
+      "14 Avenue de la Grande Armée, Paris, 75017, FR",
+      "Donau-City Straße 7, Vienna, 1220, AT",
+      "Al. Jerozolimskie 65/79, 16 Piętro, Warsaw, 00-697, PL",
+      "Holbeinstrasse 31, Zürich, CH-8008, CH",
+      "Paraguay 610, Piso 25, Buenos Aires, 1057, AR",
+      "Avenida Nilo Peçanha 50, Sala 601, Centro Rio de Janeiro, 20020-906, BR",
+      "Avenida das Nações Unidas, 12551 09° andar, São Paulo, Sp. CEP, 04578-000, BR",
+      "Liberty House, Unit 511,, Level 5, Dubai International Financial Centre, P.O. Box 506784, Dubai, AE",
+      "3485 Al Amir Sultan Ibn Abdul Aziz St, Al Olaya District, Office 16, Level 5, Riyadh , 12211-7124, SA",
+      "8 Buyaka-2 Sitesi Kule-2 Kat: 16 Tepeüstü Ümraniye, Istanbul, TR",
+      "7 Metsada Street, 5th Floor, Unit 18, Bnei Brak, IL",
+      "250 Washington Avenue Ext, Albany, New York 12203, US",
+      "1045 N Lynndale Drive, Suite 2E, Appleton, Wisconsin 54914, US",
+      "3424 Peachtree Rd NE, Suite 1900, Atlanta, Georgia 30326, US",
+      "International Centre, Bermudiana Road, Suite 204, Hamilton , HM 11, BM",
+      "950 W. Bannock Street, Suite 430, Boise, Idaho 83702, US",
+      "201 Edgewater Drive, Suite 289, Wakefield, Massachusetts 01880-6215, US",
+      "550 Hinesburg Road, Suite 202, South Burlington, Vermont 05403, US",
+      "10000 N Central Expy, Suite 1500, Dallas, Texas 75231, US",
+      "1400 Wewatta St, Suite 900, Denver, Colorado 80202, US",
+      "80 Lamberton Rd, Windsor, Connecticut 06095-2126, US",
+      "500 Dallas St, Suite 2550, Houston, Texas 77002, US",
+      "10 W Market St, Suite 46204, Indianapolis, Indiana 46204, US",
+      "150 Clove Rd, 10th Floor, Little Falls, New Jersey 07424, US",
+      "251 S Lake Ave, Suite 910, Pasadena, California 91101, US",
+      "3800 American Blvd W, Suite 400, Minneapolis, Minnesota 55431, US",
+      "8500 Normandale Lake Blvd, Suite1850, Minneapolis, Minnesota 55437-3830, US",
+      "One Pennsylvania Plaza, 38th Floor, New York , New York 10119, US",
+      "18205 Capitol Ave, Suite 400, Omaha, Nebraska 68022, US",
+      "19200 Von Karman Avenue, Suite 950, Irvine, California 92612, US",
+      "1550 Liberty Ridge Dr, Suite 200, Wayne, Pennsylvania 19087-5572, US",
+      "5415 E. High Street, Suite 275, Phoenix , Arizona 85054, US",
+      "121 Middle Street, Suite 401, Portland, Maine 04101-4156, US",
+      "1455 SW Broadway, Suite 1600, Portland, Oregon 97204-3654, US",
+      "2180 S 1300 E, Suite 130, Salt Lake City, Utah 84106, US",
+      "4370 La Jolla Village Drive, Suite 700, San Diego, California 92122, US",
+      "650 California St, 21st Floor, San Francisco, California 94108-2702, US",
+      "500 North Broadway, Suite 1750, St. Louis, Missouri 63102, US",
+      "3000 Bayport Dr, Suite 600, Tampa, Florida 33607, US",
+      "2175 N. California Blvd, Suite 810, Walnut Creek, California 94596, US"
+    ],
+    "linkedin_org_description": "Milliman is among the world’s largest independent actuarial and consulting firms. Founded in Seattle in 1947, Milliman has offices in key locations worldwide. Through consulting practices in employee benefits, healthcare, investment, life insurance and financial services, and property & casualty/general insurance, Milliman serves the full spectrum of business, financial, government, union, education, and nonprofit organizations. In addition to consulting actuaries, Milliman’s body of professionals includes numerous other specialists, ranging from clinicians to economists.",
+    "linkedin_org_recruitment_agency_derived": false,
+    "seniority": "Entry level",
+    "directapply": false,
+    "linkedin_org_slug": "milliman",
+    "no_jb_schema": null,
+    "external_apply_url": "https://recruiting2.ultipro.com/MIL1017/JobBoard/f54234e9-dfde-b183-fd20-4fbdb19cba7a/OpportunityDetail?opportunityId=124c1824-801e-4797-8985-df2e40abed8d&source=LinkedIn",
+    "description_text": "What We Do\n\nMilliman IntelliScript is a group of a few hundred experts in fields ranging from actuarial science to information technology to clinical practice. Together, we develop and deploy category-defining, data-driven, software-as-a-service (SaaS) products for a broad spectrum of insurance, health IT and life sciences clients. We’re a business unit within Milliman, Inc., a respected consultancy with offices around the world.\n\nCandidates who have their pick of jobs are drawn to IntelliScript’s entrepreneurial and collaborative culture of innovation, excellence, exceptional customer service, balance, and transparency. Every single person has a voice in our company, and we challenge each other to push the outer limits of our full, diverse potential. And, we’ve shown sustained growth that ensures you’ll have room to grow your skillset, responsibilities, and career.\n\nOur team is smart, down-to-earth, and ready to listen to your best ideas. We reward excellence and offer competitive compensation and benefits. Visit our LinkedIn page for a closer look at our company, and learn more about our cultural values here.\n\nMilliman invests in skills training and career development and gives all employees access to a variety of learning and mentoring opportunities. Our growing number of Milliman Employee Resource Groups (ERGs) are employee-led communities that influence policy decisions, develop future leaders, and amplify the voices of their constituents. We encourage our employees to give back to their varied professions, including leadership in professional organizations. Please visit our website to learn more about Milliman’s commitments to our people, diversity and inclusion, social impact, and sustainability.\n\nWhat This Position Entails\n\nIntelliScript’s IT organization has been a key part of our past success and is critical to our future. The DevOps Engineer II position will be crucial in supporting the application lifecycle strategy and supporting the execution of the organization's vision for IntelliScript’s industry-leading software projects. Working closely with the Cloud Engineering, Information Security, and Software Engineering teams, this person will act as a DevOps Technical Support Engineer. In this role, you will support the team by handling triage and troubleshooting of ad-hoc requests to reduce the burden on the DevOps team. This is a great opportunity for someone who wants to fully break into the DevOps space, with opportunities to grow through the DevOps Engineering career path over time.\n\nWhat You’ll Be Doing\n\nProvide support for our developer platforms as we perform large-scale migrations\nContinually work towards making improvements in developer experience, and enhancing the software delivery process through championing our best-practices\nImplement a CI/CD pipeline, consisting of the capabilities needed to build, test, integrate, monitor, and deploy software in a self-service, secure, and repeatable fashion\nSupport the team by handling triage and troubleshooting of ad-hoc requests\nCollaborate on configuration management methodologies and technologies\nEnhance security and governance in the Software Delivery Lifecycle (SDLC) via automated compliance checkpoints and stage gates\nPromote development best practices and facilitate collaboration between development, operations, cloud engineering and other IT teams\n\nWhat We Need \n\n2+ years of relevant experience\nExposure to DevOps tooling & practices (Git, CI-CD orchestration software, configuration-as-code, developing/improving the SDLC process)\nExperience with:\nGit\nBash/PowerShell\nAzure DevOps\nCI/CD Pipelines\nDocker\nTerraform\nFamiliarity with Atlassian suite of products (Jira, Confluence)\nExperience with Agile methodologies\nAbility to ramp up quickly on both new technologies and existing technologies\nExcellent technical design, problem solving, and troubleshooting skills\nExcellent collaborative skills, with strong written and verbal communication\nSelf-motivated team player who can run with a project and is willing to pitch in as needed\nWhat You Bring To The Table\n\nTechnical Expertise: has a good understanding of the DevOps field\nTeamwork: ability to work effectively in a team\nRisk Mitigation: ability to manage moderate risk\nProblem Solving: ability to solve non-route problems\nCommunication: conveys detailed information effectively and produces well-structured written documents\nContinuous Learning: regularly engages in professional development, demonstrates adaptability to new ideas, and integrates new knowledge into daily tasks\nIdeation: generates various ideas and solutions for moderately complex problems and explores multiple approaches independently\nEmbracing Change: adapts to new situations and technologies and begins to suggest improvements\nEmpowering Others: provides moderate support and guidance, encouraging peers by sharing relevant resources and knowledge\nContinuous Improvement: identifies and suggests improvements, helps implement changes, and monitors results with moderate supervision\n\nWish List \n\nContinued education, certifications, and/or demonstrated commitment to growth through ongoing learning\nExperience with:\nGitHub\nSonarQube (familiarity with concepts of SAST tooling at a minimum)\nArtifactory (familiarity with concepts of artifact management at a minimum)\n.NET / C# / Python / Go / etc. (ability to interpret OOP at a minimum)\nExperience consuming REST APIs\nExperience with Ansible, Packer, and/or other IaC tools\nExperience with Scaled Agile concepts and principles\nLocation \n\nThis position will be based out of the Milliman office in Brookfield, WI; however, this position is open to remote work. Applicants must be willing to travel to the Milliman office in Brookfield, WI for quarterly PI Planning meetings and one annual company meeting. This expected application deadline for this job is July 31, 2025.\n\nCompensation\n\nThe overall salary range for this role is $78,800 - $151,440. For candidates residing in:\n\nAlaska, California, Connecticut, Illinois, Maryland, Massachusetts, New Jersey, Pennsylvania, Virginia, Washington, or the District of Columbia the salary range is $86,680 - $138,820. \nNew York City, Newark, San Jose, or San Francisco the salary range is $94,560 - $151,440. \nAll other locations the salary range is $78,880 - $126,200. \n\nA combination of factors will be considered, including, but not limited to, education, relevant work experience, qualifications, skills, certifications, etc.\n\nBenefits\n\nWe offer a comprehensive benefits package designed to support employees’ health, financial security, and well-being. Benefits include:\n\nMedical, Dental and Vision – Coverage for employees, dependents, and domestic partners.\nEmployee Assistance Program (EAP) – Confidential support for personal and work-related challenges.\n401(k) Plan – Includes a company matching program and profit-sharing contributions.\nDiscretionary Bonus Program – Recognizing employee contributions.\nFlexible Spending Accounts (FSA) – Pre-tax savings for dependent care, transportation, and eligible medical expenses.\nPaid Time Off (PTO) – Begins accruing on the first day of work. Full-time employees accrue 15 days per year, and employees working less than full-time accrue PTO on a prorated basis.\nHolidays – A minimum of 10 paid holidays per year.\nFamily Building Benefits – Includes adoption and fertility assistance.\nPaid Parental Leave – Up to 12 weeks of paid leave for employees who meet eligibility criteria.\nLife Insurance & AD&D – 100% of premiums covered by Milliman.\nShort-Term and Long-Term Disability – Fully paid by Milliman.\n\nEqual Opportunity\n\nAll qualified applicants will receive consideration for employment, without regard to race, color, religion, sex, sexual orientation, national origin, disability, or status as a protected veteran."
+  },
+  {
+    "id": "1791239952",
+    "date_posted": "2025-07-02T18:09:10",
+    "date_created": "2025-07-02T18:32:50.519621",
+    "title": "React Developer",
+    "organization": "Jobs via Dice",
+    "organization_url": "https://www.linkedin.com/company/jobs-via-dice",
+    "date_validthrough": "2025-08-01T18:09:10",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Ann Arbor",
+          "addressRegion": "MI",
+          "streetAddress": null
+        },
+        "latitude": 42.281418,
+        "longitude": -83.748474
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Ann Arbor, Michigan, United States"
+      }
+    ],
+    "salary_raw": null,
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/react-developer-at-jobs-via-dice-4259584568",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFwOT1y-MRTFQ/company-logo_200_200/B56ZVEKZkcHsAI-/0/1740605332130/jobs_via_dice_logo?e=2147483647&v=beta&t=ItuthDpih45En6x_7Lse_G78cn8jTcnIwXNaxfl8zqM",
+    "cities_derived": [
+      "Ann Arbor"
+    ],
+    "regions_derived": [
+      "Michigan"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Ann Arbor, Michigan, United States"
+    ],
+    "timezones_derived": [
+      "America/Detroit"
+    ],
+    "lats_derived": [
+      42.2759
+    ],
+    "lngs_derived": [
+      -83.731
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 9,
+    "linkedin_org_url": "https://www.dice.com",
+    "linkedin_org_size": "1 employee",
+    "linkedin_org_slogan": "Dice: Where tech connects.™",
+    "linkedin_org_industry": "Software Development",
+    "linkedin_org_followers": null,
+    "linkedin_org_headquarters": "",
+    "linkedin_org_type": "Public Company",
+    "linkedin_org_foundeddate": "",
+    "linkedin_org_specialties": [
+      ""
+    ],
+    "linkedin_org_locations": [],
+    "linkedin_org_description": "Welcome to Jobs via Dice, the go-to destination for discovering the tech jobs you want.\n\nThis page is dedicated to sharing job opportunities with tech professionals at every stage of their careers. When you see a job posted by Jobs via Dice, it’s a job for one of our many clients seeking to hire tech professionals like you.\n\nAt Dice, we understand that your career in technology is more than just a job; it’s a journey of growth, innovation and continuous learning. Stay connected with us to explore the latest job opportunities, industry trends and career tips tailored for tech professionals. Your future in tech starts here.\n\nWhat You’ll Find on Dice.com:\n\nTailored Tech Opportunities - Connect with the right tech companies and roles that match your skills and ambitions. Whether you're looking to land your first job or elevate your career, Dice is here to help.\n\nCareer Resources - Utilize our tools to build your skills, enhance your visibility, and get noticed by top employers.\n\nEasy Apply - Find and apply to your perfect tech role in just a few clicks with our Easy Apply feature. Simplify your job search and get hired faster.\n\nIndustry Insights - Stay ahead with our expert career advice and industry insights. From resume tips to interview prep, we provide the resources you need to succeed.\n\nEmployer Profiles - Get a firsthand look at a company’s culture to make informed decisions about where you want to work.\n\nJoin the community of tech professionals who trust Dice to help them find and apply to their next job in tech.\n\nTo follow our company page on LinkedIn, visit: https://www.linkedin.com/company/dice\n",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "jobs-via-dice",
+    "no_jb_schema": null,
+    "external_apply_url": "https://click.appcast.io/t/C3qq1vAxHFWReJ9GIFLu9lYJPyADNLP169qr9DsLits=",
+    "description_text": "Dice is the leading career destination for tech experts at every stage of their careers. Our client, Stellar IT Solutions, is seeking the following. Apply via Dice today!\n\nJob Title: React Developer\n\nLocation: Remote\n\nJob Duration: 6+ Months\n\nInterview: Video\n\nJob Description:\n\nWe are seeking a Mid to Senior-Level React Developer to support a legacy application modernization project. The role involves rewriting components of an existing WebForms application into a modern tech stack using React with TypeScript and a .NET Core API. The ideal candidate will be comfortable navigating legacy code and helping transition to the new architecture, with a strong focus on front-end development.\n\nKey Responsibilities:\n\nRewrite legacy services using React (TypeScript)\nTranslate and understand existing logic written in VB.NET or C#\nCollaborate with backend developers to integrate APIs built on .NET Core\nContribute to full-stack development as needed, with a focus on UI modernization\n\nRequired Skills:\n\n3 6 years of experience in React development (preferably with TypeScript)\nAbility to read and understand VB.NET or C# code\nExposure to full-stack development (React, .NET Core)\nStrong problem-solving skills and adaptability in working with legacy codebases"
+  },
+  {
+    "id": "1791082042",
+    "date_posted": "2025-07-02T16:52:14",
+    "date_created": "2025-07-02T17:05:50.786938",
+    "title": "Backend Developer (AWS, NodeJS)",
+    "organization": "Accelon Inc.",
+    "organization_url": "https://www.linkedin.com/company/acceloninc",
+    "date_validthrough": "2025-08-01T16:52:13",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "California",
+          "addressRegion": "United States",
+          "streetAddress": null
+        },
+        "latitude": 37.25467,
+        "longitude": -119.61727
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "California, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 78,
+        "maxValue": 82,
+        "unitText": "HOUR"
+      }
+    },
+    "employment_type": [
+      "CONTRACTOR"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/backend-developer-aws-nodejs-at-accelon-inc-4261003942",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQHue58owOn1hg/company-logo_200_200/B56ZXLlb8dHQAI-/0/1742877343840/acceloninc_logo?e=2147483647&v=beta&t=tOCGe69qHMClWBJm2rceIoWvEL4xrz_qfGtdoid_Jvs",
+    "cities_derived": null,
+    "regions_derived": [
+      "California"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "California, United States"
+    ],
+    "timezones_derived": [
+      "America/Los_Angeles"
+    ],
+    "lats_derived": [
+      38.5677
+    ],
+    "lngs_derived": [
+      -121.4685
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 43,
+    "linkedin_org_url": "http://www.acceloninc.com",
+    "linkedin_org_size": "51-200 employees",
+    "linkedin_org_slogan": "Staffing Solutions",
+    "linkedin_org_industry": "IT Services and IT Consulting",
+    "linkedin_org_followers": 101408,
+    "linkedin_org_headquarters": "San Ramon, CA",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2014",
+    "linkedin_org_specialties": [
+      "Technology Staffing",
+      "Sourcing & Procurement Staffing",
+      "Creative Services Staffing",
+      "Finance Staffing",
+      "Project Management",
+      "and Application Development"
+    ],
+    "linkedin_org_locations": [
+      "2603 Camino Ramon,, Suite 200, San Ramon, CA 94583, US",
+      "Princeville, EGL. Domlur, Princeville, Embassy Golf Links Business Park, off Intermediate ring road, Domlur, Bangalore, KA 560072, IN",
+      "55 University Ave, Suite 1100, Toronto, Ontario M5J 2H7, CA",
+      "71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, GB",
+      "Teniente General Juan D. Perón 679, piso 3, Buenos Aires, C1038AAM, AR"
+    ],
+    "linkedin_org_description": "Accelon Inc. operates across the USA, India, Canada, Argentina, and the UK, delivering exceptional solutions in staffing, project management, and application development. We pride ourselves on being fast, adaptable, and client-focused. Our size strikes the perfect balance—large enough to manage complex demands, yet agile enough to cater to your unique needs. At Accelon, we go the extra mile to understand your business, culture, and infrastructure, building a strong foundation for long-term strategic partnerships and ensuring your success.",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "acceloninc",
+    "no_jb_schema": null,
+    "external_apply_url": "https://zrec.in/gR0XL?source=CareerSite",
+    "description_text": "Experience Level:\n8+ years of experience\nDesign, develop, document, test, and debug new and existing software systems and/or applications using Node.js, React, and AWS.\nServe as a technical expert on development projects.\nParticipate in the full development life cycle, including requirements analysis and design.\nWrite technical specifications based on conceptual design and stated business requirements.\nSupport, maintain, and document software functionality.\nIdentify and evaluate new technologies for implementation.\nAnalyze code to find causes of errors and revise programs as needed.\nParticipate in software design meetings and analyze user needs to determine technical requirements.\nConsult with end user to prototype, refine, test, and debug programs to meet needs.\n\n\nRequirement\nsExtensive experience in Node.JS, React and AW\nSAWS lambda, serverless and lambda as a servic\neMinimum education requirement: BS degre\neMinimum years of experience: 8 year\n\ns\nOnly relevant applicants will be considered. Higher experienced candidates are not being considered\n\n. \nEligibili\nty:Must have independent work authorizat\nionSick leave as per your state l\nawsOpen to W2 contract or C2H o\nnlyNo visa sponsorship or transfers at this ti\nme.No C2C or third-party vend\n\nors"
+  },
+  {
+    "id": "1790961184",
+    "date_posted": "2025-07-02T15:39:18",
+    "date_created": "2025-07-02T16:14:11.539716",
+    "title": "Backend Developer (AWS, NodeJS)",
+    "organization": "Accelon Inc.",
+    "organization_url": "https://www.linkedin.com/company/acceloninc",
+    "date_validthrough": "2025-08-01T15:39:18",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "California",
+          "addressRegion": "United States",
+          "streetAddress": null
+        },
+        "latitude": 37.25467,
+        "longitude": -119.61727
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "California, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 78,
+        "maxValue": 82,
+        "unitText": "HOUR"
+      }
+    },
+    "employment_type": [
+      "CONTRACTOR"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/backend-developer-aws-nodejs-at-accelon-inc-4260899113",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQHue58owOn1hg/company-logo_200_200/B56ZXLlb8dHQAI-/0/1742877343840/acceloninc_logo?e=2147483647&v=beta&t=tOCGe69qHMClWBJm2rceIoWvEL4xrz_qfGtdoid_Jvs",
+    "cities_derived": null,
+    "regions_derived": [
+      "California"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "California, United States"
+    ],
+    "timezones_derived": [
+      "America/Los_Angeles"
+    ],
+    "lats_derived": [
+      38.5677
+    ],
+    "lngs_derived": [
+      -121.4685
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 43,
+    "linkedin_org_url": "http://www.acceloninc.com",
+    "linkedin_org_size": "51-200 employees",
+    "linkedin_org_slogan": "Staffing Solutions",
+    "linkedin_org_industry": "IT Services and IT Consulting",
+    "linkedin_org_followers": 101408,
+    "linkedin_org_headquarters": "San Ramon, CA",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2014",
+    "linkedin_org_specialties": [
+      "Technology Staffing",
+      "Sourcing & Procurement Staffing",
+      "Creative Services Staffing",
+      "Finance Staffing",
+      "Project Management",
+      "and Application Development"
+    ],
+    "linkedin_org_locations": [
+      "2603 Camino Ramon,, Suite 200, San Ramon, CA 94583, US",
+      "Princeville, EGL. Domlur, Princeville, Embassy Golf Links Business Park, off Intermediate ring road, Domlur, Bangalore, KA 560072, IN",
+      "55 University Ave, Suite 1100, Toronto, Ontario M5J 2H7, CA",
+      "71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, GB",
+      "Teniente General Juan D. Perón 679, piso 3, Buenos Aires, C1038AAM, AR"
+    ],
+    "linkedin_org_description": "Accelon Inc. operates across the USA, India, Canada, Argentina, and the UK, delivering exceptional solutions in staffing, project management, and application development. We pride ourselves on being fast, adaptable, and client-focused. Our size strikes the perfect balance—large enough to manage complex demands, yet agile enough to cater to your unique needs. At Accelon, we go the extra mile to understand your business, culture, and infrastructure, building a strong foundation for long-term strategic partnerships and ensuring your success.",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Mid-Senior level",
+    "directapply": false,
+    "linkedin_org_slug": "acceloninc",
+    "no_jb_schema": null,
+    "external_apply_url": "https://zrec.in/BkyTc?source=CareerSite",
+    "description_text": "Experience Level:\n8+ years of experience\nDesign, develop, document, test, and debug new and existing software systems and/or applications using Node.js, React, and AWS.\nServe as a technical expert on development projects.\nParticipate in the full development life cycle, including requirements analysis and design.\nWrite technical specifications based on conceptual design and stated business requirements.\nSupport, maintain, and document software functionality.\nIdentify and evaluate new technologies for implementation.\nAnalyze code to find causes of errors and revise programs as needed.\nParticipate in software design meetings and analyze user needs to determine technical requirements.\nConsult with end user to prototype, refine, test, and debug programs to meet needs.\n\n\nRequirement\nsExtensive experience in Node.JS, React and AW\nSAWS lambda, serverless and lambda as a servic\neMinimum education requirement: BS degre\neMinimum years of experience: 8 year\n\ns\nOnly relevant applicants will be considered. Higher experienced candidates are not being considered\n\n. \nEligibili\nty:Must have independent work authorizat\nionSick leave as per your state l\nawsOpen to W2 contract or C2H o\nnlyNo visa sponsorship or transfers at this ti\nme.No C2C or third-party vend\n\nors"
+  },
+  {
+    "id": "1790819491",
+    "date_posted": "2025-07-02T15:25:25",
+    "date_created": "2025-07-02T15:34:32.428268",
+    "title": "DevOps Engineer - AWS",
+    "organization": "Jobot",
+    "organization_url": "https://www.linkedin.com/company/jobot",
+    "date_validthrough": "2025-08-01T15:25:25",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Pittsburg",
+          "addressRegion": "CA",
+          "streetAddress": null
+        },
+        "latitude": 38.020794,
+        "longitude": -121.88783
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Pittsburg, California, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 80000,
+        "maxValue": 140000,
+        "unitText": "YEAR"
+      }
+    },
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/devops-engineer-aws-at-jobot-4257177978",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+    "cities_derived": [
+      "Pittsburg"
+    ],
+    "regions_derived": [
+      "California"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Pittsburg, California, United States"
+    ],
+    "timezones_derived": [
+      "America/Los_Angeles"
+    ],
+    "lats_derived": [
+      38.0182
+    ],
+    "lngs_derived": [
+      -121.8965
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 1256,
+    "linkedin_org_url": "http://Jobot.com",
+    "linkedin_org_size": "501-1,000 employees",
+    "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+    "linkedin_org_industry": "Staffing and Recruiting",
+    "linkedin_org_followers": 3252988,
+    "linkedin_org_headquarters": "Newport Beach, California",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2018",
+    "linkedin_org_specialties": [
+      "technology",
+      "recruiting",
+      "AI",
+      "artificial intelligence",
+      "construction",
+      "IT",
+      "tech recruiting",
+      "staffing",
+      "mortgage",
+      "healthcare",
+      "accountingfinance",
+      "accounting",
+      "jobot",
+      "staffing",
+      "sales",
+      "humanresources",
+      "tech",
+      "and engineering"
+    ],
+    "linkedin_org_locations": [
+      "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+    ],
+    "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Not Applicable",
+    "directapply": true,
+    "linkedin_org_slug": "jobot",
+    "no_jb_schema": null,
+    "external_apply_url": null,
+    "description_text": "Want to learn more about this role and Jobot? Click our Jobot logo and follow our LinkedIn page!\n\nJob details\n\nAbout Us\n\nWe are seeking a highly skilled and motivated DevOps Engineer to join our dynamic team. The successful candidate will play a pivotal role in the development and deployment of our innovative energy solutions. As a DevOps Engineer, you will work with cutting-edge technologies and work with a team of talented engineers to ensure system consistency, improve customer experience, and achieve high availability and performance of our services. This role is customer-facing, so excellent communication skills are essential. This is a permanent position offering a fantastic opportunity to work in a fast-paced and technologically advanced environment.\n\nJob Details\n\nAre you a good fit?\n\nImplement and manage continuous delivery systems and methodologies on AWS.\nUnderstand, implement, and automate security controls, governance processes, and compliance validation.\nDefine and deploy monitoring, metrics, and logging systems on AWS.\nImplement systems that are highly available, scalable, and self-healing on the AWS platform.\nDesign, manage, and maintain tools to automate operational processes.\nWork closely with the development team to integrate new deployment processes and strategies.\nMaintain and improve AWS infrastructure to ensure optimal performance, availability, and security.\nAct as a point of contact for technical issues for customers, providing effective and efficient problem-solving solutions.\nUse New Relic and other tools to monitor and troubleshoot systems, ensuring high availability and performance.\nProficiency in AWS and cloud infrastructure management.\nExperience with continuous delivery systems and methodologies.\nStrong understanding of security controls, governance processes, and compliance validation.\n\nWant to learn more about this role and Jobot?\n\nClick our Jobot logo and follow our LinkedIn page!"
+  },
+  {
+    "id": "1790818894",
+    "date_posted": "2025-07-02T15:25:24",
+    "date_created": "2025-07-02T15:34:20.827504",
+    "title": "DevOps Engineer - AWS",
+    "organization": "Jobot",
+    "organization_url": "https://www.linkedin.com/company/jobot",
+    "date_validthrough": "2025-08-01T15:25:24",
+    "locations_raw": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "US",
+          "addressLocality": "Phoenix",
+          "addressRegion": "AZ",
+          "streetAddress": null
+        },
+        "latitude": 33.448204,
+        "longitude": -112.072586
+      }
+    ],
+    "location_type": "TELECOMMUTE",
+    "location_requirements_raw": [
+      {
+        "@type": "Country",
+        "name": "Phoenix, Arizona, United States"
+      }
+    ],
+    "salary_raw": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "minValue": 80000,
+        "maxValue": 140000,
+        "unitText": "YEAR"
+      }
+    },
+    "employment_type": [
+      "FULL_TIME"
+    ],
+    "url": "https://www.linkedin.com/jobs/view/devops-engineer-aws-at-jobot-4257178871",
+    "source_type": "jobboard",
+    "source": "linkedin",
+    "source_domain": "linkedin.com",
+    "organization_logo": "https://media.licdn.com/dms/image/v2/D560BAQFBeHszXin1VA/company-logo_200_200/company-logo_200_200/0/1737157657968/jobot_logo?e=2147483647&v=beta&t=NicMQnujqzx01lzFeWUEoy_NEm1RqfjA_I0QlnQslR8",
+    "cities_derived": [
+      "Phoenix"
+    ],
+    "regions_derived": [
+      "Arizona"
+    ],
+    "countries_derived": [
+      "United States"
+    ],
+    "locations_derived": [
+      "Phoenix, Arizona, United States"
+    ],
+    "timezones_derived": [
+      "America/Phoenix"
+    ],
+    "lats_derived": [
+      33.5722
+    ],
+    "lngs_derived": [
+      -112.0892
+    ],
+    "remote_derived": true,
+    "recruiter_name": null,
+    "recruiter_title": null,
+    "recruiter_url": null,
+    "linkedin_org_employees": 1256,
+    "linkedin_org_url": "http://Jobot.com",
+    "linkedin_org_size": "501-1,000 employees",
+    "linkedin_org_slogan": "Hire or Be Hired. Jobot can help. Find a good job at: Jobot.com - Employee Owned Since 2024 💙🤖",
+    "linkedin_org_industry": "Staffing and Recruiting",
+    "linkedin_org_followers": 3252988,
+    "linkedin_org_headquarters": "Newport Beach, California",
+    "linkedin_org_type": "Privately Held",
+    "linkedin_org_foundeddate": "2018",
+    "linkedin_org_specialties": [
+      "technology",
+      "recruiting",
+      "AI",
+      "artificial intelligence",
+      "construction",
+      "IT",
+      "tech recruiting",
+      "staffing",
+      "mortgage",
+      "healthcare",
+      "accountingfinance",
+      "accounting",
+      "jobot",
+      "staffing",
+      "sales",
+      "humanresources",
+      "tech",
+      "and engineering"
+    ],
+    "linkedin_org_locations": [
+      "3101 W Pacific Coast Hwy, Newport Beach, California 92663, US"
+    ],
+    "linkedin_org_description": "Jobot is on a mission to connect good people with good jobs. By combining AI-powered technology with the expertise of Jobot Pros, our experienced recruiters, we help you find career opportunities that align with your goals and values.\n\nFounded in 2018 and employee-owned since 2024, Jobot is committed to fostering a culture of kindness, respect, innovation, and connection.  As an industry leader, we’ve been recognized as a top workplace by Forbes, Fortune, USA Today, and Staffing Industry Analysts (SIA).\n\nReady to find a good job? Create your profile today at Jobot.com. 🤖",
+    "linkedin_org_recruitment_agency_derived": true,
+    "seniority": "Entry level",
+    "directapply": true,
+    "linkedin_org_slug": "jobot",
+    "no_jb_schema": null,
+    "external_apply_url": null,
+    "description_text": "Want to learn more about this role and Jobot? Click our Jobot logo and follow our LinkedIn page!\n\nJob details\n\nAbout Us\n\nWe are seeking a highly skilled and motivated DevOps Engineer to join our dynamic team. The successful candidate will play a pivotal role in the development and deployment of our innovative energy solutions. As a DevOps Engineer, you will work with cutting-edge technologies and work with a team of talented engineers to ensure system consistency, improve customer experience, and achieve high availability and performance of our services. This role is customer-facing, so excellent communication skills are essential. This is a permanent position offering a fantastic opportunity to work in a fast-paced and technologically advanced environment.\n\nJob Details\n\nAre you a good fit?\n\nImplement and manage continuous delivery systems and methodologies on AWS.\nUnderstand, implement, and automate security controls, governance processes, and compliance validation.\nDefine and deploy monitoring, metrics, and logging systems on AWS.\nImplement systems that are highly available, scalable, and self-healing on the AWS platform.\nDesign, manage, and maintain tools to automate operational processes.\nWork closely with the development team to integrate new deployment processes and strategies.\nMaintain and improve AWS infrastructure to ensure optimal performance, availability, and security.\nAct as a point of contact for technical issues for customers, providing effective and efficient problem-solving solutions.\nUse New Relic and other tools to monitor and troubleshoot systems, ensuring high availability and performance.\nProficiency in AWS and cloud infrastructure management.\nExperience with continuous delivery systems and methodologies.\nStrong understanding of security controls, governance processes, and compliance validation.\n\nWant to learn more about this role and Jobot?\n\nClick our Jobot logo and follow our LinkedIn page!"
+  }
+]
