@@ -5,7 +5,7 @@ class LinkedInService {
   constructor() {
     this.baseURL = 'https://linkedin-job-search-api.p.rapidapi.com/active-jb-24h';
     this.headers = {
-      'x-rapidapi-key': process.env.RAPIDAPI_KEY || 'xxx',
+      'x-rapidapi-key': 'ba4440a116msh94ef00977fc1bcep1a0652jsn7f8dab649daf',
       'x-rapidapi-host': 'linkedin-job-search-api.p.rapidapi.com',
     };
   }

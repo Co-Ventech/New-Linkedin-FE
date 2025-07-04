@@ -7,7 +7,7 @@ const CSV_HEADERS = require('./utils/csvHeaders');
 // Connect to database
 connectDB();
 
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

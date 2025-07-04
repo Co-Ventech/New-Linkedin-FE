@@ -3,7 +3,7 @@ const linkedinService = require('../services/linkedinService');
 class JobModel {
   constructor() {
     this.defaultParams = {
-      limit: "30",
+      limit: "1",
       offset: "0",
       location_filter: '"United States" OR "United Kingdom"',
       description_type: 'text',

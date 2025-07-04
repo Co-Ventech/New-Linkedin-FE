@@ -96,5 +96,77 @@ class CSVService {
     return CSV_CONFIG.filename;
   }
 }
+const createSpecificFieldsCSV = async (jobs) => {
+  try {
+    const specificCsvPath = path.join(__dirname, '../', 'linkedin_jobs_specific.csv');
 
+    const specificCsvWriter = createCsvWriter({
+      path: specificCsvPath,
+      header: [
+        { id: 'source', title: 'Source' },
+        { id: 'organization_logo', title: 'Company Logo' },
+        { id: 'title', title: 'Job Title' },
+        { id: 'description_text', title: 'Job Description' },
+        { id: 'seniority', title: 'Seniority Level' },
+        { id: 'countries_derived', title: 'Countries' },
+        { id: 'location_type', title: 'Location Type' },
+        { id: 'remote_derived', title: 'Remote' },
+        { id: 'salary_raw', title: 'Salary' },
+        { id: 'linkedin_org_size', title: 'Company Size' },
+        { id: 'linkedin_org_followers', title: 'Company Followers' },
+        { id: 'linkedin_org_industry', title: 'Industry' },
+        { id: 'linkedin_org_specialties', title: 'Company Specialties' },
+        { id: 'recruiter_name', title: 'Recruiter Name' },
+        { id: 'recruiter_url', title: 'Recruiter URL' },
+        { id: 'date_posted', title: 'Date Posted' },
+        { id: 'employment_type', title: 'Employment Type' },
+        { id: 'organization', title: 'Company' },
+        { id: 'url', title: 'Job URL' },
+        { id: 'linkedin_org_employees', title: 'Company Employees' }
+      ]
+    });
+
+    // Transform data for specific fields
+    const specificData = jobs.map(job => ({
+      source: job.source || '',
+      organization_logo: job.organization_logo || '',
+      title: job.title || '',
+      description_text: job.description_text ? job.description_text.replace(/\n/g, ' ').replace(/"/g, '""') : '',
+      seniority: job.seniority || '',
+      countries_derived: Array.isArray(job.countries_derived) ? job.countries_derived.join(', ') : '',
+      location_type: job.location_type || '',
+      remote_derived: job.remote_derived ? 'Yes' : 'No',
+      salary_raw: job.salary_raw ? this.formatSalary(job.salary_raw) : '',
+      linkedin_org_size: job.linkedin_org_size || '',
+      linkedin_org_followers: job.linkedin_org_followers || '',
+      linkedin_org_industry: job.linkedin_org_industry || '',
+      linkedin_org_specialties: Array.isArray(job.linkedin_org_specialties) ? job.linkedin_org_specialties.join(', ') : '',
+      recruiter_name: job.recruiter_name || '',
+      recruiter_url: job.recruiter_url || '',
+      date_posted: job.date_posted || '',
+      employment_type: Array.isArray(job.employment_type) ? job.employment_type.join(', ') : job.employment_type || '',
+      organization: job.organization || '',
+      url: job.url || '',
+      linkedin_org_employees: job.linkedin_org_employees || ''
+    }));
+
+    // Delete old file if exists
+    if (await fs.pathExists(specificCsvPath)) {
+      await fs.remove(specificCsvPath);
+    }
+
+    // Write new CSV
+    await specificCsvWriter.writeRecords(specificData);
+    console.log(`✅ Specific fields CSV created with ${jobs.length} jobs`);
+    
+    return specificCsvPath;
+
+  } catch (error) {
+    console.error('❌ Specific CSV creation error:', error);
+    throw error;
+  }
+};
 module.exports = new CSVService();
+module.exports = {
+  createSpecificFieldsCSV
+};

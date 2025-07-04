@@ -14,6 +14,6 @@ const csvController = require('../controllers/csvController');
 const authMiddleware = require('../middleware/authMiddleware'); // Add this line
 
 // Protected routes - Add authMiddleware
-router.get('/download-csv', authMiddleware, csvController.downloadCSV);
+router.get('/download-csv',  csvController.downloadCSV);
 
 module.exports = router;
