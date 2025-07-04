@@ -797,7 +797,7 @@ async function createCSVFile(jobs) {
 app.post("/api/jobs", async (req, res) => {
   try {
     const {
-      limit = "30",
+      limit = "2",
       offset = "0",
       location_filter = '"United States" OR "United Kingdom"',
       description_type = 'text',
@@ -842,7 +842,7 @@ app.get("/api/auto-download-csv", async (req, res) => {
 
     // Get query parameters or use defaults
     const {
-      limit = "30",
+      limit = "1",
       offset = "0",
       location_filter = '"United States" OR "United Kingdom"',
       description_type = 'text',
