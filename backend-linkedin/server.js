@@ -1,8 +1,6 @@
 // // server.js
 // const express = require('express');
-// const mongoose = require('mongoose');
 // const cors = require('cors');
-// const router = require('./routes/authRoutes.js');
 // require('dotenv').config();
 // const axios = require('axios');
 // const jobRoutes = require('./routes/jobRoutes');
@@ -13,8 +11,6 @@
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 
-// // Routes
-// app.use('/api/v1/', router);
 
 // // // 404 route
 // // app.use('ss', (req, res) => {
@@ -40,11 +36,6 @@
 // // Routes
 // const jobRoutes1 = require('./routes/jobRoutes copy.js');
 // app.use('/api/jobs1', jobRoutes1);
-
-// // Database connection
-// mongoose.connect(process.env.MONGO_URL)
-//     .then(() => console.log('MongoDB connected'))
-//     .catch(err => console.error('MongoDB connection error:', err));
 
 // // app.post('/api/jobs/search1', async (req, res) => {
 // //   try {
@@ -625,6 +616,16 @@ const cors = require("cors");
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs-extra');
 const path = require('path');
+require('dotenv').config();
+const mongoose = require('mongoose');
+
+
+// Database connection
+mongoose.connect(process.env.MONGO_URL)
+    .then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('MongoDB connection error:', err));
+
+
 
 const app = express();
 const PORT = 3001;
@@ -632,6 +633,9 @@ const PORT = 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+const router = require('./routes/authRoutes.js');
+
+app.use('/api', router);
 
 // CSV CONFIGURATION WITH ALL FIELDS
 const CSV_FILENAME = 'linkedin_jobs_complete.csv';
@@ -753,7 +757,7 @@ async function fetchJobsFromLinkedIn(searchParams) {
     url: "https://linkedin-job-search-api.p.rapidapi.com/active-jb-24h",
     params: searchParams,
     headers: {
-      "x-rapidapi-key": "xx",
+      "x-rapidapi-key": "210b8f9226msh36c099be1567124p184438jsn3e86670cf03d",
       "x-rapidapi-host": "linkedin-job-search-api.p.rapidapi.com",
     },
   };
@@ -785,6 +789,9 @@ async function createCSVFile(jobs) {
   }
   return false;
 }
+
+
+// // Routes
 
 // LinkedIn Job Search Endpoint (POST)
 app.post("/api/jobs", async (req, res) => {
