@@ -1,6 +1,0 @@
-backend-linkedin/node_modules/
-frontend-linkedin/node_modules/
-node_modules/
-.env
-backend-linkedin/.env/
-frontend-linkedin/.env/

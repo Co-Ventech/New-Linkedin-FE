@@ -2,7 +2,6 @@
 require('dotenv').config();
 const app = require('./app');
 const connectDB = require('./config/database');
-const CSV_HEADERS = require('./utils/csvHeaders');
 
 // Connect to database
 connectDB();
@@ -10,9 +9,16 @@ connectDB();
 const PORT = 3001;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📡 POST Jobs: POST http://localhost:${PORT}/api/jobs`);
-  console.log(`📥 Auto Download: GET http://localhost:${PORT}/api/auto-download-csv`);
-  console.log(`📁 Download CSV: GET http://localhost:${PORT}/api/download-csv`);
-  console.log(`📊 CSV will contain ALL ${CSV_HEADERS.length} fields from API`);
+  console.log('\n================= API Endpoints =================');
+console.log(`🚀 Server running on:         http://localhost:${PORT}`);
+console.log('-------------------------------------------------');
+console.log(`🔑 Register:                 POST   /api/auth/signup`);
+console.log(`🔑 Login:                    POST   /api/auth/login`);
+console.log('-------------------------------------------------');
+console.log(`📡 Fetch & Save Jobs:        GET    /api/jobs/fetch-and-save`);
+console.log(`   (with params)             GET    /api/jobs/fetch-and-save?limit=10&location_filter="India"&advanced_title_filter="UI/UX"`);
+console.log(`📥 Export Last Batch as CSV: GET    /api/jobs/export-csv`);
+console.log('-------------------------------------------------');
+console.log(`📁 Raw API data saved at:    /backend/data/last_api_response.json`);
+console.log('=================================================\n');
 });

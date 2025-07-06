@@ -1,36 +1,31 @@
-  
+
 const axios = require('axios');
 
-class LinkedInService {
-  constructor() {
-    this.baseURL = 'https://linkedin-job-search-api.p.rapidapi.com/active-jb-24h';
-    this.headers = {
-      'x-rapidapi-key': 'ba4440a116msh94ef00977fc1bcep1a0652jsn7f8dab649daf',
-      'x-rapidapi-host': 'linkedin-job-search-api.p.rapidapi.com',
-    };
-  }
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
+const RAPIDAPI_HOST = 'linkedin-job-search-api.p.rapidapi.com';
+const BASE_URL = 'https://linkedin-job-search-api.p.rapidapi.com/active-jb-24h';
 
-  async fetchJobs(searchParams) {
-    const options = {
-      method: 'GET',
-      url: this.baseURL,
-      params: searchParams,
-      headers: this.headers,
-    };
+const DEFAULT_PARAMS = {
+  limit: "10",
+  offset: "0",
+  location_filter: '"United States" OR "United Kingdom"',
+  description_type: 'text',
+  remote: 'true',
+  advanced_title_filter: "('Test Automation' | 'Web Development' | 'AI/ML' | 'UI/UX')"
+};
 
-    console.log('🔍 Fetching jobs with params:', options.params);
-
-    try {
-      const response = await axios.request(options);
-      const jobs = Array.isArray(response.data) ? response.data : [];
-      
-      console.log('✅ Jobs found:', jobs.length);
-      return jobs;
-    } catch (error) {
-      console.error('❌ LinkedIn API Error:', error.response?.data || error.message);
-      throw new Error(`LinkedIn API Error: ${error.response?.data?.message || error.message}`);
-    }
-  }
+async function fetchJobsFromRapidAPI(params = {}) {
+  const options = {
+    method: 'GET',
+    url: BASE_URL,
+    params: { ...DEFAULT_PARAMS, ...params },
+    headers: {
+      'x-rapidapi-key': RAPIDAPI_KEY,
+      'x-rapidapi-host': RAPIDAPI_HOST,
+    },
+  };
+  const response = await axios.request(options);
+  return Array.isArray(response.data) ? response.data : [];
 }
 
-module.exports = new LinkedInService();
+module.exports = { fetchJobsFromRapidAPI };
