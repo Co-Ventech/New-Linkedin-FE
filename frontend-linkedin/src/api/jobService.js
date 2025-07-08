@@ -2,14 +2,15 @@
 
 import axios from "axios";
 
-const API_URL = "http://192.168.100.120:3000/api/jobs/search";
+// New API endpoint for real jobs
+const API_URL = "http://192.168.43.167:8000/api/v1/get-csv-jobs";
 
-export async function getJobs(token) {
+// Fetch jobs from the new API
+export async function getJobs() {
   try {
-    const res = await axios.post(API_URL, {}, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
-    return res.data.data.jobs || [];
+    const res = await axios.get(API_URL);
+    // The API returns an array of jobs with the new structure
+    return res.data || [];
   } catch (err) {
     throw new Error(
       err.response?.data?.message || err.message || "Failed to fetch jobs."
@@ -17,10 +18,11 @@ export async function getJobs(token) {
   }
 }
 
-export async function getJobById(id, token) {
+// Get a job by Job ID from the fetched jobs
+export async function getJobById(id) {
   try {
-    const jobs = await getJobs(token);
-    return jobs.find(j => j.id === id) || null;
+    const jobs = await getJobs();
+    return jobs.find(j => j["Job ID"] === id) || null;
   } catch (err) {
     throw err;
   }

@@ -45,6 +45,14 @@ const API_URL = "http://192.168.100.69:3000/api/jobs/search";
 //   }
 // ];
 
+const tierColor = (tier) => {
+  if (!tier) return "bg-gray-200 text-gray-700";
+  if (tier.toLowerCase() === "yellow") return "bg-yellow-200 text-yellow-800";
+  if (tier.toLowerCase() === "green") return "bg-green-200 text-green-800";
+  if (tier.toLowerCase() === "red") return "bg-red-200 text-red-800";
+  return "bg-gray-200 text-gray-700";
+};
+
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -117,36 +125,84 @@ const JobDetails = () => {
           &larr; Back to Jobs
         </button>
         <div className="flex items-center gap-4 mb-4">
-          {job.organization_logo && (
-            <img src={job.organization_logo} alt={job.organization} className="w-16 h-16 rounded object-contain" />
+          {job["Company Logo"] && (
+            <img src={job["Company Logo"]} alt={job["Company"]} className="w-16 h-16 rounded object-contain" />
           )}
           <div>
-            <h1 className="text-2xl font-bold mb-1">{job.title}</h1>
-            <div className="text-gray-600 font-medium">{job.organization}</div>
-            <div className="text-gray-500 text-sm">{job.location}</div>
+            <h1 className="text-2xl font-bold mb-1">{job["Job Title"]}</h1>
+            <div className="text-gray-600 font-medium">{job["Company"]}</div>
+            <div className="text-gray-500 text-sm">{job["Locations"] || job["Cities"] || job["Countries"]}</div>
+            {job["Company URL"] && (
+              <a href={job["Company URL"]} className="text-blue-500 text-xs" target="_blank" rel="noopener noreferrer">
+                {job["Company URL"]}
+              </a>
+            )}
           </div>
-        </div>
-        <div className="mb-4">
-          <a href={job.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">View on LinkedIn</a>
-        </div>
-        <div className="mb-4">
-          {job.employment_type && job.employment_type.map(type => (
-            <span key={type} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2">{type}</span>
-          ))}
-          {job.seniority && (
-            <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded mr-2">{job.seniority}</span>
+          {job["tier"] && (
+            <span className={`ml-auto px-2 py-1 rounded text-xs font-semibold ${tierColor(job["tier"])}`}>
+              {job["tier"]}
+            </span>
           )}
-          {job.remote_derived && <span className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">Remote</span>}
+        </div>
+        <div className="mb-4">
+          <a href={job["Job URL"]} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">View Job</a>
+        </div>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {job["Employment Type"] && (
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">{job["Employment Type"]}</span>
+          )}
+          {job["Seniority Level"] && (
+            <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{job["Seniority Level"]}</span>
+          )}
+          {job["Remote"] === "True" && <span className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">Remote</span>}
+          {job["Source"] && <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">{job["Source"]}</span>}
         </div>
         <div className="prose prose-sm max-w-none mb-6 whitespace-pre-line">
-          {job.description_text}
+          {job["Job Description"]}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          {job.company_industry && <div><span className="font-semibold">Industry:</span> {job.company_industry}</div>}
-          {job.company_url && <div><span className="font-semibold">Company URL:</span> <a href={job.company_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{job.company_url}</a></div>}
-          {job.salary_source && <div><span className="font-semibold">Salary:</span> {job.salary_source}</div>}
-          {job.job_level && <div><span className="font-semibold">Level:</span> {job.job_level}</div>}
-          {job.emails && <div><span className="font-semibold">Contact:</span> {job.emails}</div>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
+          {job["Recruiter Name"] && <div><span className="font-semibold">Recruiter:</span> {job["Recruiter Name"]} {job["Recruiter Title"] && <span className="text-gray-400">({job["Recruiter Title"]})</span>}</div>}
+          {job["Recruiter URL"] && <div><span className="font-semibold">Recruiter Profile:</span> <a href={job["Recruiter URL"]} className="text-blue-500" target="_blank" rel="noopener noreferrer">{job["Recruiter URL"]}</a></div>}
+          {job["Company Size"] && <div><span className="font-semibold">Company Size:</span> {job["Company Size"]}</div>}
+          {job["Company Followers"] && <div><span className="font-semibold">Followers:</span> {job["Company Followers"]}</div>}
+          {job["Industry"] && <div><span className="font-semibold">Industry:</span> {job["Industry"]}</div>}
+          {job["Company Slogan"] && <div><span className="font-semibold">Slogan:</span> {job["Company Slogan"]}</div>}
+          {job["Company Description"] && <div className="sm:col-span-2"><span className="font-semibold">Company Description:</span> {job["Company Description"]}</div>}
+          {job["Date Posted"] && <div><span className="font-semibold">Date Posted:</span> {new Date(job["Date Posted"]).toLocaleString()}</div>}
+          {job["Valid Through"] && <div><span className="font-semibold">Valid Through:</span> {new Date(job["Valid Through"]).toLocaleString()}</div>}
+          {job["Location Type"] && <div><span className="font-semibold">Location Type:</span> {job["Location Type"]}</div>}
+          {job["Salary"] && <div><span className="font-semibold">Salary:</span> {job["Salary"]}</div>}
+          {job["Company Employees"] && <div><span className="font-semibold">Employees:</span> {job["Company Employees"]}</div>}
+          {job["Company HQ"] && <div><span className="font-semibold">HQ:</span> {job["Company HQ"]}</div>}
+          {job["Company Type"] && <div><span className="font-semibold">Type:</span> {job["Company Type"]}</div>}
+          {job["Company Founded"] && <div><span className="font-semibold">Founded:</span> {job["Company Founded"]}</div>}
+          {job["Company Specialties"] && <div><span className="font-semibold">Specialties:</span> {job["Company Specialties"]}</div>}
+          {job["Seniority Level"] && <div><span className="font-semibold">Seniority Level:</span> {job["Seniority Level"]}</div>}
+        </div>
+        <div className="text-xs text-gray-500 mb-2">
+          <span className="font-semibold">Job ID:</span> {job["Job ID"]}
+        </div>
+        {/* KPIs Section */}
+        <div className="mt-4">
+          <h3 className="font-semibold mb-2">Job KPIs</h3>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div><span className="font-semibold">JD Quality:</span> {job["kpi_jd_quality"]}</div>
+            <div><span className="font-semibold">Domain Fit:</span> {job["kpi_domain_fit"]}</div>
+            <div><span className="font-semibold">Seniority:</span> {job["kpi_seniority"]}</div>
+            <div><span className="font-semibold">Location:</span> {job["kpi_location"]}</div>
+            <div><span className="font-semibold">Remote:</span> {job["kpi_remote"]}</div>
+            <div><span className="font-semibold">Salary:</span> {job["kpi_salary"]}</div>
+            <div><span className="font-semibold">Company Size:</span> {job["kpi_company_size"]}</div>
+            <div><span className="font-semibold">Popularity:</span> {job["kpi_popularity"]}</div>
+            <div><span className="font-semibold">Industry Match:</span> {job["kpi_industry_match"]}</div>
+            <div><span className="font-semibold">Recruiter:</span> {job["kpi_recruiter"]}</div>
+            <div><span className="font-semibold">Freshness:</span> {job["kpi_freshness"]}</div>
+            <div><span className="font-semibold">Employment Type:</span> {job["kpi_employment_type"]}</div>
+            <div><span className="font-semibold">Contact Info:</span> {job["kpi_contact_info"]}</div>
+            <div><span className="font-semibold">Skills Explicitness:</span> {job["kpi_skills_explicitness"]}</div>
+            <div><span className="font-semibold">Experience Threshold:</span> {job["kpi_experience_threshold"]}</div>
+            <div><span className="font-semibold">Final Score:</span> {job["final_score"]}</div>
+          </div>
         </div>
       </div>
     </div>
