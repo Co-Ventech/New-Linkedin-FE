@@ -1,5 +1,6 @@
 import { setUser } from "../slices/userSlice";
 
+//api 
 const API_BASE = "http://localhost:3001/api";
 
 export const loginUser = async (dispatch, email, password) => {
