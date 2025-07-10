@@ -8,7 +8,7 @@ const JobDetailsModal = ({ job, open, onClose }) => {
         <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600" onClick={onClose}>&times;</button>
         <h2 className="text-2xl font-bold mb-2">{job?.title || "Job Title"}</h2>
         <p className="text-gray-600 mb-1">{job?.company || "Company Name"}</p>
-        <p className="text-gray-500 text-sm mb-2">{job?.location || "Location"}</p>
+        <p className="text-gray-500 text-sm mb-2">{Array.isArray(job?.locations) ? job.locations.join(", ") : job?.locations || "Location"}</p>
         <div className="text-gray-700 text-sm">
           {job?.description || "Full job description goes here."}
         </div>
