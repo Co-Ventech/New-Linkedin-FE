@@ -1,7 +1,12 @@
 import { setUser } from "../slices/userSlice";
+// import dotenv from 'dotenv'; dotenv.config();
 
+
+const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST
+const PORT = import.meta.env.VITE_PORT 
 //api 
-const API_BASE = "http://localhost:3001/api";
+const API_BASE = `${REMOTE_HOST}:${PORT}/api`;
+console.log(API_BASE);
 
 export const loginUser = async (dispatch, email, password) => {
   try {

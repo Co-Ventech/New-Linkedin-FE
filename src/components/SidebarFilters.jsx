@@ -82,63 +82,48 @@ const SidebarFilters = ({ categories, jobTypes, colors, countries, fields, filte
                 }}
                 className="accent-blue-600"
               />
-              <span>{color}</span>
+              <span>{color === 'Green' ? 'AI Recommended' : color === 'Yellow' ? 'Recommended' : color === 'Red' ? 'Not Recommended' : color}</span>
             </label>
           ))}
         </div>
       </div>
     )}
-    {/* Country (multi-select) */}
+    {/* Country (single-select) */}
     {countries && countries.length > 0 && (
       <div>
         <h3 className="font-semibold mb-2">Country</h3>
-        <div className="space-y-1">
+        <select
+          className="w-full border rounded px-2 py-1"
+          value={filters.country[0] || ""}
+          onChange={e => {
+            const value = e.target.value;
+            onFilterChange("country", value ? [value] : []);
+          }}
+        >
+          <option value="">All</option>
           {countries.map((country) => (
-            <label key={country} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="country"
-                value={country}
-                checked={filters.country.includes(country)}
-                onChange={() => {
-                  const newCountries = filters.country.includes(country)
-                    ? filters.country.filter((c) => c !== country)
-                    : [...filters.country, country];
-                  onFilterChange("country", newCountries);
-                }}
-                className="accent-blue-600"
-              />
-              <span>{country}</span>
-            </label>
+            <option key={country} value={country}>{country}</option>
           ))}
-        </div>
+        </select>
       </div>
     )}
-    {/* Field (multi-select) */}
+    {/* Field (single-select) */}
     {fields && fields.length > 0 && (
       <div>
         <h3 className="font-semibold mb-2">Field</h3>
-        <div className="space-y-1">
+        <select
+          className="w-full border rounded px-2 py-1"
+          value={filters.field[0] || ""}
+          onChange={e => {
+            const value = e.target.value;
+            onFilterChange("field", value ? [value] : []);
+          }}
+        >
+          <option value="">All</option>
           {fields.map((field) => (
-            <label key={field} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="field"
-                value={field}
-                checked={filters.field.includes(field)}
-                onChange={() => {
-                  
-                  const newFields = filters.field.includes(field)
-                    ? filters.field.filter((f) => f !== field)
-                    : [...filters.field, field];
-                  onFilterChange("field", newFields);
-                }}
-                className="accent-blue-600"
-              />
-              <span>{field}</span>
-            </label>
+            <option key={field} value={field}>{field}</option>
           ))}
-        </div>
+        </select>
       </div>
     )}
   </div>

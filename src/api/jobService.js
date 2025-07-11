@@ -1,39 +1,54 @@
-// Placeholder API service for jobs
+// src/api/jobService.js
 
 import axios from "axios";
+// import dotenv from 'dotenv'; dotenv.config();
 
-// Old API and its logic removed. Only new API endpoints are used now.
 
-// If getJobs and getJobById are not used, you can remove them. If still imported elsewhere, make them throw:
-export async function getJobs() {
-  throw new Error("getJobs is deprecated. Use the new API endpoints via the header buttons.");
+const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST
+const PORT = import.meta.env.VITE_PORT 
+//api 
+const API_BASE = `${REMOTE_HOST}:${PORT}/api`;
+
+
+
+function getAuthHeaders() {
+  const token = localStorage.getItem('authToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function getJobById(id) {
-  throw new Error("getJobById is deprecated. Use the new API endpoints via the header buttons.");
-}
-
-export async function getScoredJobs() {
+export async function saveJobsToBackend(jobs) {
   try {
-    const res = await axios.get("http://localhost:3001/api/apify/scored");
-    return res.data || [];
+    console.log("[saveJobsToBackend] Sending jobs to backend:", jobs);
+    const res = await axios.post(
+      `${REMOTE_HOST}:${PORT}/api/save-jobs`,
+      jobs,
+      { headers: getAuthHeaders() }
+    );
+    console.log("[saveJobsToBackend] Response from backend:", res.data);
+    return res.data;
   } catch (err) {
+    console.error("[saveJobsToBackend] Error:", err.response?.data || err.message);
     throw new Error(
-      err.response?.data?.message || err.message || "Failed to fetch scored jobs."
+      err.response?.data?.message || err.message || "Failed to save jobs to backend."
     );
   }
 }
 
-export async function getCategories() {
-  // TODO: Implement API call
-  return [];
-}
-
-export async function downloadJobsExcel(filters) {
-  // TODO: Implement API call
-}
-
-export async function getJobDetails(id) {
-  // TODO: Implement API call
-  return null;
-} 
+ export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
+   try {
+     const res = await axios.get(
+       `${REMOTE_HOST}:${PORT}/api/jobs-by-date`,
+       { headers: getAuthHeaders() }
+     );
+     const data = res.data || [];
+     // Patch: if the response is a single object, wrap it in an array
+     if (data && !Array.isArray(data) && data.date && data.jobs) {
+       return [data];
+     }
+     return data;
+   } catch (err) {
+     throw new Error(
+      err.response?.data?.message || err.message || "Failed to fetch jobs by date."
+     );
+   }
+ }

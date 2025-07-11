@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { getJobById } from "../api/jobService";
+// import { getJobById } from "../api/jobService"; // Remove this line
 
 const API_URL = "http://192.168.100.69:3000/api/jobs/search";
 
@@ -85,20 +85,9 @@ const JobDetails = () => {
 
   useEffect(() => {
     if (job) return; // Already have job from state
-    const fetchJob = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const token = localStorage.getItem('authToken');
-        const found = await getJobById(id, token);
-        setJob(found || null);
-      } catch (err) {
-        setError(err.message || "Failed to fetch job details.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJob();
+    // If job is not in state, show error (or you could fetch from jobs list in Redux)
+    setLoading(false);
+    setError("Job details not available. Please access from the job list.");
   }, [id, job]);
 
   if (loading) {

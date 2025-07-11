@@ -29,7 +29,9 @@ const JobCard = ({ job, onClick }) => {
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-lg font-bold text-gray-800 flex-1 truncate">{job.title || 'Job Title'}</h2>
           {job.tier && (
-            <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass} ml-2`} title="Tier">{job.tier}</span>
+            <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass} ml-2`} title="Tier">
+              {job.tier === 'Green' ? 'AI Recommended' : job.tier === 'Yellow' ? 'Recommended' : job.tier === 'Red' ? 'Not Recommended' : job.tier}
+            </span>
           )}
         </div>
         <div className="flex flex-wrap gap-2 mb-1">

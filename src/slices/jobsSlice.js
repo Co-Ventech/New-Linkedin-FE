@@ -1,22 +1,28 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getJobs, getScoredJobs } from '../api/jobService';
+import { saveJobsToBackend, fetchJobsByDate } from '../api/jobService';
 import { normalizeJob } from '../utils/normalizeJob';
 
-// Async thunk to fetch jobs from API
-export const fetchJobs = createAsyncThunk('jobs/fetchJobs', async (_, { rejectWithValue }) => {
+// Async thunk to save jobs to backend
+export const saveJobsToBackendThunk = createAsyncThunk('jobs/saveJobsToBackend', async (jobs, { rejectWithValue }) => {
   try {
-    const jobs = await getJobs();
-    // Normalize all jobs before returning
-    return jobs.map(normalizeJob);
+    // jobs should be normalized before calling this thunk
+    await saveJobsToBackend(jobs);
+    return true;
   } catch (err) {
     return rejectWithValue(err.message);
   }
 });
 
-export const fetchScoredJobs = createAsyncThunk('jobs/fetchScoredJobs', async (_, { rejectWithValue }) => {
+// Async thunk to fetch jobs grouped by date from backend
+export const fetchJobsByDateThunk = createAsyncThunk('jobs/fetchJobsByDate', async ({ range, page, limit }, { rejectWithValue }) => {
   try {
-    const jobs = await getScoredJobs();
-    return jobs.map(normalizeJob);
+    const data = await fetchJobsByDate(range, page, limit);
+    // Each data item: { date, jobs: [...] }
+    // Normalize jobs in each group
+    return data.map(day => ({
+      date: day.date,
+      jobs: (day.jobs || []).map(normalizeJob)
+    }));
   } catch (err) {
     return rejectWithValue(err.message);
   }
@@ -25,52 +31,62 @@ export const fetchScoredJobs = createAsyncThunk('jobs/fetchScoredJobs', async (_
 const jobsSlice = createSlice({
   name: 'jobs',
   initialState: {
-    jobs: [],
+    jobsByDate: [], // [{date, jobs:[]}, ...]
     loading: false,
     error: null,
+    hasMore: true,
+    page: 1,
+    range: '7d',
   },
   reducers: {
-    loadJobsFromStorage(state) {
-      try {
-        const stored = localStorage.getItem('scoredJobs');
-        if (stored) {
-          state.jobs = JSON.parse(stored);
-        }
-      } catch {}
+    resetJobsByDate(state) {
+      state.jobsByDate = [];
+      state.page = 1;
+      state.hasMore = true;
+    },
+    setRange(state, action) {
+      state.range = action.payload;
+      state.page = 1;
+      state.hasMore = true;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchJobs.pending, (state) => {
+      .addCase(saveJobsToBackendThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchJobs.fulfilled, (state, action) => {
-        state.jobs = action.payload;
+      .addCase(saveJobsToBackendThunk.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
-        try { localStorage.setItem('scoredJobs', JSON.stringify(action.payload)); } catch {}
       })
-      .addCase(fetchJobs.rejected, (state, action) => {
+      .addCase(saveJobsToBackendThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to save jobs.';
+      })
+      .addCase(fetchJobsByDateThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchJobsByDateThunk.fulfilled, (state, action) => {
+        if (state.page === 1) {
+          state.jobsByDate = action.payload;
+        } else {
+          // Append new days, avoid duplicates
+          const existingDates = new Set(state.jobsByDate.map(d => d.date));
+          const newDays = action.payload.filter(d => !existingDates.has(d.date));
+          state.jobsByDate = [...state.jobsByDate, ...newDays];
+        }
+        state.loading = false;
+        state.error = null;
+        state.hasMore = action.payload.length > 0;
+      })
+      .addCase(fetchJobsByDateThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch jobs.';
-      })
-      .addCase(fetchScoredJobs.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchScoredJobs.fulfilled, (state, action) => {
-        state.jobs = action.payload;
-        state.loading = false;
-        state.error = null;
-        try { localStorage.setItem('scoredJobs', JSON.stringify(action.payload)); } catch {}
-      })
-      .addCase(fetchScoredJobs.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || 'Failed to fetch scored jobs.';
       });
   },
 });
 
-export const { loadJobsFromStorage } = jobsSlice.actions;
+export const { resetJobsByDate, setRange } = jobsSlice.actions;
 export default jobsSlice.reducer; 
