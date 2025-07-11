@@ -1,43 +1,54 @@
-// Placeholder API service for jobs
+// src/api/jobService.js
 
 import axios from "axios";
+// import dotenv from 'dotenv'; dotenv.config();
 
-// New API endpoint for real jobs
-const API_URL = "http://192.168.43.167:8000/api/v1/get-csv-jobs";
 
-// Fetch jobs from the new API
-export async function getJobs() {
+const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST
+const PORT = import.meta.env.VITE_PORT 
+//api 
+const API_BASE = `${REMOTE_HOST}:${PORT}/api`;
+
+
+
+function getAuthHeaders() {
+  const token = localStorage.getItem('authToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export async function saveJobsToBackend(jobs) {
   try {
-    const res = await axios.get(API_URL);
-    // The API returns an array of jobs with the new structure
-    return res.data || [];
+    console.log("[saveJobsToBackend] Sending jobs to backend:", jobs);
+    const res = await axios.post(
+      `${REMOTE_HOST}:${PORT}/api/save-jobs`,
+      jobs,
+      { headers: getAuthHeaders() }
+    );
+    console.log("[saveJobsToBackend] Response from backend:", res.data);
+    return res.data;
   } catch (err) {
+    console.error("[saveJobsToBackend] Error:", err.response?.data || err.message);
     throw new Error(
-      err.response?.data?.message || err.message || "Failed to fetch jobs."
+      err.response?.data?.message || err.message || "Failed to save jobs to backend."
     );
   }
 }
 
-// Get a job by Job ID from the fetched jobs
-export async function getJobById(id) {
-  try {
-    const jobs = await getJobs();
-    return jobs.find(j => j["Job ID"] === id) || null;
-  } catch (err) {
-    throw err;
-  }
-}
-
-export async function getCategories() {
-  // TODO: Implement API call
-  return [];
-}
-
-export async function downloadJobsExcel(filters) {
-  // TODO: Implement API call
-}
-
-export async function getJobDetails(id) {
-  // TODO: Implement API call
-  return null;
-} 
+ export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
+   try {
+     const res = await axios.get(
+       `${REMOTE_HOST}:${PORT}/api/jobs-by-date`,
+       { headers: getAuthHeaders() }
+     );
+     const data = res.data || [];
+     // Patch: if the response is a single object, wrap it in an array
+     if (data && !Array.isArray(data) && data.date && data.jobs) {
+       return [data];
+     }
+     return data;
+   } catch (err) {
+     throw new Error(
+      err.response?.data?.message || err.message || "Failed to fetch jobs by date."
+     );
+   }
+ }

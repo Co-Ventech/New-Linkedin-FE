@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { getJobById } from "../api/jobService";
+// import { getJobById } from "../api/jobService"; // Remove this line
 
 const API_URL = "http://192.168.100.69:3000/api/jobs/search";
 
@@ -53,6 +53,28 @@ const tierColor = (tier) => {
   return "bg-gray-200 text-gray-700";
 };
 
+const badgeClass = {
+  tier: {
+    Yellow: 'bg-yellow-200 text-yellow-800 border-yellow-400',
+    Green: 'bg-green-200 text-green-800 border-green-400',
+    Red: 'bg-red-200 text-red-800 border-red-400',
+    Default: 'bg-gray-200 text-gray-700 border-gray-300',
+  },
+  jobType: 'bg-blue-100 text-blue-800 border-blue-300',
+  workplace: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+  applicants: 'bg-green-100 text-green-800 border-green-300',
+  views: 'bg-orange-100 text-orange-800 border-orange-300',
+};
+
+// KPI badge color logic
+const getKpiBadge = (score) => {
+  if (typeof score !== 'number') score = parseFloat(score);
+  if (isNaN(score)) return { color: 'bg-gray-200 text-gray-700 border-gray-300', tag: '' };
+  if (score >= 0.7) return { color: 'bg-green-100 text-green-800 border-green-400', tag: 'Green' };
+  if (score >= 0.5) return { color: 'bg-yellow-100 text-yellow-800 border-yellow-400', tag: 'Yellow' };
+  return { color: 'bg-red-100 text-red-800 border-red-400', tag: 'Red' };
+};
+
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -63,20 +85,9 @@ const JobDetails = () => {
 
   useEffect(() => {
     if (job) return; // Already have job from state
-    const fetchJob = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const token = localStorage.getItem('authToken');
-        const found = await getJobById(id, token);
-        setJob(found || null);
-      } catch (err) {
-        setError(err.message || "Failed to fetch job details.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchJob();
+    // If job is not in state, show error (or you could fetch from jobs list in Redux)
+    setLoading(false);
+    setError("Job details not available. Please access from the job list.");
   }, [id, job]);
 
   if (loading) {
@@ -124,86 +135,118 @@ const JobDetails = () => {
         >
           &larr; Back to Jobs
         </button>
-        <div className="flex items-center gap-4 mb-4">
-          {job["Company Logo"] && (
-            <img src={job["Company Logo"]} alt={job["Company"]} className="w-16 h-16 rounded object-contain" />
-          )}
-          <div>
-            <h1 className="text-2xl font-bold mb-1">{job["Job Title"]}</h1>
-            <div className="text-gray-600 font-medium">{job["Company"]}</div>
-            <div className="text-gray-500 text-sm">{job["Locations"] || job["Cities"] || job["Countries"]}</div>
-            {job["Company URL"] && (
-              <a href={job["Company URL"]} className="text-blue-500 text-xs" target="_blank" rel="noopener noreferrer">
-                {job["Company URL"]}
-              </a>
+        {/* Job Overview Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Job Overview</h2>
+          <div className="flex items-center gap-4 mb-2">
+            <h1 className="text-2xl font-bold text-gray-800 flex-1">{job.title}</h1>
+            {job.tier && (
+              <span className={`px-2 py-1 rounded text-xs font-semibold border ${badgeClass.tier[job.tier] || badgeClass.tier.Default}`} title="Tier">{job.tier}</span>
             )}
           </div>
-          {job["tier"] && (
-            <span className={`ml-auto px-2 py-1 rounded text-xs font-semibold ${tierColor(job["tier"])}`}>
-              {job["tier"]}
-            </span>
+          {/* Location display */}
+          {job.locations && (
+            <div className="text-sm text-gray-600 mb-2">
+              <span className="font-bold">Location:</span> {(() => {
+                if (Array.isArray(job.locations)) {
+                  if (typeof job.locations[0] === 'object' && job.locations[0] !== null && 'country' in job.locations[0]) {
+                    return job.locations.map(loc => [loc.city, loc.state, loc.country].filter(Boolean).join(', ')).join(' | ');
+                  }
+                  // If array of strings
+                  return job.locations.join(' | ');
+                }
+                // If single string
+                return job.locations;
+              })()}
+            </div>
           )}
-        </div>
-        <div className="mb-4">
-          <a href={job["Job URL"]} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">View Job</a>
-        </div>
-        <div className="mb-4 flex flex-wrap gap-2">
-          {job["Employment Type"] && (
-            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">{job["Employment Type"]}</span>
-          )}
-          {job["Seniority Level"] && (
-            <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{job["Seniority Level"]}</span>
-          )}
-          {job["Remote"] === "True" && <span className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">Remote</span>}
-          {job["Source"] && <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">{job["Source"]}</span>}
-        </div>
-        <div className="prose prose-sm max-w-none mb-6 whitespace-pre-line">
-          {job["Job Description"]}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-4">
-          {job["Recruiter Name"] && <div><span className="font-semibold">Recruiter:</span> {job["Recruiter Name"]} {job["Recruiter Title"] && <span className="text-gray-400">({job["Recruiter Title"]})</span>}</div>}
-          {job["Recruiter URL"] && <div><span className="font-semibold">Recruiter Profile:</span> <a href={job["Recruiter URL"]} className="text-blue-500" target="_blank" rel="noopener noreferrer">{job["Recruiter URL"]}</a></div>}
-          {job["Company Size"] && <div><span className="font-semibold">Company Size:</span> {job["Company Size"]}</div>}
-          {job["Company Followers"] && <div><span className="font-semibold">Followers:</span> {job["Company Followers"]}</div>}
-          {job["Industry"] && <div><span className="font-semibold">Industry:</span> {job["Industry"]}</div>}
-          {job["Company Slogan"] && <div><span className="font-semibold">Slogan:</span> {job["Company Slogan"]}</div>}
-          {job["Company Description"] && <div className="sm:col-span-2"><span className="font-semibold">Company Description:</span> {job["Company Description"]}</div>}
-          {job["Date Posted"] && <div><span className="font-semibold">Date Posted:</span> {new Date(job["Date Posted"]).toLocaleString()}</div>}
-          {job["Valid Through"] && <div><span className="font-semibold">Valid Through:</span> {new Date(job["Valid Through"]).toLocaleString()}</div>}
-          {job["Location Type"] && <div><span className="font-semibold">Location Type:</span> {job["Location Type"]}</div>}
-          {job["Salary"] && <div><span className="font-semibold">Salary:</span> {job["Salary"]}</div>}
-          {job["Company Employees"] && <div><span className="font-semibold">Employees:</span> {job["Company Employees"]}</div>}
-          {job["Company HQ"] && <div><span className="font-semibold">HQ:</span> {job["Company HQ"]}</div>}
-          {job["Company Type"] && <div><span className="font-semibold">Type:</span> {job["Company Type"]}</div>}
-          {job["Company Founded"] && <div><span className="font-semibold">Founded:</span> {job["Company Founded"]}</div>}
-          {job["Company Specialties"] && <div><span className="font-semibold">Specialties:</span> {job["Company Specialties"]}</div>}
-          {job["Seniority Level"] && <div><span className="font-semibold">Seniority Level:</span> {job["Seniority Level"]}</div>}
-        </div>
-        <div className="text-xs text-gray-500 mb-2">
-          <span className="font-semibold">Job ID:</span> {job["Job ID"]}
-        </div>
-        {/* KPIs Section */}
-        <div className="mt-4">
-          <h3 className="font-semibold mb-2">Job KPIs</h3>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div><span className="font-semibold">JD Quality:</span> {job["kpi_jd_quality"]}</div>
-            <div><span className="font-semibold">Domain Fit:</span> {job["kpi_domain_fit"]}</div>
-            <div><span className="font-semibold">Seniority:</span> {job["kpi_seniority"]}</div>
-            <div><span className="font-semibold">Location:</span> {job["kpi_location"]}</div>
-            <div><span className="font-semibold">Remote:</span> {job["kpi_remote"]}</div>
-            <div><span className="font-semibold">Salary:</span> {job["kpi_salary"]}</div>
-            <div><span className="font-semibold">Company Size:</span> {job["kpi_company_size"]}</div>
-            <div><span className="font-semibold">Popularity:</span> {job["kpi_popularity"]}</div>
-            <div><span className="font-semibold">Industry Match:</span> {job["kpi_industry_match"]}</div>
-            <div><span className="font-semibold">Recruiter:</span> {job["kpi_recruiter"]}</div>
-            <div><span className="font-semibold">Freshness:</span> {job["kpi_freshness"]}</div>
-            <div><span className="font-semibold">Employment Type:</span> {job["kpi_employment_type"]}</div>
-            <div><span className="font-semibold">Contact Info:</span> {job["kpi_contact_info"]}</div>
-            <div><span className="font-semibold">Skills Explicitness:</span> {job["kpi_skills_explicitness"]}</div>
-            <div><span className="font-semibold">Experience Threshold:</span> {job["kpi_experience_threshold"]}</div>
-            <div><span className="font-semibold">Final Score:</span> {job["final_score"]}</div>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {job.employmentType && <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.jobType}`} title="Job Type">{job.employmentType}</span>}
+            {job.workplaceType && <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.workplace}`} title="Workplace Type">{job.workplaceType}</span>}
+            {job.applicants && <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.applicants}`} title="Applicants">{job.applicants} Applicants</span>}
+            {job.views && <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.views}`} title="Views">{job.views} Views</span>}
           </div>
-        </div>
+          <div className="flex flex-wrap gap-4 text-xs text-gray-500 mb-2">
+            <span className="font-bold">Posted: {job.postedDate ? new Date(job.postedDate).toLocaleString() : '-'}</span>
+            {job.expireAt && <span className="font-bold">Expires: {new Date(job.expireAt).toLocaleString()}</span>}
+            <span><span className="font-bold">Salary:</span> {job.salary || '-'}</span>
+          </div>
+        </section>
+        {/* Company Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">About the Company</h2>
+          <div className="flex items-center gap-2 mb-2">
+            {job.companyLogo && (
+              <a href={job.companyUrl} target="_blank" rel="noopener noreferrer">
+                <img src={job.companyLogo} alt={job.company} className="w-12 h-12 rounded object-contain border border-gray-200" />
+              </a>
+            )}
+            <span className="font-bold text-xs text-gray-700">Company:</span>
+            <span className="text-xs text-gray-800 font-semibold truncate">{job.company || 'Company'}</span>
+            {job.companyWebsite && (
+              <a href={job.companyWebsite} className="text-blue-500 text-xs ml-2" target="_blank" rel="noopener noreferrer">Website</a>
+            )}
+            {job.companyUrl && (
+              <a href={job.companyUrl} className="text-blue-500 text-xs ml-2" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
+            <span><span className="font-bold">Size:</span> {job.companyEmployeeCount || '-'}</span>
+            <span><span className="font-bold">Followers:</span> {job.companyFollowerCount || '-'}</span>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
+            <span className="line-clamp-2 max-w-full"><span className="font-bold">Industry:</span> {Array.isArray(job.companyIndustries) ? job.companyIndustries.join(', ') : job.companyIndustries || '-'}</span>
+            <span className="line-clamp-2 max-w-full"><span className="font-bold">Specialities:</span> {Array.isArray(job.companySpecialities) ? job.companySpecialities.join(', ') : job.companySpecialities || '-'}</span>
+          </div>
+          <div className="mb-2"><span className="font-bold">Description:</span> {job.companyDescription || '-'}</div>
+        </section>
+        {/* Job Description Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Job Description</h2>
+          <div className="prose prose-sm max-w-none whitespace-pre-line mb-2">{job.descriptionText}</div>
+          <div className="flex gap-4 mt-2">
+            <a href={job.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">View Job</a>
+            {job.easyApplyUrl && (
+              <a href={job.easyApplyUrl} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline text-sm">Easy Apply</a>
+            )}
+          </div>
+        </section>
+        {/* KPIs Section */}
+        <section className="mb-2">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">KPIs</h2>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {[
+              { label: 'JD Quality', value: job.kpi_jd_quality },
+              { label: 'Domain Fit', value: job.kpi_domain_fit },
+              { label: 'Seniority Alignment', value: job.kpi_seniority_alignment },
+              { label: 'Location Priority', value: job.kpi_location_priority },
+              { label: 'Company Specialties', value: job.kpi_company_specialties },
+              { label: 'Salary', value: job.kpi_salary },
+              { label: 'Company Size', value: job.kpi_company_size },
+              { label: 'Company Popularity', value: job.kpi_company_popularity },
+              { label: 'Industry Match', value: job.kpi_industry_match },
+              { label: 'Job Popularity', value: job.kpi_job_popularity },
+              { label: 'Job Freshness', value: job.kpi_job_freshness },
+              { label: 'Employment Type', value: job.kpi_employment_type },
+              { label: 'Contact Info', value: job.kpi_contact_info },
+              { label: 'Skills Explicitness', value: job.kpi_skills_explicitness },
+              { label: 'Experience Threshold', value: job.kpi_experience_threshold },
+            ].map(({ label, value }) => {
+              const { color } = getKpiBadge(value);
+              return (
+                <div key={label} className="flex items-center gap-2">
+                  <span className="font-semibold w-32 inline-block">{label}:</span>
+                  <span className={`px-2 py-0.5 rounded text-xs font-bold border ${color} min-w-[36px] text-center`}>{value !== undefined && value !== '' ? value : '-'}</span>
+                </div>
+              );
+            })}
+            {/* AI Score as percentage, no badge or color tag */}
+            <div className="flex items-center gap-2">
+              <span className="font-semibold w-32 inline-block">AI Score:</span>
+              <span className="text-xs font-bold min-w-[36px] text-center">{job.final_score !== undefined && job.final_score !== '' ? `${Math.round(parseFloat(job.final_score) * 100)}%` : '-'}</span>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
