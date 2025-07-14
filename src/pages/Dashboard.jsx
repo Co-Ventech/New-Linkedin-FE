@@ -92,8 +92,8 @@ const Dashboard = () => {
     }),
   }));
 
-  console.log('jobsByDate', jobsByDate);
-  console.log('filteredJobsByDate', filteredJobsByDate);
+  // console.log('jobsByDate', jobsByDate);
+  // console.log('filteredJobsByDate', filteredJobsByDate);
 
   // Extract unique job types, categories, colors, countries, fields
   const jobTypes = Array.from(new Set(allJobs.flatMap((j) => j.employmentType || []).filter(Boolean)));
@@ -180,7 +180,7 @@ const Dashboard = () => {
                   <h2 className="text-lg font-bold mb-2">{day.date}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {day.jobs.map((job) => {
-                      console.log('Job passed to JobCard:', job);
+                      // console.log('Job passed to JobCard:', job);
                       return (
                         <JobCard
                           key={job.id}

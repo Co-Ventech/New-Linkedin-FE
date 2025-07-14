@@ -524,7 +524,10 @@
 
 // export default JobCard;
 
+
+
 import React from "react";
+
 const badgeClass = {
   tier: {
     Yellow: 'bg-yellow-200 text-yellow-800 border-yellow-400',
@@ -537,82 +540,226 @@ const badgeClass = {
   applicants: 'bg-green-100 text-green-800 border-green-300',
   views: 'bg-orange-100 text-orange-800 border-orange-300',
 };
+
 const JobCard = ({ job, onClick }) => {
   const [showFullDesc, setShowFullDesc] = React.useState(false);
-  // Defensive: support both flat and nested company fields
-  const companyObj = typeof job.company === 'object' && job.company !== null ? job.company : {};
-  const companyName = companyObj.name || job.company || '-';
-  const companyLogo = companyObj.logo || job.companyLogo || null;
-  const companyUrl = companyObj.linkedinUrl || job.companyUrl || '#';
-  const companyWebsite = companyObj.website || job.companyWebsite || null;
-  const companyIndustries = companyObj.industries || job.companyIndustries || [];
-  const companySpecialities = companyObj.specialities || job.companySpecialities || [];
-  const companyEmployeeCount = companyObj.employeeCount || job.companyEmployeeCount || '-';
-  const companyFollowerCount = companyObj.followerCount || job.companyFollowerCount || '-';
-  const desc = job.descriptionText || job["Job Description"] || '';
-  const shortDesc = desc.length > 120 ? desc.slice(0, 120) : desc;
-  const isTruncated = desc.length > 120;
-  const tierColorClass = badgeClass.tier[job.tier] || badgeClass.tier.Default;
-  // Defensive: support both array and string for locations
-  let locationString = '-';
-  if (Array.isArray(job.locations) && job.locations.length > 0) {
-    if (typeof job.locations[0] === 'object' && job.locations[0]?.country) {
-      locationString = [...new Set(job.locations.map(loc => loc.country).filter(Boolean))].join(', ');
-    } else {
-      locationString = [...new Set(job.locations.map(loc => typeof loc === 'string' ? loc.split(',').pop().trim() : ''))].join(', ');
+  const [error, setError] = React.useState(null);
+
+  // Safe data extraction with try-catch
+  const extractJobData = () => {
+    try {
+      // Defensive: support both flat and nested company fields
+      const companyObj = typeof job?.company === 'object' && job.company !== null ? job.company : {};
+      
+      // Safe company name extraction
+      const companyName = (() => {
+        try {
+          return companyObj.name || 
+                 (typeof job?.company === 'string' ? job.company : '') || 
+                 '-';
+        } catch (err) {
+          console.warn('Error extracting company name:', err);
+          return '-';
+        }
+      })();
+      
+      // Safe array handling for industries
+      const companyIndustries = (() => {
+        try {
+          return Array.isArray(companyObj.industries) ? companyObj.industries : 
+                 Array.isArray(job?.companyIndustries) ? job.companyIndustries : 
+                 [];
+        } catch (err) {
+          console.warn('Error extracting company industries:', err);
+          return [];
+        }
+      })();
+      
+      // Safe array handling for specialities
+      const companySpecialities = (() => {
+        try {
+          return Array.isArray(companyObj.specialities) ? companyObj.specialities : 
+                 Array.isArray(job?.companySpecialities) ? job.companySpecialities : 
+                 [];
+        } catch (err) {
+          console.warn('Error extracting company specialities:', err);
+          return [];
+        }
+      })();
+      
+      // Safe location string extraction
+      const locationString = (() => {
+        try {
+          if (Array.isArray(job?.locations) && job.locations.length > 0) {
+            if (typeof job.locations[0] === 'object' && job.locations[0]?.country) {
+              return [...new Set(job.locations.map(loc => loc?.country).filter(Boolean))].join(', ');
+            } else {
+              return [...new Set(job.locations.map(loc => 
+                typeof loc === 'string' ? loc.split(',').pop()?.trim() : ''
+              ).filter(Boolean))].join(', ');
+            }
+          } else if (typeof job?.locations === 'string') {
+            return job.locations;
+          }
+          return '-';
+        } catch (err) {
+          console.warn('Error extracting location string:', err);
+          return '-';
+        }
+      })();
+
+      // Safe date formatting
+      const formatDate = (dateValue) => {
+        try {
+          if (!dateValue) return null;
+          const date = new Date(dateValue);
+          return isNaN(date.getTime()) ? null : date.toLocaleDateString();
+        } catch (err) {
+          console.warn('Error formatting date:', err);
+          return null;
+        }
+      };
+
+      return {
+        companyName,
+        companyLogo: companyObj.logo || job?.companyLogo || null,
+        companyUrl: companyObj.linkedinUrl || job?.companyUrl || '#',
+        companyWebsite: companyObj.website || job?.companyWebsite || null,
+        companyIndustries,
+        companySpecialities,
+        companyEmployeeCount: String(companyObj.employeeCount || job?.companyEmployeeCount || '-'),
+        companyFollowerCount: String(companyObj.followerCount || job?.companyFollowerCount || '-'),
+        locationString,
+        postedDate: formatDate(job?.postedDate || job?.["Date Posted"]),
+        expireDate: formatDate(job?.expireAt),
+        description: job?.descriptionText || job?.["Job Description"] || '',
+        title: job?.title || 'Job Title',
+        tier: job?.tier || null,
+        employmentType: job?.employmentType || null,
+        workplaceType: job?.workplaceType || null,
+        applicants: job?.applicants || null,
+        views: job?.views || null,
+        salary: job?.salary || null,
+        linkedinUrl: job?.linkedinUrl || null,
+        easyApplyUrl: job?.easyApplyUrl || null
+      };
+    } catch (err) {
+      console.error('Error extracting job data:', err);
+      setError('Failed to load job data');
+      return null;
     }
-  } else if (typeof job.locations === 'string') {
-    locationString = job.locations;
+  };
+
+  const jobData = extractJobData();
+
+  // Handle click events safely
+  const handleCardClick = () => {
+    try {
+      if (onClick && typeof onClick === 'function') {
+        onClick();
+      }
+    } catch (err) {
+      console.error('Error handling card click:', err);
+    }
+  };
+
+  const handleReadMoreClick = (e) => {
+    try {
+      e.stopPropagation();
+      setShowFullDesc(true);
+    } catch (err) {
+      console.error('Error handling read more click:', err);
+    }
+  };
+
+  const handleLinkClick = (e) => {
+    try {
+      e.stopPropagation();
+    } catch (err) {
+      console.error('Error handling link click:', err);
+    }
+  };
+
+  // Error fallback UI
+  if (error || !jobData) {
+    return (
+      <div className="bg-red-50 rounded-lg shadow p-4 border border-red-200 min-h-[320px] flex flex-col justify-center items-center">
+        <div className="text-red-600 text-center">
+          <h3 className="font-bold mb-2">Error Loading Job</h3>
+          <p className="text-sm">{error || 'Failed to load job data'}</p>
+        </div>
+      </div>
+    );
   }
+
+  // Safe description processing
+  const processDescription = () => {
+    try {
+      const desc = jobData.description;
+      const shortDesc = desc.length > 120 ? desc.slice(0, 120) : desc;
+      const isTruncated = desc.length > 120;
+      return { desc, shortDesc, isTruncated };
+    } catch (err) {
+      console.warn('Error processing description:', err);
+      return { desc: '', shortDesc: '', isTruncated: false };
+    }
+  };
+
+  const { desc, shortDesc, isTruncated } = processDescription();
+  const tierColorClass = badgeClass.tier[jobData.tier] || badgeClass.tier.Default;
+
   return (
     <div
       className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-xl hover:scale-[1.025] hover:border-blue-400 border border-transparent transition-all duration-200 group min-h-[320px] flex flex-col"
-      onClick={onClick}
+      onClick={handleCardClick}
     >
       {/* Header */}
       <div className="mb-2">
         <div className="flex items-center gap-2 mb-1">
-          <h2 className="text-lg font-bold text-gray-800 flex-1 truncate">{job.title || 'Job Title'}</h2>
-          {job.tier && (
+          <h2 className="text-lg font-bold text-gray-800 flex-1 truncate">{jobData.title}</h2>
+          {jobData.tier && (
             <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass} ml-2`} title="Tier">
-              {job.tier === 'Green' ? 'AI Recommended' :
-               job.tier === 'Yellow' ? 'Recommended' :
-               job.tier === 'Red' ? 'Not Recommended' : job.tier}
+              {jobData.tier === 'Green' ? 'AI Recommended' :
+               jobData.tier === 'Yellow' ? 'Recommended' :
+               jobData.tier === 'Red' ? 'Not Recommended' : jobData.tier}
             </span>
           )}
         </div>
+        
         {/* Badges */}
         <div className="flex flex-wrap gap-2 mb-1">
-          {job.employmentType && (
+          {jobData.employmentType && (
             <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.jobType}`} title="Job Type">
-              {job.employmentType}
+              {jobData.employmentType}
             </span>
           )}
-          {job.workplaceType && (
+          {jobData.workplaceType && (
             <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.workplace}`} title="Workplace Type">
-              {job.workplaceType}
+              {jobData.workplaceType}
             </span>
           )}
-          {job.applicants && (
+          {jobData.applicants && (
             <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.applicants}`} title="Applicants">
-              {job.applicants} Applicants
+              {jobData.applicants} Applicants
             </span>
           )}
-          {job.views && (
+          {jobData.views && (
             <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.views}`} title="Views">
-              {job.views} Views
+              {jobData.views} Views
             </span>
           )}
         </div>
+        
         {/* Dates */}
         <div className="text-xs text-gray-500 mb-1 flex gap-2">
           <span className="font-bold">
-            {job.postedDate || job["Date Posted"] ? new Date(job.postedDate || job["Date Posted"]).toLocaleDateString() : 'Date Posted'}
+            {jobData.postedDate || 'Date Posted'}
           </span>
-          {job.expireAt && (
-            <span className="font-bold">(Expires: {new Date(job.expireAt).toLocaleDateString()})</span>
+          {jobData.expireDate && (
+            <span className="font-bold">(Expires: {jobData.expireDate})</span>
           )}
         </div>
+        
         {/* Description */}
         <div className={`text-gray-700 text-sm mb-2 ${!showFullDesc ? 'line-clamp-3' : ''} min-h-[40px]`}>
           <span className="font-bold">Description: </span>
@@ -620,59 +767,91 @@ const JobCard = ({ job, onClick }) => {
           {isTruncated && !showFullDesc && (
             <button
               className="text-blue-500 ml-1 text-xs underline hover:text-blue-700"
-              onClick={e => { e.stopPropagation(); setShowFullDesc(true); }}
+              onClick={handleReadMoreClick}
             >
               Read more
             </button>
           )}
         </div>
       </div>
+      
       {/* Company Section */}
       <div className="mb-2">
         <div className="flex items-center gap-2 mb-1">
-          {companyLogo && (
-            <a href={companyUrl} target="_blank" rel="noopener noreferrer">
-              <img src={companyLogo} alt={companyName || "Company"} className="w-8 h-8 rounded object-contain border border-gray-200" />
+          {jobData.companyLogo && (
+            <a href={jobData.companyUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick}>
+              <img 
+                src={jobData.companyLogo} 
+                alt={jobData.companyName || "Company"} 
+                className="w-8 h-8 rounded object-contain border border-gray-200"
+                onError={(e) => {
+                  try {
+                    e.target.style.display = 'none';
+                  } catch (err) {
+                    console.warn('Error handling image error:', err);
+                  }
+                }}
+              />
             </a>
           )}
           <span className="font-bold text-xs text-gray-700">Company:</span>
-          <span className="text-xs text-gray-800 font-semibold truncate">{companyName || 'Company'}</span>
-          {companyWebsite && (
-            <a href={companyWebsite} className="text-blue-500 text-xs ml-2" target="_blank" rel="noopener noreferrer">Website</a>
+          <span className="text-xs text-gray-800 font-semibold truncate">{jobData.companyName}</span>
+          {jobData.companyWebsite && (
+            <a 
+              href={jobData.companyWebsite} 
+              className="text-blue-500 text-xs ml-2" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={handleLinkClick}
+            >
+              Website
+            </a>
           )}
         </div>
         <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-1">
-          <span><span className="font-bold">Industry:</span> {Array.isArray(companyIndustries) ? companyIndustries.join(', ') : companyIndustries || '-'}</span>
-          <span><span className="font-bold">Specialities:</span> {Array.isArray(companySpecialities) ? companySpecialities.join(', ') : companySpecialities || '-'}</span>
+          <span>
+            <span className="font-bold">Industry:</span> {
+              jobData.companyIndustries.length > 0 ? jobData.companyIndustries.join(', ') : '-'
+            }
+          </span>
+          <span>
+            <span className="font-bold">Specialities:</span> {
+              jobData.companySpecialities.length > 0 ? jobData.companySpecialities.join(', ') : '-'
+            }
+          </span>
         </div>
       </div>
+      
       {/* Meta Section */}
       <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
-        <span><span className="font-bold">Size:</span> {companyEmployeeCount || '-'}</span>
-        <span><span className="font-bold">Followers:</span> {companyFollowerCount || '-'}</span>
-        <span><span className="font-bold">Salary:</span> {job.salary || '-'}</span>
-        {locationString && <span><span className="font-bold">Location:</span> {locationString}</span>}
+        <span><span className="font-bold">Size:</span> {jobData.companyEmployeeCount}</span>
+        <span><span className="font-bold">Followers:</span> {jobData.companyFollowerCount}</span>
+        <span><span className="font-bold">Salary:</span> {jobData.salary || '-'}</span>
+        {jobData.locationString && (
+          <span><span className="font-bold">Location:</span> {jobData.locationString}</span>
+        )}
       </div>
+      
       {/* Footer */}
       <div className="flex gap-2 mt-auto pt-2">
-        {job.linkedinUrl && (
+        {jobData.linkedinUrl && (
           <a
-            href={job.linkedinUrl}
+            href={jobData.linkedinUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline text-xs"
-            onClick={e => e.stopPropagation()}
+            onClick={handleLinkClick}
           >
             View Job
           </a>
         )}
-        {job.easyApplyUrl && (
+        {jobData.easyApplyUrl && (
           <a
-            href={job.easyApplyUrl}
+            href={jobData.easyApplyUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-green-600 hover:underline text-xs"
-            onClick={e => e.stopPropagation()}
+            onClick={handleLinkClick}
           >
             Easy Apply
           </a>
@@ -681,4 +860,5 @@ const JobCard = ({ job, onClick }) => {
     </div>
   );
 };
+
 export default JobCard;
