@@ -3,7 +3,7 @@ name: Deploy Frontend to EC2
 on:
   push:
     branches:
-      - main  # change if your branch is named differently
+      - main
 
 jobs:
   deploy:
@@ -25,11 +25,8 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/frontend/New-Linkedin-FE
-
             git pull origin main
-
             npm install
             npm run build
-
             sudo cp -r dist/* /var/www/html/
           EOF
