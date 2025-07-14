@@ -24,9 +24,17 @@ jobs:
       - name: Deploy frontend to EC2
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/frontend/New-Linkedin-FE
+            cd ~/front-end/New-Linkedin-FE
+
+            # Pull latest changes
             git pull origin main
+
+            # Install dependencies
             npm install
+
+            # Build frontend
             npm run build
+
+            # Deploy to Nginx web root
             sudo cp -r dist/* /var/www/html/
           EOF
