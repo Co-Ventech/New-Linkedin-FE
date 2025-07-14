@@ -1,0 +1,35 @@
+name: Deploy Frontend to EC2
+
+on:
+  push:
+    branches:
+      - main  # change if your branch is named differently
+
+jobs:
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy frontend to EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/frontend/New-Linkedin-FE
+
+            git pull origin main
+
+            npm install
+            npm run build
+
+            sudo cp -r dist/* /var/www/html/
+          EOF
