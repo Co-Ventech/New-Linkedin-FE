@@ -9,9 +9,8 @@ import { dummyJobs } from "../dummyJobs";
 // import dotenv from 'dotenv';
 // dotenv.config();
 
-const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST
-const PORT = import.meta.env.VITE_PORT 
-
+const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
+const PORT = import.meta.env.VITE_PORT;
 
 const Header = ({ onLogout, user, onRefreshJobs }) => {
   const [showProfile, setShowProfile] = useState(false);
@@ -23,7 +22,7 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
   // Auto-hide message after 2 seconds
   useEffect(() => {
     if (message) {
-      const timer = setTimeout(() => setMessage(''), 2000);
+      const timer = setTimeout(() => setMessage(""), 2000);
       return () => clearTimeout(timer);
     }
   }, [message]);
@@ -50,10 +49,7 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
     setFetchCooldown(Math.floor(diff / 1000));
   };
 
- 
-
-// Add this button somewhere in your Header's JSX for testing:
-
+  // Add this button somewhere in your Header's JSX for testing:
 
   // Updated Fetch Jobs logic (unchanged)
   const handleFetchJobs = async () => {
@@ -66,7 +62,9 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
     updateCooldown(now);
     try {
       const fetchRes = await axios.get(`${REMOTE_HOST}:${PORT}/api/apify`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
       });
       let jobs = fetchRes.data.jobs;
       if (!jobs) {
@@ -95,7 +93,28 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
       // 2. Score jobs
       await axios.get(`${REMOTE_HOST}:${PORT}/api/apify/score`);
       setMessage("Score jobs: Success!");
-
+      // 3. Save jobs to DB
+      await axios.post(
+        `${REMOTE_HOST}:${PORT}/api/save-jobs`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+      setMessage("Fetch Jobs from Database: Success!");
+      await axios.get(
+        `${REMOTE_HOST}:${PORT}/api/jobs-by-date`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+      setMessage("Fetch Jobs from Database!");
       // 3. Fetch scored jobs from backend file (not jobs-by-date)
       // const scoredRes = await axios.get("http://localhost:3001/api/scored-jobs-file", {
       //   headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
@@ -132,13 +151,17 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
     try {
       alert("About to fetch scored jobs from backend file");
       const res = await fetch(`${REMOTE_HOST}:${PORT}/api/jobs-by-date`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
       });
       const data = await res.json();
       console.log(data.job);
-      
+
       const jobs = data;
-      alert("Fetched " + (jobs?.length || 0) + " scored jobs. Now saving to DB...");
+      alert(
+        "Fetched " + (jobs?.length || 0) + " scored jobs. Now saving to DB..."
+      );
       await saveJobsToBackend(jobs);
       alert("Scored jobs saved to DB!");
       setMessage("Scored jobs saved to DB!");
@@ -156,7 +179,9 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
         <div className="flex items-center space-x-2">
           {/* Optional: Replace with a logo image if you have one */}
           <span className="text-xl font-extrabold text-blue-600">Job</span>
-          <span className="text-xl font-extrabold text-gray-700">Dashboard</span>
+          <span className="text-xl font-extrabold text-gray-700">
+            Dashboard
+          </span>
         </div>
         <div className="flex items-center gap-4">
           {/* Action buttons moved right before menu */}
@@ -171,14 +196,18 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
                 {loading === "fetch" ? "Fetching..." : "Fetch Jobs"}
               </button>
             ) : (
-              <span className="text-xs text-gray-500">You can fetch jobs again in {formatCooldown(fetchCooldown)}</span>
+              <span className="text-xs text-gray-500">
+                You can fetch jobs again in {formatCooldown(fetchCooldown)}
+              </span>
             )}
             <button
               className="px-3 py-1 border border-blue-600 text-blue-700 bg-blue-50 rounded hover:bg-blue-100 hover:text-blue-900 disabled:opacity-50 transition font-semibold"
               onClick={handleProcessSaveAndFetch}
               disabled={loading}
             >
-              {loading === "process-all" ? "Processing..." : "Process, Save & Show Jobs"}
+              {loading === "process-all"
+                ? "Processing..."
+                : "Process, Save & Show Jobs"}
             </button>
             {/* Remove or comment out the other process/fetch/save buttons to avoid confusion */}
             {/*
@@ -224,7 +253,9 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      className={`w-full text-left px-4 py-2 text-gray-700 ${active ? "bg-gray-100" : ""}`}
+                      className={`w-full text-left px-4 py-2 text-gray-700 ${
+                        active ? "bg-gray-100" : ""
+                      }`}
                       onClick={() => setShowProfile(true)}
                     >
                       Profile
@@ -234,7 +265,9 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      className={`w-full text-left px-4 py-2 text-gray-700 ${active ? "bg-gray-100" : ""}`}
+                      className={`w-full text-left px-4 py-2 text-gray-700 ${
+                        active ? "bg-gray-100" : ""
+                      }`}
                       onClick={() => {}}
                     >
                       Settings
@@ -244,7 +277,9 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      className={`w-full text-left px-4 py-2 text-red-600 ${active ? "bg-gray-100" : ""}`}
+                      className={`w-full text-left px-4 py-2 text-red-600 ${
+                        active ? "bg-gray-100" : ""
+                      }`}
                       onClick={onLogout}
                     >
                       Logout
@@ -265,8 +300,14 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
                     ×
                   </button>
                   <h2 className="text-lg font-bold mb-2">User Profile </h2>
-                  <div className="mb-1"><span className="font-semibold">Name:</span> {user?.username || user?.name || "Zameer"}</div>
-                  <div><span className="font-semibold">Email:</span> {user?.email || "zameer@gmail.com"}</div>
+                  <div className="mb-1">
+                    <span className="font-semibold">Name:</span>{" "}
+                    {user?.username || user?.name || "Zameer"}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Email:</span>{" "}
+                    {user?.email || "zameer@gmail.com"}
+                  </div>
                 </div>
               </div>
             )}
