@@ -1,6 +1,32 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { saveJobsToBackend, fetchJobsByDate } from '../api/jobService';
+import { updateJobStatus, addJobComment } from '../api/updateJobStatus';
+// Async thunk to add a comment to a job
+export const addJobCommentThunk = createAsyncThunk(
+  'jobs/addJobComment',
+  async ({ jobId, comment }, { rejectWithValue }) => {
+    try {
+      const updated = await addJobComment(jobId, comment);
+      return { jobId, comments: updated.comments };
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+// Async thunk to update job status
+export const updateJobStatusThunk = createAsyncThunk(
+  'jobs/updateJobStatus',
+  async ({ jobId, status }, { rejectWithValue }) => {
+    try {
+      const updated = await updateJobStatus(jobId, status);
+      return { jobId, status: updated.status };
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
 import { normalizeJob } from '../utils/normalizeJob';
+import { fetchJobById } from '../api/jobService'; 
 
 // Async thunk to save jobs to backend
 export const saveJobsToBackendThunk = createAsyncThunk('jobs/saveJobsToBackend', async (jobs, { rejectWithValue }) => {
@@ -12,6 +38,17 @@ export const saveJobsToBackendThunk = createAsyncThunk('jobs/saveJobsToBackend',
     return rejectWithValue(err.message);
   }
 });
+export const fetchJobByIdThunk = createAsyncThunk(
+  'jobs/fetchJobById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const job = await fetchJobById(id);
+      return job;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
 
 // Async thunk to fetch jobs grouped by date from backend
 export const fetchJobsByDateThunk = createAsyncThunk('jobs/fetchJobsByDate', async ({ range, page, limit }, { rejectWithValue }) => {
@@ -84,6 +121,28 @@ const jobsSlice = createSlice({
       .addCase(fetchJobsByDateThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch jobs.';
+      })
+      .addCase(updateJobStatusThunk.fulfilled, (state, action) => {
+        // Update job status in jobsByDate
+        const { jobId, status } = action.payload;
+        state.jobsByDate.forEach(day => {
+          day.jobs.forEach(job => {
+            if (String(job.id) === String(jobId)) {
+              job.status = status;
+            }
+          });
+        });
+      })
+      .addCase(addJobCommentThunk.fulfilled, (state, action) => {
+        // Update job comments in jobsByDate
+        const { jobId, comments } = action.payload;
+        state.jobsByDate.forEach(day => {
+          day.jobs.forEach(job => {
+            if (String(job.id) === String(jobId)) {
+              job.comments = comments;
+            }
+          });
+        });
       });
   },
 });

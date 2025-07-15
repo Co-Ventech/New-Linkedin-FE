@@ -525,7 +525,7 @@
 // export default JobCard;
 
 
-
+import { useNavigate } from "react-router-dom";
 import React from "react";
 
 const badgeClass = {
@@ -542,6 +542,7 @@ const badgeClass = {
 };
 
 const JobCard = ({ job, onClick }) => {
+  const navigate = useNavigate();
   const [showFullDesc, setShowFullDesc] = React.useState(false);
   const [error, setError] = React.useState(null);
 
@@ -653,15 +654,27 @@ const JobCard = ({ job, onClick }) => {
   const jobData = extractJobData();
 
   // Handle click events safely
+
   const handleCardClick = () => {
-    try {
-      if (onClick && typeof onClick === 'function') {
-        onClick();
-      }
-    } catch (err) {
-      console.error('Error handling card click:', err);
-    }
-  };
+  const jobId = job?.id;
+
+  console.log("job id before navigate", jobId); // Should be 4264428501
+
+  if (jobId) {
+    navigate(`/jobs/${jobId}`, { state: { job } });
+  } else {
+    alert("Job ID is missing. Cannot show details.");
+  }
+
+  // try {
+  //   if (onClick && typeof onClick === "function") {
+  //     onClick();
+  //   }
+  // } catch (err) {
+  //   console.error("Error handling card click:", err);
+  // }
+};
+
 
   const handleReadMoreClick = (e) => {
     try {

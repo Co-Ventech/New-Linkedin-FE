@@ -34,7 +34,7 @@ export async function saveJobsToBackend(jobs) {
   }
 }
 
- export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
+export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
    try {
      const res = await axios.get(
        `${REMOTE_HOST}:${PORT}/api/jobs-by-date`,
@@ -52,3 +52,16 @@ export async function saveJobsToBackend(jobs) {
      );
    }
  }
+ export async function fetchJobById(id) {
+  try {
+    const res = await axios.get(
+      `${REMOTE_HOST}:${PORT}/api/jobs/${id}`,
+      { headers: getAuthHeaders() }
+    );
+    return res.data;
+  } catch (err) {
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to fetch job by ID."
+    );
+  }
+}

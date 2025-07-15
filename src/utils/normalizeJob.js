@@ -143,6 +143,8 @@ export function normalizeJob(rawJob) {
     applyMethod: rawJob.applyMethod || {},
     salary: salary,
     tier: rawJob.tier || '',
+    status: rawJob.status || '',
+    comments: Array.isArray(rawJob.comments) ? rawJob.comments : [],
     // KPIs
     kpi_jd_quality: rawJob.kpi_jd_quality || '',
     kpi_domain_fit: rawJob.kpi_domain_fit || '',
@@ -160,5 +162,6 @@ export function normalizeJob(rawJob) {
     kpi_skills_explicitness: rawJob.kpi_skills_explicitness || '',
     kpi_experience_threshold: rawJob.kpi_experience_threshold || '',
     final_score: rawJob.final_score || '',
+    ai_remark: rawJob.ai_remark || '',
   };
 } 

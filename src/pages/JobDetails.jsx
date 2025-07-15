@@ -1,49 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-// import { getJobById } from "../api/jobService"; // Remove this line
-
-const API_URL = "http://192.168.100.69:3000/api/jobs/search";
-
-// Use the same mockJobs as in Dashboard for now
-
-// const mockJobs = [
-//   {
-//     id: "li-4258624375",
-//     site: "linkedin",
-//     job_url: "https://www.linkedin.com/jobs/view/4258624375",
-//     job_url_direct: "",
-//     title: "Full Stack Engineer",
-//     company: "Unico Connect",
-//     location: "Mumbai, Maharashtra, India",
-//     date_posted: "",
-//     job_type: "fulltime",
-//     salary_source: "",
-//     interval: "",
-//     min_amount: "",
-//     max_amount: "",
-//     currency: "",
-//     is_remote: "False",
-//     job_level: "mid-senior level",
-//     job_function: "Information Technology",
-//     listing_type: "",
-//     emails: "",
-//     description: `**About Unico Connect**\n\nUnico Connect is a dynamic and innovative technology company that specializes in creating cutting-edge web and mobile applications for a wide range of industries including fintech, edtech, healthtech, and more. We blend traditional engineering with modern frameworks, no-code platforms, and automation to deliver impactful digital products. We are seeking a talented Full Stack Developer with strong MERN stack expertise to join our team and contribute to the development of user-centric, scalable, and performance-driven applications.\n\n**About the Role**\n\nWe are seeking a talented and self-driven Full Stack Developer (MERN Stack) to join our dynamic team. You will be responsible for developing and maintaining full-stack applications using MongoDB, Express.js, React.js, and Node.js. The ideal candidate will have a strong passion for coding, be committed to building scalable applications, and demonstrate a knack for solving complex problems with clean and efficient code.\n\n**Key Responsibilities**\n- Collaborate with the design and product teams to translate UI/UX designs into high-quality code\n- Develop scalable and reusable front-end components using React.js and state management libraries like Redux\n- Build robust RESTful APIs and backend services using Node.js and Express.js\n- Work with MongoDB for database design, performance optimization, and query handling\n- Optimize applications for performance, speed, and scalability\n- Debug and resolve technical issues across the full stack\n- Write clean, maintainable, and well-documented code\n- Work on No-Code/Low-Code platforms when required\n- Participate in code reviews, team meetings, and technical discussions\n- Stay updated with the latest trends and advancements in full stack and web technologies\n\n**Requirements**\n- Bachelor's or Master's degree in Computer Science, IT, or a related field\n- 3+ years of hands-on experience in full stack web development\n- Proficiency in JavaScript, HTML5, CSS3\n- Strong expertise in the MERN Stack (MongoDB, Express.js, React.js, Node.js)\n- Experience with Next.js is a plus\n- Familiarity with GraphQL is an advantage\n- Working knowledge of modern build tools like Webpack, Babel, and version control systems like Git\n- Solid understanding of RESTful APIs, authentication, and security best practices\n- Strong debugging and performance optimization skills\n- Good communication, research, and project management skills\n\n**Nice to Have**\n- Experience working with cloud platforms like AWS, Azure, or Firebase\n- Exposure to CI/CD tools and DevOps practices\n- Previous experience with Agile methodologies\n\n**Why Join Us?**\n- Work with a skilled team in a collaborative environment\n- Flexible work setup and growth opportunities\n- Exposure to diverse projects across industries`,
-//     company_industry: "IT Services and IT Consulting",
-//     company_url: "https://in.linkedin.com/company/unico-connect",
-//     company_logo: "https://media.licdn.com/dms/image/v2/C4D0BAQHvMmczdPGU6g/company-logo_100_100/company-logo_100_100/0/1657528020504/unico_connect_logo?e=2147483647&v=beta&t=ZTPfPDfXHNRcAWR8MzSLWOq3PrlalTRbjnEgWOnN50Y",
-//     company_url_direct: "",
-//     company_addresses: "",
-//     company_num_employees: "",
-//     company_revenue: "",
-//     company_description: "",
-//     skills: "",
-//     experience_range: "",
-//     company_rating: "",
-//     company_reviews_count: "",
-//     vacancy_count: "",
-//     work_from_home_type: ""
-//   }
-// ];
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk } from "../slices/jobsSlice";
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -78,53 +36,60 @@ const getKpiBadge = (score) => {
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const [job, setJob] = useState(state?.job || null);
-  const [loading, setLoading] = useState(!state?.job);
-  const [error, setError] = useState("");
+  const dispatch = useDispatch();
+  const [toggleLoading, setToggleLoading] = useState(false);
+  const [comment, setComment] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+  const range = useSelector(state => state.jobs.range);
+  const jobsByDate = useSelector(state => state.jobs.jobsByDate);
+  const allJobs = jobsByDate.flatMap(day => day.jobs || []);
+  // Log the first job object to inspect structure
+  console.log("First job object in jobsByDate:", allJobs[0]);
+  // Log all job objects that match the ID in any way
+  allJobs.forEach(j => {
+    if (String(j.id) === String(id)) {
+      console.log("MATCHED BY j.id:", j);
+    }
+    if (j.job && String(j.job.id) === String(id)) {
+      console.log("MATCHED BY j.job.id:", j.job);
+    }
+  });
+  console.log("Looking for job ID:", id);
+  console.log("jobsByDate after refetch:", jobsByDate);
+  const job = allJobs.find(j => String(j.id) === String(id));
+  console.log("Redux job status:", job?.status);
 
-  useEffect(() => {
-    if (job) return; // Already have job from state
-    // If job is not in state, show error (or you could fetch from jobs list in Redux)
-    setLoading(false);
-    setError("Job details not available. Please access from the job list.");
-  }, [id, job]);
+  const handleToggleEngaged = async (e) => {
+    const newEngaged = e.target.checked;
+    setToggleLoading(true);
+    try {
+      const payload = { status: newEngaged ? "engaged" : "not_engaged" };
+      console.log("Sending PATCH payload:", payload);
+      await dispatch(updateJobStatusThunk({ jobId: job.id, status: payload.status })).unwrap();
+      await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
+    } catch (err) {
+      alert("Failed to update job status.");
+    } finally {
+      setToggleLoading(false);
+    }
+  };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Loading job details...</div>;
-  }
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!comment.trim()) return;
+    setCommentLoading(true);
+    try {
+      await dispatch(addJobCommentThunk({ jobId: job.id, comment })).unwrap();
+      await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 })); // Refetch jobs to update UI
+      setComment("");
+    } catch (err) {
+      alert("Failed to add comment.");
+    } finally {
+      setCommentLoading(false);
+    }
+  };
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white p-8 rounded shadow-md text-center">
-          <h2 className="text-xl font-semibold mb-4">{error}</h2>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            onClick={() => navigate(-1)}
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!job) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white p-8 rounded shadow-md text-center">
-          <h2 className="text-xl font-semibold mb-4">Job not found</h2>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            onClick={() => navigate(-1)}
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (!job) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Job not found.</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 flex justify-center">
@@ -135,6 +100,17 @@ const JobDetails = () => {
         >
           &larr; Back to Jobs
         </button>
+        {/* Engaged Toggle Switch */}
+        <div className="mb-4 flex items-center gap-2">
+          <label className="font-semibold">Engaged:</label>
+          <input
+            type="checkbox"
+            checked={job.status === "engaged"}
+            onChange={handleToggleEngaged}
+            disabled={toggleLoading}
+          />
+          {toggleLoading && <span className="text-xs text-gray-400 ml-2">Saving...</span>}
+        </div>
         {/* Job Overview Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">Job Overview</h2>
@@ -211,6 +187,15 @@ const JobDetails = () => {
             )}
           </div>
         </section>
+        {/* AI Remark Section */}
+        {job.ai_remark && (
+          <section className="mb-6 border-b pb-4">
+            <h2 className="text-lg font-bold mb-3 text-gray-800">AI Remark</h2>
+            <div className="prose prose-sm max-w-none whitespace-pre-line mb-2 text-blue-900 bg-blue-50 p-3 rounded border border-blue-200">
+              {job.ai_remark}
+            </div>
+          </section>
+        )}
         {/* KPIs Section */}
         <section className="mb-2">
           <h2 className="text-lg font-bold mb-3 text-gray-800">KPIs</h2>
@@ -247,9 +232,36 @@ const JobDetails = () => {
             </div>
           </div>
         </section>
+        {/* Comment Box */}
+        <form onSubmit={handleAddComment} className="mb-4">
+          <input
+            type="text"
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            placeholder="Add a comment..."
+            className="border px-2 py-1 rounded w-2/3"
+            disabled={commentLoading}
+          />
+          <button
+            type="submit"
+            className="ml-2 px-4 py-1 bg-blue-600 text-white rounded"
+            disabled={commentLoading}
+          >
+            {commentLoading ? "Saving..." : "Add"}
+          </button>
+        </form>
+        <ul className="mb-4">
+          {Array.isArray(job.comments) && job.comments.length > 0 ? (
+            job.comments.map((c, idx) => (
+              <li key={idx} className="text-sm text-gray-700 mb-1">- {c}</li>
+            ))
+          ) : (
+            <li className="text-sm text-gray-400">No comments yet.</li>
+          )}
+        </ul>
       </div>
     </div>
   );
 };
 
-export default JobDetails; 
+export default JobDetails;
