@@ -28,19 +28,25 @@ jobs:
             set -e
 
             echo "📁 Navigating to project directory..."
-            cd ~/frontend/New-Linkedin-FE
+            cd ~/front-end/New-Linkedin-FE || {
+              echo "❌ Error: Directory not found!";
+              ls -la ~/;
+              exit 1;
+            }
 
             echo "📥 Pulling latest code from main branch..."
             git pull origin main
 
-            echo "📦 Installing dependencies and building frontend..."
+            echo "📦 Installing dependencies..."
             npm install
+
+            echo "🏗️ Building frontend..."
             npm run build
 
-            echo "🧹 Clearing old Nginx HTML files..."
+            echo "🧹 Clearing old Nginx files..."
             sudo rm -rf /var/www/html/*
 
-            echo "📁 Copying new build to Nginx..."
+            echo "📁 Copying new build..."
             sudo cp -r dist/* /var/www/html/
 
             echo "🔁 Restarting Nginx..."
