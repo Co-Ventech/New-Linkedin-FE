@@ -1,0 +1,50 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.EC2_SSH_KEY }}
+          known_hosts: ${{ secrets.EC2_HOST }}
+          config: |
+            Host ${{ secrets.EC2_HOST }}
+              StrictHostKeyChecking no
+              UserKnownHostsFile=/dev/null
+
+      - name: Deploy Frontend
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+
+            echo "📁 Navigating to project directory..."
+            cd ~/frontend/New-Linkedin-FE
+
+            echo "📥 Pulling latest code from main branch..."
+            git pull origin main
+
+            echo "📦 Installing dependencies and building frontend..."
+            npm install
+            npm run build
+
+            echo "🧹 Clearing old Nginx HTML files..."
+            sudo rm -rf /var/www/html/*
+
+            echo "📁 Copying new build to Nginx..."
+            sudo cp -r dist/* /var/www/html/
+
+            echo "🔁 Restarting Nginx..."
+            sudo systemctl restart nginx
+
+            echo "✅ Deployment complete!"
+          EOF
