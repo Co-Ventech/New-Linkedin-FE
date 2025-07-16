@@ -541,11 +541,20 @@ const badgeClass = {
   views: 'bg-orange-100 text-orange-800 border-orange-300',
 };
 
-const JobCard = ({ job, onClick }) => {
+const JobCard = ({ job, onClick , view = "grid"}) => {
   const navigate = useNavigate();
   const [showFullDesc, setShowFullDesc] = React.useState(false);
   const [error, setError] = React.useState(null);
 
+const handleViewJob = (e) => {
+  e.stopPropagation();
+  navigate(`/jobs/${job.id}`, { state: { job } });
+};
+
+const handleReadMoreClick = (e) => {
+  e.stopPropagation();
+  navigate(`/jobs/${job.id}`, { state: { job } });
+};
   // Safe data extraction with try-catch
   const extractJobData = () => {
     try {
@@ -563,6 +572,13 @@ const JobCard = ({ job, onClick }) => {
           return '-';
         }
       })();
+
+      const logo =
+    companyObj.logo ||
+    job.companyLogo ||
+    job.logo ||
+    companyObj.companyLogo ||
+    "";
       
       // Safe array handling for industries
       const companyIndustries = (() => {
@@ -676,14 +692,14 @@ const JobCard = ({ job, onClick }) => {
 };
 
 
-  const handleReadMoreClick = (e) => {
-    try {
-      e.stopPropagation();
-      setShowFullDesc(true);
-    } catch (err) {
-      console.error('Error handling read more click:', err);
-    }
-  };
+  // const handleReadMoreClick = (e) => {
+  //   try {
+  //     e.stopPropagation();
+  //     setShowFullDesc(true);
+  //   } catch (err) {
+  //     console.error('Error handling read more click:', err);
+  //   }
+  // };
 
   const handleLinkClick = (e) => {
     try {
@@ -721,154 +737,163 @@ const JobCard = ({ job, onClick }) => {
   const { desc, shortDesc, isTruncated } = processDescription();
   const tierColorClass = badgeClass.tier[jobData.tier] || badgeClass.tier.Default;
 
+  // Layout classes
+   const cardBase = "bg-white rounded-lg shadow cursor-pointer hover:shadow-xl hover:scale-[1.025] hover:border-blue-400 border border-transparent transition-all duration-200 group min-h-[120px]";
+  const gridLayout = "flex flex-col";
+  const listLayout = "flex flex-row items-stretch min-h-[120px]";
+
+
   return (
     <div
-      className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-xl hover:scale-[1.025] hover:border-blue-400 border border-transparent transition-all duration-200 group min-h-[320px] flex flex-col"
+      className={`${cardBase} ${view === "list" ? listLayout : gridLayout} p-2`}
       onClick={handleCardClick}
     >
-      {/* Header */}
-      <div className="mb-2">
-        <div className="flex items-center gap-2 mb-1">
-          <h2 className="text-lg font-bold text-gray-800 flex-1 truncate">{jobData.title}</h2>
-          {jobData.tier && (
-            <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass} ml-2`} title="Tier">
-              {jobData.tier === 'Green' ? 'AI Recommended' :
-               jobData.tier === 'Yellow' ? 'Recommended' :
-               jobData.tier === 'Red' ? 'Not Recommended' : jobData.tier}
+      {/* Company Logo (left in list, top in grid) */}
+      {jobData.companyLogo && (
+        <a
+          href={jobData.companyUrl}
+          target="_blank"
+         rel="noopener noreferrer"
+          onClick={handleLinkClick}
+          className={view === "list" ? "flex-shrink-0 self-start mr-3" : "self-start mb-2"}
+        >
+          <img
+            src={jobData.companyLogo}
+            alt={jobData.companyName || "Company"}
+            className="w-12 h-12 object-contain"
+            onError={e => { try { e.target.style.display = 'none'; } catch {} }}
+          />
+        </a>
+     )}
+      {/* Main Content */}
+      <div className={view === "list" ? "flex-1" : "flex-1 flex flex-col"}>
+        {/* Header */}
+        <div className="mb-2">
+          <div className={view === "list" ? "flex items-center gap-2 mb-1" : "flex items-center gap-2 mb-1"}>
+            <h2 className="text-lg font-bold text-gray-800 flex-1">{jobData.title}</h2>
+            {jobData.tier && (
+              <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass} ml-2`} title="Tier">
+                {jobData.tier === 'Green' ? 'AI Recommended' :
+                 jobData.tier === 'Yellow' ? 'Recommended' :
+                 jobData.tier === 'Red' ? 'Not Recommended' : jobData.tier}
+              </span>
+            )}
+          </div>
+          {/* Badges */}
+          <div className="flex flex-wrap gap-2 mb-1">
+            {jobData.employmentType && (
+              <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.jobType}`} title="Job Type">
+                {jobData.employmentType}
+              </span>
+            )}
+            {jobData.workplaceType && (
+              <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.workplace}`} title="Workplace Type">
+                {jobData.workplaceType}
+              </span>
+            )}
+            {jobData.applicants && (
+              <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.applicants}`} title="Applicants">
+                {jobData.applicants} Applicants
+              </span>
+            )}
+            {jobData.views && (
+              <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.views}`} title="Views">
+                {jobData.views} Views
+              </span>
+            )}
+          </div>
+          {/* Dates */}
+          <div className="text-xs text-gray-500 mb-1 flex gap-2">
+            <span className="font-bold">
+              {jobData.postedDate || 'Date Posted'}
             </span>
-          )}
-        </div>
-        
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2 mb-1">
-          {jobData.employmentType && (
-            <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.jobType}`} title="Job Type">
-              {jobData.employmentType}
-            </span>
-          )}
-          {jobData.workplaceType && (
-            <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.workplace}`} title="Workplace Type">
-              {jobData.workplaceType}
-            </span>
-          )}
-          {jobData.applicants && (
-            <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.applicants}`} title="Applicants">
-              {jobData.applicants} Applicants
-            </span>
-          )}
-          {jobData.views && (
-            <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.views}`} title="Views">
-              {jobData.views} Views
-            </span>
-          )}
-        </div>
-        
-        {/* Dates */}
-        <div className="text-xs text-gray-500 mb-1 flex gap-2">
-          <span className="font-bold">
-            {jobData.postedDate || 'Date Posted'}
-          </span>
-          {jobData.expireDate && (
-            <span className="font-bold">(Expires: {jobData.expireDate})</span>
-          )}
-        </div>
-        
-        {/* Description */}
+            {jobData.expireDate && (
+              <span className="font-bold">(Expires: {jobData.expireDate})</span>
+            )}
+          </div>
+          {/* Description */}
         <div className={`text-gray-700 text-sm mb-2 ${!showFullDesc ? 'line-clamp-3' : ''} min-h-[40px]`}>
-          <span className="font-bold">Description: </span>
-          {showFullDesc ? desc : shortDesc}
-          {isTruncated && !showFullDesc && (
-            <button
-              className="text-blue-500 ml-1 text-xs underline hover:text-blue-700"
-              onClick={handleReadMoreClick}
-            >
-              Read more
-            </button>
+  <span className="font-bold">Description: </span>
+  {desc.length > 120 ? (
+    <>
+      {desc.slice(0, 120)}...
+      <button
+        className="text-blue-500 ml-1 text-xs underline hover:text-blue-700"
+        onClick={handleReadMoreClick}
+      >
+        Read more
+      </button>
+    </>
+  ) : (
+    desc
+  )}
+</div>
+        </div>
+        {/* Company Section (in main content for both views) */}
+        <div className="mb-2">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-bold text-xs text-gray-700">Company:</span>
+            <span className="text-xs text-gray-800 font-semibold truncate">{jobData.companyName}</span>
+            {jobData.companyWebsite && (
+              <a
+                href={jobData.companyWebsite}
+                className="text-blue-500 text-xs ml-2"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleLinkClick}
+              >
+                Website
+              </a>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-1">
+            <span>
+              <span className="font-bold">Industry:</span> {
+                jobData.companyIndustries.length > 0 ? jobData.companyIndustries.join(', ') : '-'
+              }
+            </span>
+            <span>
+              <span className="font-bold">Specialities:</span> {
+                jobData.companySpecialities.length > 0 ? jobData.companySpecialities.join(', ') : '-'
+              }
+            </span>
+          </div>
+        </div>
+        {/* Meta Section */}
+        <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
+          <span><span className="font-bold">Size:</span> {jobData.companyEmployeeCount}</span>
+          <span><span className="font-bold">Followers:</span> {jobData.companyFollowerCount}</span>
+          <span><span className="font-bold">Salary:</span> {jobData.salary || '-'}</span>
+          {jobData.locationString && (
+            <span><span className="font-bold">Location:</span> {jobData.locationString}</span>
           )}
         </div>
-      </div>
-      
-      {/* Company Section */}
-      <div className="mb-2">
-        <div className="flex items-center gap-2 mb-1">
-          {jobData.companyLogo && (
-            <a href={jobData.companyUrl} target="_blank" rel="noopener noreferrer" onClick={handleLinkClick}>
-              <img 
-                src={jobData.companyLogo} 
-                alt={jobData.companyName || "Company"} 
-                className="w-8 h-8 rounded object-contain border border-gray-200"
-                onError={(e) => {
-                  try {
-                    e.target.style.display = 'none';
-                  } catch (err) {
-                    console.warn('Error handling image error:', err);
-                  }
-                }}
-              />
-            </a>
+       
+        {/* Footer */}
+        <div className="flex gap-2 mt-auto pt-2">
+          {jobData.linkedinUrl && (
+ <div className={view === "list" ? "flex flex-col justify-between items-end ml-auto" : "flex justify-end w-full"}>
+  <button
+    className="px-3 py-1 bg-blue-600 text-white rounded text-xs"
+    onClick={handleViewJob}
+    tabIndex={0}
+  >
+    View Job
+  </button>
+</div>
           )}
-          <span className="font-bold text-xs text-gray-700">Company:</span>
-          <span className="text-xs text-gray-800 font-semibold truncate">{jobData.companyName}</span>
-          {jobData.companyWebsite && (
-            <a 
-              href={jobData.companyWebsite} 
-              className="text-blue-500 text-xs ml-2" 
-              target="_blank" 
+          {jobData.easyApplyUrl && (
+            <a
+              href={jobData.easyApplyUrl}
+              target="_blank"
               rel="noopener noreferrer"
+              className="text-green-600 hover:underline text-xs"
               onClick={handleLinkClick}
             >
-              Website
+              Easy Apply
             </a>
           )}
         </div>
-        <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-1">
-          <span>
-            <span className="font-bold">Industry:</span> {
-              jobData.companyIndustries.length > 0 ? jobData.companyIndustries.join(', ') : '-'
-            }
-          </span>
-          <span>
-            <span className="font-bold">Specialities:</span> {
-              jobData.companySpecialities.length > 0 ? jobData.companySpecialities.join(', ') : '-'
-            }
-          </span>
-        </div>
-      </div>
-      
-      {/* Meta Section */}
-      <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
-        <span><span className="font-bold">Size:</span> {jobData.companyEmployeeCount}</span>
-        <span><span className="font-bold">Followers:</span> {jobData.companyFollowerCount}</span>
-        <span><span className="font-bold">Salary:</span> {jobData.salary || '-'}</span>
-        {jobData.locationString && (
-          <span><span className="font-bold">Location:</span> {jobData.locationString}</span>
-        )}
-      </div>
-      
-      {/* Footer */}
-      <div className="flex gap-2 mt-auto pt-2">
-        {jobData.linkedinUrl && (
-          <a
-            href={jobData.linkedinUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline text-xs"
-            onClick={handleLinkClick}
-          >
-            View Job
-          </a>
-        )}
-        {jobData.easyApplyUrl && (
-          <a
-            href={jobData.easyApplyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-green-600 hover:underline text-xs"
-            onClick={handleLinkClick}
-          >
-            Easy Apply
-          </a>
-        )}
       </div>
     </div>
   );

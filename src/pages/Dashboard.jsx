@@ -216,6 +216,7 @@ import {
 } from "../slices/jobsSlice";
 import { logoutUser } from "../api/authApi";
 
+
 const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -223,6 +224,8 @@ const Dashboard = () => {
     (state) => state.jobs
   );
   const user = useSelector((state) => state.user.user);
+  // Add at the top of your Dashboard component
+const [view, setView] = React.useState("grid");
   const [filters, setFilters] = React.useState({
     type: "",
     category: "",
@@ -387,6 +390,18 @@ const Dashboard = () => {
               <option value="7d">Last 7 days</option>
               <option value="30d">Last 30 days</option>
             </select>
+             <button
+    className={`ml-auto px-3 py-1 rounded ${view === "grid" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    onClick={() => setView("grid")}
+  >
+    Grid
+  </button>
+  <button
+    className={`px-3 py-1 rounded ${view === "list" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    onClick={() => setView("list")}
+  >
+    List
+  </button>
           </div>
           {loading ? (
             <div className="text-center text-gray-500">Loading jobs...</div>
@@ -399,15 +414,18 @@ const Dashboard = () => {
               filteredJobsByDate.map((day) => (
                 <section key={day.date} className="mb-8">
                   <h2 className="text-lg font-bold mb-2">{day.date}</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {day.jobs.map((job) => (
-                      <JobCard
-                        key={job.id}
-                        job={job}
-                        onClick={() => handleJobClick(job)}
-                      />
-                    ))}
-                  </div>
+                  <div className={view === "grid"
+  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
+  : "flex flex-col gap-4"}>
+  {day.jobs.map((job) => (
+    <JobCard
+      key={job.id}
+      job={job}
+      onClick={() => handleJobClick(job)}
+      view={view}
+    />
+  ))}
+</div>
                 </section>
               ))
             )
