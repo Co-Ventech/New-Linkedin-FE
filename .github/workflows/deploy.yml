@@ -1,40 +1,56 @@
-name: Deploy Frontend to EC2
+name: Deploy to EC2
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   deploy:
-    name: Deploy via SSH
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.EC2_SSH_KEY }}
+          known_hosts: ${{ secrets.EC2_HOST }}
+          config: |
+            Host ${{ secrets.EC2_HOST }}
+              StrictHostKeyChecking no
+              UserKnownHostsFile=/dev/null
 
-      - name: Deploy frontend to EC2
+      - name: Deploy Frontend
         run: |
-          ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ~/front-end/New-Linkedin-FE
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
 
-            # Pull latest changes
+            echo "📁 Navigating to project directory..."
+            cd ~/front-end/New-Linkedin-FE || {
+              echo "❌ Error: Directory not found!";
+              ls -la ~/;
+              exit 1;
+            }
+
+            echo "📥 Pulling latest code from main branch..."
             git pull origin main
 
-            # Install dependencies
+            echo "📦 Installing dependencies..."
             npm install
 
-            # Build frontend
+            echo "🏗️ Building frontend..."
             npm run build
 
-            # Deploy to Nginx web root
+            echo "🧹 Clearing old Nginx files..."
+            sudo rm -rf /var/www/html/*
+
+            echo "📁 Copying new build..."
             sudo cp -r dist/* /var/www/html/
+
+            echo "🔁 Restarting Nginx..."
+            sudo systemctl restart nginx
+
+            echo "✅ Deployment complete!"
           EOF
