@@ -4,7 +4,6 @@ import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { saveJobsToBackend } from "../api/jobService";
-import { dummyJobs } from "../dummyJobs";
 
 // import dotenv from 'dotenv';
 // dotenv.config();
@@ -302,11 +301,11 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
                   <h2 className="text-lg font-bold mb-2">User Profile </h2>
                   <div className="mb-1">
                     <span className="font-semibold">Name:</span>{" "}
-                    {user?.username || user?.name || "Zameer"}
+                    {user?.username || user?.name || "coventech@coventech.com"}
                   </div>
                   <div>
                     <span className="font-semibold">Email:</span>{" "}
-                    {user?.email || "zameer@gmail.com"}
+                    {user?.email || "coventech@coventech.com"}
                   </div>
                 </div>
               </div>

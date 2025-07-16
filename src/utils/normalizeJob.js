@@ -163,5 +163,6 @@ export function normalizeJob(rawJob) {
     kpi_experience_threshold: rawJob.kpi_experience_threshold || '',
     final_score: rawJob.final_score || '',
     ai_remark: rawJob.ai_remark || '',
+    predicted_domain: rawJob.predicted_domain || '',
   };
 } 

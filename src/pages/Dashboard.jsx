@@ -230,6 +230,8 @@ const Dashboard = () => {
     country: [],
     seniority: "",
     field: [],
+    domain: [],
+    status: "", 
   });
 
   // Fetch jobs only if not already loaded or when range changes
@@ -256,7 +258,7 @@ const Dashboard = () => {
   // Flatten all jobs for filter options
   const allJobs = jobsByDate.flatMap((d) => d.jobs);
 
-  // Filtering logic (apply type, field, country, and color filters)
+  // Filtering logic (apply type, field, country, color, and domain filters)
   const filteredJobsByDate = jobsByDate.map((day) => ({
     date: day.date,
     jobs: day.jobs.filter((job) => {
@@ -268,6 +270,14 @@ const Dashboard = () => {
       if (filters.field.length > 0 && !filters.field.includes(job.title)) {
         return false;
       }
+      // Domain filter (predicted_domain)
+      if (filters.domain.length > 0 && !filters.domain.includes(job.predicted_domain)) {
+        return false;
+      }
+      //status filter
+      if (filters.status && job.status !== filters.status) {
+  return false;
+}
       // Country filter
       if (filters.country.length > 0) {
         let jobCountries = [];
@@ -299,7 +309,7 @@ const Dashboard = () => {
     }),
   }));
 
-  // Extract unique job types, categories, colors, countries, fields
+  // Extract unique job types, categories, colors, countries, fields, domains
   const jobTypes = Array.from(new Set(allJobs.flatMap((j) => j.employmentType || []).filter(Boolean)));
   const categories = Array.from(new Set(allJobs.map((j) => j.seniority).filter(Boolean)));
   const colors = Array.from(new Set(allJobs.map((j) => j.tier || j.tierColor).filter(Boolean)));
@@ -332,6 +342,13 @@ const Dashboard = () => {
         .filter(Boolean)
     )
   );
+  const domains = Array.from(
+    new Set(
+      allJobs
+        .map((j) => j.predicted_domain)
+        .filter(Boolean)
+    )
+  );
 
   // Add logout handler
   const handleLogout = () => {
@@ -351,6 +368,7 @@ const Dashboard = () => {
             colors={colors}
             countries={countries}
             fields={fields}
+            domains={domains}
             filters={filters}
             onFilterChange={handleFilterChange}
           />
