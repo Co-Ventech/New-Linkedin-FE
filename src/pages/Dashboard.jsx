@@ -29,7 +29,7 @@
 
 //   // Fetch jobs on mount and when range changes
 //   useEffect(() => {
-    
+
 //     dispatch(resetJobsByDate());
 //     dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 })); // fetch all at once
 //   }, [dispatch, range]);
@@ -225,7 +225,7 @@ const Dashboard = () => {
   );
   const user = useSelector((state) => state.user.user);
   // Add at the top of your Dashboard component
-const [view, setView] = React.useState("grid");
+  const [view, setView] = React.useState("grid");
   const [filters, setFilters] = React.useState({
     type: "",
     category: "",
@@ -234,7 +234,7 @@ const [view, setView] = React.useState("grid");
     seniority: "",
     field: [],
     domain: [],
-    status: "", 
+    status: "",
   });
 
   // Fetch jobs only if not already loaded or when range changes
@@ -263,7 +263,7 @@ const [view, setView] = React.useState("grid");
 
   // Filtering logic (apply type, field, country, color, and domain filters)
   const filteredJobsByDate = jobsByDate.map((day) => ({
-    date: day.date,
+    // date: day.date,
     jobs: day.jobs.filter((job) => {
       // Job type filter
       if (filters.type && !(Array.isArray(job.employmentType) ? job.employmentType.includes(filters.type) : job.employmentType === filters.type)) {
@@ -279,8 +279,8 @@ const [view, setView] = React.useState("grid");
       }
       //status filter
       if (filters.status && job.status !== filters.status) {
-  return false;
-}
+        return false;
+      }
       // Country filter
       if (filters.country.length > 0) {
         let jobCountries = [];
@@ -352,7 +352,9 @@ const [view, setView] = React.useState("grid");
         .filter(Boolean)
     )
   );
-
+  const handleExport = () => {
+    alert("Exporting jobs...");
+  };
   // Add logout handler
   const handleLogout = () => {
     logoutUser(dispatch);
@@ -361,7 +363,7 @@ const [view, setView] = React.useState("grid");
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <Header user={user} onLogout={handleLogout} />
+      <Header source="linkedin" user={user} onLogout={handleLogout} onExport={handleExport} />
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
         {/* Sidebar: visible on desktop only */}
         <aside className="hidden md:block md:w-1/4">
@@ -379,7 +381,7 @@ const [view, setView] = React.useState("grid");
         {/* Main job list area */}
         <main className="w-full md:w-3/4">
           <div className="flex items-center mb-4 gap-2">
-            <label htmlFor="date-range" className="font-semibold">Show jobs from:</label>
+            {/* <label htmlFor="date-range" className="font-semibold">Show jobs from:</label>
             <select
               id="date-range"
               value={range}
@@ -389,19 +391,19 @@ const [view, setView] = React.useState("grid");
               <option value="1d">Last 24 hours</option>
               <option value="7d">Last 7 days</option>
               <option value="30d">Last 30 days</option>
-            </select>
-             <button
-    className={`ml-auto px-3 py-1 rounded ${view === "grid" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-    onClick={() => setView("grid")}
-  >
-    Grid
-  </button>
-  <button
-    className={`px-3 py-1 rounded ${view === "list" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-    onClick={() => setView("list")}
-  >
-    List
-  </button>
+            </select> */}
+            <button
+              className={`ml-auto px-3 py-1 rounded ${view === "grid" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+              onClick={() => setView("grid")}
+            >
+              Grid
+            </button>
+            <button
+              className={`px-3 py-1 rounded ${view === "list" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+              onClick={() => setView("list")}
+            >
+              List
+            </button>
           </div>
           {loading ? (
             <div className="text-center text-gray-500">Loading jobs...</div>
@@ -415,17 +417,17 @@ const [view, setView] = React.useState("grid");
                 <section key={day.date} className="mb-8">
                   <h2 className="text-lg font-bold mb-2">{day.date}</h2>
                   <div className={view === "grid"
-  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
-  : "flex flex-col gap-4"}>
-  {day.jobs.map((job) => (
-    <JobCard
-      key={job.id}
-      job={job}
-      onClick={() => handleJobClick(job)}
-      view={view}
-    />
-  ))}
-</div>
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
+                    : "flex flex-col gap-4"}>
+                    {day.jobs.map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        onClick={() => handleJobClick(job)}
+                        view={view}
+                      />
+                    ))}
+                  </div>
                 </section>
               ))
             )

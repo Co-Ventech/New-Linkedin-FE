@@ -2,8 +2,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import UpworkDashboard from "./pages/UpworkDashboard"; // <-- New import
+import UpworkJobDetails from "./pages/UpworkJobDetails";
 import JobDetails from "./pages/JobDetails";
-import { useSelector } from "react-redux";
+import { useSelector } from "react-redux"
 
 function ProtectedRoute({ children }) {
   const user = useSelector(state => state.user.user);
@@ -25,20 +27,44 @@ function App() {
           path="/register"
           element={user ? <Navigate to="/dashboard" /> : <Register />}
         />
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/jobs/:id" element={
-          <ProtectedRoute>
-            <JobDetails />
-          </ProtectedRoute>
-        } />
+         {/* Redirect /dashboard to /dashboard/linkedin */}
+         <Route path="/dashboard" element={<Navigate to="/dashboard/linkedin" />} />
+        <Route
+          path="/dashboard/linkedin"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/upwork"
+          element={
+            <ProtectedRoute>
+              <UpworkDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobs/:id"
+          element={
+            <ProtectedRoute>
+              <JobDetails />
+            </ProtectedRoute>
+          } 
+        />
+        <Route
+          path="/upwork/jobs/:id"
+          element={
+            <ProtectedRoute>
+               <UpworkJobDetails />
+            </ProtectedRoute>
+            }
+        />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
-export default App; 
+export default App;

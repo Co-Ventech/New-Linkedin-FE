@@ -1,6 +1,6 @@
 import React from "react";
 
-const SidebarFilters = ({ categories, jobTypes, colors, countries, fields, domains = [], filters, onFilterChange }) => (
+const SidebarFilters = ({ categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange }) => (
   <div className="bg-white rounded-lg shadow p-4 space-y-6 sticky top-6">
     {/* Job Type */}
     <div>
@@ -101,7 +101,42 @@ const SidebarFilters = ({ categories, jobTypes, colors, countries, fields, domai
         </label>
       </div>
     </div> */}
-    
+   
+{/* Level (single-select) */}
+{levels && levels.length > 0 && (
+  <div>
+    <h3 className="font-semibold mb-2">Level</h3>
+    <select
+      className="w-full border rounded px-2 py-1"
+      value={filters.level || ""}
+      onChange={e => onFilterChange("level", e.target.value)}
+    >
+      <option value="">All</option>
+      {levels.map(level => (
+        <option key={level} value={level}>{level}</option>
+      ))}
+    </select>
+  </div>
+)}
+{/* Category (multi-select) */}
+{categories && categories.length > 0 && (
+  <div>
+    <h3 className="font-semibold mb-2">Category</h3>
+    <select
+      className="w-full border rounded px-2 py-1"
+      value={filters.category[0] || ""}
+      onChange={e => {
+        const value = e.target.value;
+        onFilterChange("category", value ? [value] : []);
+      }}
+    >
+      <option value="">All</option>
+      {categories.map(category => (
+        <option key={category} value={category}>{category}</option>
+      ))}
+    </select>
+  </div>
+)}
     {/* Color (multi-select) */}
     {colors && colors.length > 0 && (
       <div>

@@ -4,6 +4,7 @@ import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { saveJobsToBackend } from "../api/jobService";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // import dotenv from 'dotenv';
 // dotenv.config();
@@ -11,13 +12,14 @@ import { saveJobsToBackend } from "../api/jobService";
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
 const PORT = import.meta.env.VITE_PORT;
 
-const Header = ({ onLogout, user, onRefreshJobs }) => {
+const Header = ({ onExport, onLogout, user, onRefreshJobs }) => {
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(""); // '', 'fetch', 'filter', 'score'
   const [message, setMessage] = useState("");
+  const [fetchCooldown, setFetchCooldown] = useState(0);
   const [lastFetchTime, setLastFetchTime] = useState(null);
-  const [fetchCooldown, setFetchCooldown] = useState(0); // seconds remaining
-
+  const navigate = useNavigate();
+  const location = useLocation();
   // Auto-hide message after 2 seconds
   useEffect(() => {
     if (message) {
@@ -25,10 +27,11 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
       return () => clearTimeout(timer);
     }
   }, [message]);
-
+  const getCurrentSource = () => (location.pathname.includes("upwork") ? "upwork" : "linkedin");
   // On mount, check last fetch time from localStorage
   useEffect(() => {
-    const last = localStorage.getItem("lastFetchJobsTime");
+    const source = getCurrentSource();
+    const last = localStorage.getItem(`lastFetchJobsTime_${source}`);
     if (last) {
       setLastFetchTime(Number(last));
       updateCooldown(Number(last));
@@ -38,7 +41,8 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
       if (lastFetchTime) updateCooldown(lastFetchTime);
     }, 1000);
     return () => clearInterval(interval);
-  }, [lastFetchTime]);
+    // eslint-disable-next-line
+  }, [location.pathname, lastFetchTime]);
 
   // Helper to update cooldown
   const updateCooldown = (last) => {
@@ -51,35 +55,34 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
   // Add this button somewhere in your Header's JSX for testing:
 
   // Updated Fetch Jobs logic (unchanged)
-  const handleFetchJobs = async () => {
-    setLoading("fetch");
-    setMessage("");
-    // Hide button and start timer immediately on click
-    const now = Date.now();
-    localStorage.setItem("lastFetchJobsTime", now.toString());
-    setLastFetchTime(now);
-    updateCooldown(now);
-    try {
-      const fetchRes = await axios.get(`${REMOTE_HOST}:${PORT}/api/apify`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      });
-      let jobs = fetchRes.data.jobs;
-      if (!jobs) {
-        setMessage("No jobs found to save.");
-        setLoading("");
-        return;
-      }
-      await saveJobsToBackend(jobs);
-      setMessage("About to save jobs to DB...");
-      if (onRefreshJobs) onRefreshJobs();
-    } catch (err) {
-      setMessage("Fetch & Save jobs: Failed!");
-    } finally {
-      setLoading("");
-    }
-  };
+  // const handleFetchJobs = async () => {
+  //   setLoading("fetch");
+  //   setMessage("");
+  //   const now = Date.now();
+  //   localStorage.setItem("lastFetchJobsTime_linkedin", now.toString());
+  //   setLastFetchTime(now);
+  //   updateCooldown(now);
+  //   try {
+  //     const fetchRes = await axios.get(`${REMOTE_HOST}:${PORT}/api/apify`, {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //       },
+  //     });
+  //     let jobs = fetchRes.data.jobs;
+  //     if (!jobs) {
+  //       setMessage("No jobs found to save.");
+  //       setLoading("");
+  //       return;
+  //     }
+  //     await saveJobsToBackend(jobs);
+  //     setMessage("About to save jobs to DB...");
+  //     if (onRefreshJobs) onRefreshJobs();
+  //   } catch (err) {
+  //     setMessage("Fetch & Save jobs: Failed!");
+  //   } finally {
+  //     setLoading("");
+  //   }
+  // };
 
   // Unified Process, Save, and Fetch handler
   const handleProcessSaveAndFetch = async () => {
@@ -171,6 +174,93 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
       setLoading("");
     }
   };
+  // Upwork API handlers (implement your real logic here)
+  const handleUpworkFetchJobs = async () => {
+    setLoading("fetch");
+    setMessage("");
+    const now = Date.now();
+    localStorage.setItem("lastFetchJobsTime_upwork", now.toString());
+    setLastFetchTime(now);
+    updateCooldown(now);
+  try {
+    // Call the Upwork API with POST and token
+    const response = await axios.post(
+      "http://44.214.92.17:3000/api/upwork",
+      {}, // If your API expects a body, add it here; otherwise, keep as empty object
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const jobs = response.data.jobs;
+    if (!jobs || jobs.length === 0) {
+      setMessage("No Upwork jobs found.");
+      setLoading("");
+      return;
+    }
+    await saveJobsToBackend(jobs); // Save jobs to your backend as you do for LinkedIn
+    setMessage("Upwork jobs fetched and saved!");
+    if (onRefreshJobs) onRefreshJobs();
+  } catch (err) {
+    setMessage("Failed to fetch Upwork jobs.");
+  } finally {
+    setLoading("");
+  }
+};
+
+const handleUpworkProcessSaveAndFetch = async () => {
+  setLoading("process-all");
+  setMessage("");
+  try {
+    // 1. Filter/deduplicate jobs
+    await axios.get("http://44.214.92.17:3000/api/upwork/filtered", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    setMessage("Upwork: Filtered jobs!");
+
+    // 2. Score jobs and get scored jobs JSON
+    const scoreRes = await axios.get("http://44.214.92.17:3000/api/upwork/score", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    setMessage("Upwork: Scored jobs!");
+
+    // 3. Save scored jobs to DB
+    await axios.post(
+      "http://44.214.92.17:3000/api/upwork/save-jobs",
+      {}, // If your API expects a body, add it here; otherwise, keep as empty object
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    setMessage("Upwork: Jobs saved to DB!");
+
+
+    // 4. Fetch jobs from DB (new step)
+    const jobsRes = await axios.get("http://44.214.92.17:3000/api/upwork/jobs-by-date", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    });
+    setMessage("Upwork: Jobs fetched from DB!");
+
+    // Optionally, update your UI with jobsRes.data if needed
+    if (onRefreshJobs) onRefreshJobs(jobsRes.data);
+
+  } catch (err) {
+    setMessage("Upwork: Process/Save/Fetch jobs failed!");
+  } finally {
+    setLoading("");
+  }
+};
 
   return (
     <header className="bg-gradient-to-r from-blue-50 to-white shadow-sm border-b mb-4">
@@ -182,32 +272,105 @@ const Header = ({ onLogout, user, onRefreshJobs }) => {
             Dashboard
           </span>
         </div>
+       
         <div className="flex items-center gap-4">
+        <Menu as="div" className="relative inline-block text-left mr-4">
+            <Menu.Button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100">
+              {location.pathname.includes("upwork") ? "Upwork Jobs" : "LinkedIn Jobs"} ▼
+            </Menu.Button>
+            <Menu.Items className="absolute left-0 mt-2 w-44 origin-top-left bg-white border border-gray-200 rounded-md shadow-lg z-50">
+              <div className="py-1">
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      className={`w-full text-left px-4 py-2 ${active ? "bg-gray-100" : ""}`}
+                      onClick={() => navigate("/dashboard/linkedin")}
+                    >
+                      LinkedIn Jobs
+                    </button>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      className={`w-full text-left px-4 py-2 ${active ? "bg-gray-100" : ""}`}
+                      onClick={() => navigate("/dashboard/upwork")}
+                    >
+                      Upwork Jobs
+                    </button>
+                  )}
+                </Menu.Item>
+              </div>
+            </Menu.Items>
+          </Menu> 
+          <button
+        className="ml-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+        onClick={onExport}
+        >
+          Download jobs as Excel 
+        </button>
           {/* Action buttons moved right before menu */}
           <div className="flex items-center gap-2">
-            {/* Fetch button only visible if cooldown is 0 */}
-            {fetchCooldown === 0 ? (
-              <button
-                className="px-3 py-1 border border-blue-400 text-blue-700 bg-blue-50 rounded hover:bg-blue-100 hover:text-blue-900 disabled:opacity-50 transition"
-                onClick={handleFetchJobs}
-                disabled={loading}
-              >
-                {loading === "fetch" ? "Fetching..." : "Fetch Jobs"}
-              </button>
-            ) : (
-              <span className="text-xs text-gray-500">
-                You can fetch jobs again in {formatCooldown(fetchCooldown)}
-              </span>
-            )}
-            <button
-              className="px-3 py-1 border border-blue-600 text-blue-700 bg-blue-50 rounded hover:bg-blue-100 hover:text-blue-900 disabled:opacity-50 transition font-semibold"
-              onClick={handleProcessSaveAndFetch}
-              disabled={loading}
-            >
-              {loading === "process-all"
-                ? "Processing..."
-                : "Process, Save & Show Jobs"}
-            </button>
+  {location.pathname.includes("upwork") ? (
+    // Upwork Dashboard Buttons
+    <>
+      {fetchCooldown === 0 ? (
+        <button
+          className="px-3 py-1 border border-green-400 text-green-700 bg-green-50 rounded hover:bg-green-100 hover:text-green-900 disabled:opacity-50 transition"
+          onClick={handleUpworkFetchJobs}
+          disabled={loading}
+        >
+          {loading === "fetch" ? "Fetching..." : "Fetch Upwork Jobs"}
+        </button>
+      ) : (
+        <span className="text-xs text-gray-500">
+          You can fetch jobs again in {formatCooldown(fetchCooldown)}
+        </span>
+      )}
+      <button
+        className="px-3 py-1 border border-green-600 text-green-700 bg-green-50 rounded hover:bg-green-100 hover:text-green-900 disabled:opacity-50 transition font-semibold"
+        onClick={handleUpworkProcessSaveAndFetch}
+        disabled={loading}
+      >
+        {loading === "process-all"
+          ? "Processing..."
+          : "Process, Save & Show Upwork Jobs"}
+      </button>
+    </>
+  ) : (
+    // LinkedIn Dashboard Buttons
+    <>
+      {/* {fetchCooldown === 0 ? (
+        <button
+          className="px-3 py-1 border border-blue-400 text-blue-700 bg-blue-50 rounded hover:bg-blue-100 hover:text-blue-900 disabled:opacity-50 transition"
+          onClick={handleFetchJobs}
+          disabled={loading}
+        >
+          {loading === "fetch" ? "Fetching..." : "Fetch Jobs"}
+        </button>
+      ) : (
+        <span className="text-xs text-gray-500">
+          You can fetch jobs again in {formatCooldown(fetchCooldown)}
+        </span>
+      )}
+      <button
+        className="px-3 py-1 border border-blue-600 text-blue-700 bg-blue-50 rounded hover:bg-blue-100 hover:text-blue-900 disabled:opacity-50 transition font-semibold"
+        onClick={handleProcessSaveAndFetch}
+        disabled={loading}
+      >
+        {loading === "process-all"
+          ? "Processing..."
+          : "Process, Save & Show Jobs"}
+      </button> */}
+    </>
+  )}
+  {/* <button
+  className="ml-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+  onClick={onExport}
+>
+  Export
+</button> */}
+{/* </div> */}
             {/* Remove or comment out the other process/fetch/save buttons to avoid confusion */}
             {/*
             <button

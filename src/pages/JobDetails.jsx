@@ -37,12 +37,25 @@ const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [selectedUser, setSelectedUser] = useState("");
+  const [engaged, setEngaged] = useState("");
+  const [engagedBy, setEngagedBy] = useState( "");
+
   const [toggleLoading, setToggleLoading] = useState(false);
   const [comment, setComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const range = useSelector(state => state.jobs.range);
   const jobsByDate = useSelector(state => state.jobs.jobsByDate);
   const allJobs = jobsByDate.flatMap(day => day.jobs || []);
+  // const [aeRemark, setAeRemark] = useState(job.ae_remark || "");
+  const [aeRemark, setAeRemark] = useState("");
+  const [aeRemarkInput, setAeRemarkInput] = useState("");
+  const [saving, setSaving] = useState(false);
+
+
+  const userList = ["Alice", "Bob", "Charlie"]; // Replace with real user list
+
+
   // Log the first job object to inspect structure
   console.log("First job object in jobsByDate:", allJobs[0]);
   // Log all job objects that match the ID in any way
@@ -74,6 +87,21 @@ const JobDetails = () => {
     }
   };
 
+  const handleSaveAeRemark = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      // TODO: Replace with your backend endpoint and job.id
+      // Example:
+      // await axios.post(`/api/jobs/${job.id}/ae-remark`, { remark: aeRemarkInput });
+      setAeRemark(aeRemarkInput); // Optimistic update
+      setAeRemarkInput("");
+    } catch (err) {
+      alert("Failed to save AE Remark.");
+    } finally {
+      setSaving(false);
+    }
+  };
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!comment.trim()) return;
@@ -100,17 +128,57 @@ const JobDetails = () => {
         >
           &larr; Back to Jobs
         </button>
+        <section className="mb-4">
+        {!selectedUser && (
+          <div className="flex items-center gap-2">
+            <label className="font-semibold">Select User:</label>
+            <select
+              className="border rounded px-2 py-1"
+              value={selectedUser}
+              onChange={e => setSelectedUser(e.target.value)}
+            >
+              <option value="">-- Select --</option>
+              {userList.map(user => (
+                <option key={user} value={user}>{user}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Engaged Toggle Switch */}
-        <div className="mb-4 flex items-center gap-2">
-          <label className="font-semibold">Engaged:</label>
-          <input
-            type="checkbox"
-            checked={job.status === "engaged"}
-            onChange={handleToggleEngaged}
-            disabled={toggleLoading}
-          />
-          {toggleLoading && <span className="text-xs text-gray-400 ml-2">Saving...</span>}
-        </div>
+        {selectedUser && (
+          <div className="flex items-center gap-2 mt-2">
+            <label className="font-semibold">Engaged:</label>
+            <input
+              type="checkbox"
+              checked={engaged}
+              onChange={async (e) => {
+                setToggleLoading(true);
+                try {
+                  // TODO: Call backend to update status
+                  setEngaged(e.target.checked);
+                  setEngagedBy(e.target.checked ? selectedUser : "");
+                } catch (err) {
+                  alert("Failed to update job status.");
+                } finally {
+                  setToggleLoading(false);
+                }
+              }}
+              disabled={toggleLoading}
+            />
+            {toggleLoading && <span className="text-xs text-gray-400 ml-2">Saving...</span>}
+          </div>
+        )}
+
+        {/* Show engaged message */}
+        {engaged && engagedBy && (
+          <div className="mt-2 text-green-700 font-semibold">
+            {engagedBy} engaged with this job
+          </div>
+        )}
+      </section>
+
+        
         {/* Job Overview Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">Job Overview</h2>
@@ -196,6 +264,34 @@ const JobDetails = () => {
             </div>
           </section>
         )}
+       {/* AE Remark Section */}
+      <section className="mb-6 border-b pb-4">
+        <h2 className="text-lg font-bold mb-3 text-gray-800">AE Remark</h2>
+        {!aeRemark ? (
+          <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
+            <textarea
+              className="border rounded px-2 py-1 w-full"
+              rows={2}
+              placeholder="Write AE Remark..."
+              value={aeRemarkInput}
+              onChange={e => setAeRemarkInput(e.target.value)}
+              disabled={saving}
+            />
+            <button
+              type="submit"
+              className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+              disabled={saving || !aeRemarkInput.trim()}
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </form>
+        ) : (
+          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-900">
+            <span className="font-semibold">Saved AE Remark:</span>
+            <div>{aeRemark}</div>
+          </div>
+        )}
+      </section>
         {/* KPIs Section */}
         <section className="mb-2">
           <h2 className="text-lg font-bold mb-3 text-gray-800">KPIs</h2>

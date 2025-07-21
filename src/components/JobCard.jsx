@@ -744,6 +744,7 @@ const handleReadMoreClick = (e) => {
 
 
   return (
+  
     <div
       className={`${cardBase} ${view === "list" ? listLayout : gridLayout} p-2`}
       onClick={handleCardClick}
@@ -753,7 +754,7 @@ const handleReadMoreClick = (e) => {
         <a
           href={jobData.companyUrl}
           target="_blank"
-         rel="noopener noreferrer"
+          rel="noopener noreferrer"
           onClick={handleLinkClick}
           className={view === "list" ? "flex-shrink-0 self-start mr-3" : "self-start mb-2"}
         >
