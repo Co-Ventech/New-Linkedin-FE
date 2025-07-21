@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
+const PORT = import.meta.env.VITE_PORT;
+const API_BASE = `${REMOTE_HOST}:${PORT}/api`;
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk } from "../slices/jobsSlice";
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -33,11 +36,27 @@ const getKpiBadge = (score) => {
   return { color: 'bg-red-100 text-red-800 border-red-400', tag: 'Red' };
 };
 
+
+async function fetchJobById(jobId) {
+  const res = await axios.get(`${API_BASE}/jobs/${jobId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+    },
+  });
+  return res.data;
+}
+const STATUS_OPTIONS = [
+  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'archived'
+];
+
+const USER_LIST = ["khubaib", "Taha","Basit" , "huzaifa" , "abdulrehman"]; 
+
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [selectedUser, setSelectedUser] = useState("");
+
+
   const [engaged, setEngaged] = useState("");
   const [engagedBy, setEngagedBy] = useState( "");
 
@@ -50,10 +69,9 @@ const JobDetails = () => {
   // const [aeRemark, setAeRemark] = useState(job.ae_remark || "");
   const [aeRemark, setAeRemark] = useState("");
   const [aeRemarkInput, setAeRemarkInput] = useState("");
-  const [saving, setSaving] = useState(false);
+  // const [saving, setSaving] = useState(false);
 
 
-  const userList = ["khubaib", "Taha","Basit" , "huzaifa" , "abdulrehman"]; 
 
 
   // Log the first job object to inspect structure
@@ -70,22 +88,71 @@ const JobDetails = () => {
   console.log("Looking for job ID:", id);
   console.log("jobsByDate after refetch:", jobsByDate);
   const job = allJobs.find(j => String(j.id) === String(id));
+
+  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(job.currentStatus || "not_engaged");
+  const [saving, setSaving] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(job.currentStatus || "not_engaged");
+  const [statusHistory, setStatusHistory] = useState(job.statusHistory || []);
+  
+
   console.log("Redux job status:", job?.status);
 
-  const handleToggleEngaged = async (e) => {
-    const newEngaged = e.target.checked;
-    setToggleLoading(true);
+  const loadJob = async () => {
     try {
-      const payload = { status: newEngaged ? "engaged" : "not_engaged" };
-      console.log("Sending PATCH payload:", payload);
-      await dispatch(updateJobStatusThunk({ jobId: job.id, status: payload.status })).unwrap();
-      await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
+      const job = await fetchJobById(id);
+      setCurrentStatus(job.currentStatus || "not_engaged");
+      setStatusHistory(Array.isArray(job.statusHistory) ? job.statusHistory : []);
+      setSelectedStatus(job.currentStatus || "not_engaged");
     } catch (err) {
-      alert("Failed to update job status.");
-    } finally {
-      setToggleLoading(false);
+      // handle error
     }
   };
+  useEffect(() => {
+    loadJob();
+  }, [id]);
+
+  const handleSaveStatus = async (e) => {
+    e.preventDefault();
+    if (!selectedUser || !selectedStatus) return;
+    setSaving(true);
+    try {
+      await axios.patch(
+        `${API_BASE}/jobs/${id}`,
+        {
+          status: selectedStatus,
+          username: selectedUser,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      await loadJob(); // Refresh job data after update
+    } catch (err) {
+      alert("Failed to update status.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
+  // const handleToggleEngaged = async (e) => {
+  //   const newEngaged = e.target.checked;
+  //   setToggleLoading(true);
+  //   try {
+  //     const payload = { status: newEngaged ? "engaged" : "not_engaged" };
+  //     console.log("Sending PATCH payload:", payload);
+  //     await dispatch(updateJobStatusThunk({ jobId: job.id, status: payload.status })).unwrap();
+  //     await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
+  //   } catch (err) {
+  //     alert("Failed to update job status.");
+  //   } finally {
+  //     setToggleLoading(false);
+  //   }
+  // };
 
   const handleSaveAeRemark = async (e) => {
     e.preventDefault();
@@ -120,6 +187,7 @@ const JobDetails = () => {
   if (!job) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Job not found.</div>;
 
   return (
+    
     <div className="min-h-screen bg-gray-50 py-8 px-4 flex justify-center">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
         <button
@@ -128,8 +196,67 @@ const JobDetails = () => {
         >
           &larr; Back to Jobs
         </button>
-        <section className="mb-4">
-        {!selectedUser && (
+
+        <section className="mb-6 border-b pb-4">
+      <h2 className="text-lg font-bold mb-3 text-gray-800">Status Management</h2>
+      <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
+        <select
+          className="border rounded px-2 py-1"
+          value={selectedUser}
+          onChange={e => setSelectedUser(e.target.value)}
+        >
+          <option value="">Select User</option>
+          {USER_LIST.map(user => (
+            <option key={user} value={user}>{user}</option>
+          ))}
+        </select>
+        <select
+          className="border rounded px-2 py-1"
+          value={selectedStatus}
+          onChange={e => setSelectedStatus(e.target.value)}
+        >
+          {STATUS_OPTIONS.map(status => (
+            <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className="px-4 py-1 bg-blue-600 text-white rounded"
+          disabled={saving || !selectedUser || !selectedStatus}
+        >
+          {saving ? "Saving..." : "Save"}
+        </button>
+      </form>
+      {/* Show current status */}
+      <div className="mb-2">
+  <span className="font-semibold">Current Status:</span>{" "}
+  <span className="px-2 py-1 rounded bg-gray-100">
+    {(currentStatus || "-").replace(/_/g, " ")}
+  </span>
+</div>
+<div>
+  <span className="font-semibold">Status History:</span>
+  <ul className="mt-1 space-y-1">
+  {Array.isArray(statusHistory) && statusHistory.length === 0 ? (
+  <li className="text-gray-400 text-sm">No status history.</li>
+) : (
+  Array.isArray(statusHistory) && statusHistory.map((entry, idx) => (
+    <li key={idx} className="text-sm">
+      <span className="font-semibold">{entry.username}</span> set status to{" "}
+      <span className="px-2 py-0.5 rounded bg-gray-200">
+        {(entry.status || "-").replace(/_/g, " ")}
+      </span>{" "}
+      <span className="text-xs text-gray-500">
+        ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
+      </span>
+    </li>
+  ))
+)}
+  </ul>
+</div>
+    </section>
+        {/* <section className="mb-4"> */}
+        {/* {!selectedUser && (
           <div className="flex items-center gap-2">
             <label className="font-semibold">Select User:</label>
             <select
@@ -143,40 +270,40 @@ const JobDetails = () => {
               ))}
             </select>
           </div>
-        )}
+        )} */}
 
         {/* Engaged Toggle Switch */}
-        {selectedUser && (
-          <div className="flex items-center gap-2 mt-2">
-            <label className="font-semibold">Engaged:</label>
-            <input
-              type="checkbox"
-              checked={engaged}
-              onChange={async (e) => {
-                setToggleLoading(true);
-                try {
-                  // TODO: Call backend to update status
-                  setEngaged(e.target.checked);
-                  setEngagedBy(e.target.checked ? selectedUser : "");
-                } catch (err) {
-                  alert("Failed to update job status.");
-                } finally {
-                  setToggleLoading(false);
-                }
-              }}
-              disabled={toggleLoading}
-            />
-            {toggleLoading && <span className="text-xs text-gray-400 ml-2">Saving...</span>}
-          </div>
-        )}
+        {/* {selectedUser && (
+          // <div className="flex items-center gap-2 mt-2">
+          //   <label className="font-semibold">Engaged:</label>
+          //   <input
+          //     type="checkbox"
+          //     checked={engaged}
+          //     onChange={async (e) => {
+          //       setToggleLoading(true);
+          //       try {
+          //         // TODO: Call backend to update status
+          //         setEngaged(e.target.checked);
+          //         setEngagedBy(e.target.checked ? selectedUser : "");
+          //       } catch (err) {
+          //         alert("Failed to update job status.");
+          //       } finally {
+          //         setToggleLoading(false);
+          //       }
+          //     }}
+          //     disabled={toggleLoading}
+          //   />
+          //   {toggleLoading && <span className="text-xs text-gray-400 ml-2">Saving...</span>}
+          // </div>
+        )} */}
 
         {/* Show engaged message */}
-        {engaged && engagedBy && (
+        {/* {engaged && engagedBy && (
           <div className="mt-2 text-green-700 font-semibold">
             {engagedBy} engaged with this job
           </div>
-        )}
-      </section>
+        )} */}
+      {/* </section> */}
 
         
         {/* Job Overview Section */}
