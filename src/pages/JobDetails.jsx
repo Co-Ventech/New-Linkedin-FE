@@ -53,7 +53,7 @@ const JobDetails = () => {
   const [saving, setSaving] = useState(false);
 
 
-  const userList = ["Alice", "Bob", "Charlie"]; // Replace with real user list
+  const userList = ["khubaib", "Taha","Basit" , "huzaifa" , "abdulrehman"]; 
 
 
   // Log the first job object to inspect structure
