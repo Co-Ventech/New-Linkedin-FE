@@ -1,5 +1,20 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+// import { useDispatch } from "react-redux";
+// import { updateUpworkAeCommentThunk, updateUpworkJobStatusThunk, addUpworkJobCommentThunk } from "../slices/jobsSlice";
+// await dispatch(updateUpworkJobStatusThunk({ jobId: job.id, status: ..., username:  }))
+// const dispatch = useDispatch();
+
+// const { id } = useParams();
+// const job = useSelector(state => {
+//   // Replace with your upwork jobs state path
+//   return state.upworkJobs.jobsByDate.flatMap(day => day.jobs || []).find(j => String(j.id) === String(id));
+// });
+
+const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
+const STATUS_OPTIONS = [
+  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'archived'
+];
 
 const badgeClass = {
   tier: {
@@ -23,7 +38,63 @@ const getKpiBadge = (score) => {
 const UpworkJobDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  // const dispatch = useDispatch();
   const job = location.state?.job;
+
+  // Local state for AE Remark, status, comments
+  const [aeRemarkInput, setAeRemarkInput] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [selectedUser, setSelectedUser] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(job?.currentStatus || "not_engaged");
+  const [commentUser, setCommentUser] = useState("");
+  const [comment, setComment] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+
+  
+  // Sync local state with job object
+  useEffect(() => {
+    if (job) {
+      setSelectedStatus(job.currentStatus || "not_engaged");
+    }
+  }, [job]);
+
+  const handleSaveAeRemark = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await dispatch(updateUpworkAeCommentThunk({ jobId: job.id, ae_comment: aeRemarkInput })).unwrap();
+      setAeRemarkInput("");
+    } catch (err) {
+      alert("Failed to save AE Remark.");
+    } finally {
+      setSaving(false);
+    }
+  };
+  const handleSaveStatus = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await dispatch(updateUpworkJobStatusThunk({ jobId: job.id, status: selectedStatus, username: selectedUser })).unwrap();
+    } catch (err) {
+      alert("Failed to update status.");
+    } finally {
+      setSaving(false);
+    }
+  };
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!commentUser || !comment.trim()) return;
+    setCommentLoading(true);
+    try {
+      await dispatch(addUpworkJobCommentThunk({ jobId: job.id, username: commentUser, comment })).unwrap();
+      setComment("");
+      setCommentUser("");
+    } catch (err) {
+      alert("Failed to add comment.");
+    } finally {
+      setCommentLoading(false);
+    }
+  };
 
   if (!job) {
     return <div className="p-8">No job details found.</div>;
@@ -40,6 +111,139 @@ const UpworkJobDetails = () => {
         >
           &larr; Back to Jobs
         </button>
+        {/* Status Management Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Status Management</h2>
+          <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
+            <select
+              className="border rounded px-2 py-1"
+              value={selectedUser}
+              onChange={e => setSelectedUser(e.target.value)}
+            >
+              <option value="">Select User</option>
+              {USER_LIST.map(user => (
+                <option key={user} value={user}>{user}</option>
+              ))}
+            </select>
+            <select
+              className="border rounded px-2 py-1"
+              value={selectedStatus}
+              onChange={e => setSelectedStatus(e.target.value)}
+            >
+              {STATUS_OPTIONS.map(status => (
+                <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="px-4 py-1 bg-blue-600 text-white rounded"
+              disabled={saving || !selectedUser || !selectedStatus}
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </form>
+          {/* Show current status */}
+          <div className="mb-2">
+            <span className="font-semibold">Current Status:</span>{" "}
+            <span className="px-2 py-1 rounded bg-gray-100">
+              {(job.currentStatus || "-").replace(/_/g, " ")}
+            </span>
+          </div>
+          <div>
+            <span className="font-semibold">Status History:</span>
+            <ul className="mt-1 space-y-1">
+              {Array.isArray(job.statusHistory) && job.statusHistory.length === 0 ? (
+                <li className="text-gray-400 text-sm">No status history.</li>
+              ) : (
+                Array.isArray(job.statusHistory) && job.statusHistory.map((entry, idx) => (
+                  <li key={idx} className="text-sm">
+                    <span className="font-semibold">{entry.username}</span> set status to{" "}
+                    <span className="px-2 py-0.5 rounded bg-gray-200">
+                      {(entry.status || "-").replace(/_/g, " ")}
+                    </span>{" "}
+                    <span className="text-xs text-gray-500">
+                      ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
+                    </span>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </section>
+        {/* AE Remark Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Remark</h2>
+          {!job.ae_comment ? (
+            <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
+              <textarea
+                className="border rounded px-2 py-1 w-full"
+                rows={2}
+                placeholder="Write AE Remark..."
+                value={aeRemarkInput}
+                onChange={e => setAeRemarkInput(e.target.value)}
+                disabled={saving}
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={saving || !aeRemarkInput.trim()}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </form>
+          ) : (
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-900">
+              <span className="font-semibold">Saved AE Remark:</span>
+              <div>{job.ae_comment}</div>
+            </div>
+          )}
+        </section>
+        {/* Comments Section */}
+        <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">
+          <select
+            className="border rounded px-2 py-1"
+            value={commentUser}
+            onChange={e => setCommentUser(e.target.value)}
+            required
+          >
+            <option value="">Select User</option>
+            {USER_LIST.map(user => (
+              <option key={user} value={user}>{user}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            placeholder="Add a comment..."
+            className="border px-2 py-1 rounded w-full"
+            disabled={commentLoading}
+            required
+          />
+          <button
+            type="submit"
+            className="px-4 py-1 bg-blue-600 text-white rounded"
+            disabled={commentLoading || !commentUser || !comment.trim()}
+          >
+            {commentLoading ? "Saving..." : "Add"}
+          </button>
+        </form>
+        <ul className="mb-4">
+          {Array.isArray(job.comments) && job.comments.length > 0 ? (
+            job.comments.map((c, idx) => (
+              <li key={idx} className="text-sm text-gray-700 mb-1">
+                <span className="font-semibold">{c.username}:</span> {c.comment}
+                {c.date && (
+                  <span className="text-xs text-gray-500 ml-2">
+                    ({new Date(c.date).toLocaleString()})
+                  </span>
+                )}
+              </li>
+            ))
+          ) : (
+            <li className="text-sm text-gray-400">No comments yet.</li>
+          )}
+        </ul>
         {/* Job Overview Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">Job Overview</h2>

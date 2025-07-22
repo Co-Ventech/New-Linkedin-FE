@@ -1,12 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { saveJobsToBackend, fetchJobsByDate } from '../api/jobService';
-import { updateJobStatus, addJobComment } from '../api/updateJobStatus';
+import { updateJobStatus, addJobComment} from '../api/updateJobStatus';
+// import { updateJobStatus, addJobComment, updateUpworkJobStatus, updateUpworkAeComment, addUpworkJobComment } from '../api/updateJobStatus';
+import { updateAeComment } from '../api/updateJobStatus';
+
 // Async thunk to add a comment to a job
 export const addJobCommentThunk = createAsyncThunk(
   'jobs/addJobComment',
-  async ({ jobId, comment }, { rejectWithValue }) => {
+  async ({ jobId, username, comment }, { rejectWithValue }) => {
     try {
-      const updated = await addJobComment(jobId, comment);
+      const updated = await addJobComment(jobId, { username, comment });
       return { jobId, comments: updated.comments };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -16,12 +19,14 @@ export const addJobCommentThunk = createAsyncThunk(
 // Async thunk to update job status
 export const updateJobStatusThunk = createAsyncThunk(
   'jobs/updateJobStatus',
-  async ({ jobId, status }, { rejectWithValue }) => {
+  async ({ jobId, status, username }, { rejectWithValue }) => {
     try {
-      const updated = await updateJobStatus(jobId, status);
-      return { jobId, status: updated.status };
+      const updated = await updateJobStatus(jobId, { status, username });
+      return { jobId, status: updated.status, currentStatus: updated.currentStatus, statusHistory: updated.statusHistory };
     } catch (err) {
-      return rejectWithValue(err.message);
+      // Add this:
+      console.error("updateJobStatusThunk error:", err, err.response?.data);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 );
@@ -64,6 +69,54 @@ export const fetchJobsByDateThunk = createAsyncThunk('jobs/fetchJobsByDate', asy
     return rejectWithValue(err.message);
   }
 });
+
+export const updateAeCommentThunk = createAsyncThunk(
+  'jobs/updateAeComment',
+  async ({ jobId, ae_comment }, { rejectWithValue }) => {
+    try {
+      const updated = await updateAeComment(jobId, ae_comment);
+      return { jobId, ae_comment: updated.ae_comment };
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+// export const updateUpworkJobStatusThunk = createAsyncThunk(
+//   'upworkJobs/updateJobStatus',
+//   async ({ jobId, status, username }, { rejectWithValue }) => {
+//     try {
+//       const updated = await updateUpworkJobStatus(jobId, { status, username }); // points to Upwork API
+//       return { jobId, status: updated.status, currentStatus: updated.currentStatus, statusHistory: updated.statusHistory };
+//     } catch (err) {
+//       return rejectWithValue(err.message);
+//     }
+//   }
+// );
+
+// export const updateUpworkAeCommentThunk = createAsyncThunk(
+//   'upworkJobs/updateAeComment',
+//   async ({ jobId, ae_comment }, { rejectWithValue }) => {
+//     try {
+//       const updated = await updateUpworkAeComment(jobId, ae_comment);
+//       return { jobId, ae_comment: updated.ae_comment };
+//     } catch (err) {
+//       return rejectWithValue(err.message);
+//     }
+//   }
+// );
+
+// export const addUpworkJobCommentThunk = createAsyncThunk(
+//   'upworkJobs/addJobComment',
+//   async ({ jobId, username, comment }, { rejectWithValue }) => {
+//     try {
+//       const updated = await addUpworkJobComment(jobId, { username, comment });
+//       return { jobId, comments: updated.comments };
+//     } catch (err) {
+//       return rejectWithValue(err.message);
+//     }
+//   }
+// );
 
 const jobsSlice = createSlice({
   name: 'jobs',
@@ -122,19 +175,32 @@ const jobsSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Failed to fetch jobs.';
       })
+
+
       .addCase(updateJobStatusThunk.fulfilled, (state, action) => {
-        // Update job status in jobsByDate
-        const { jobId, status } = action.payload;
+        const { jobId, status, currentStatus, statusHistory } = action.payload;
         state.jobsByDate.forEach(day => {
           day.jobs.forEach(job => {
             if (String(job.id) === String(jobId)) {
               job.status = status;
+              job.currentStatus = currentStatus;
+              job.statusHistory = statusHistory;
             }
           });
         });
       })
+      // .addCase(updateJobStatusThunk.fulfilled, (state, action) => {
+      //   // Update job status in jobsByDate
+      //   const { jobId, status } = action.payload;
+      //   state.jobsByDate.forEach(day => {
+      //     day.jobs.forEach(job => {
+      //       if (String(job.id) === String(jobId)) {
+      //         job.status = status;
+      //       }
+      //     });
+      //   });
+      // })
       .addCase(addJobCommentThunk.fulfilled, (state, action) => {
-        // Update job comments in jobsByDate
         const { jobId, comments } = action.payload;
         state.jobsByDate.forEach(day => {
           day.jobs.forEach(job => {
@@ -143,7 +209,19 @@ const jobsSlice = createSlice({
             }
           });
         });
-      });
+      })
+      .addCase(updateAeCommentThunk.fulfilled, (state, action) => {
+        const { jobId, ae_comment } = action.payload;
+        state.jobsByDate.forEach(day => {
+          day.jobs.forEach(job => {
+            if (String(job.id) === String(jobId)) {
+              job.ae_comment = ae_comment;
+            }
+          });
+        });
+      })
+      
+      
   },
 });
 

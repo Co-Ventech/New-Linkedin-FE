@@ -144,7 +144,10 @@ export function normalizeJob(rawJob) {
     salary: salary,
     tier: rawJob.tier || '',
     status: rawJob.status || '',
+    currentStatus: rawJob.currentStatus || rawJob.status || "not_engaged",
+    statusHistory: Array.isArray(rawJob.statusHistory) ? rawJob.statusHistory : [],
     comments: Array.isArray(rawJob.comments) ? rawJob.comments : [],
+    ae_comment: rawJob.ae_comment || "",
     // KPIs
     kpi_jd_quality: rawJob.kpi_jd_quality || '',
     kpi_domain_fit: rawJob.kpi_domain_fit || '',

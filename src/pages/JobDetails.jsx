@@ -5,6 +5,8 @@ const API_BASE = `${REMOTE_HOST}:${PORT}/api`;
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk,updateAeCommentThunk } from "../slices/jobsSlice";
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -49,7 +51,7 @@ const STATUS_OPTIONS = [
   'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'archived'
 ];
 
-const USER_LIST = ["khubaib", "Taha","Basit" , "huzaifa" , "abdulrehman"]; 
+const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -58,19 +60,20 @@ const JobDetails = () => {
 
 
   const [engaged, setEngaged] = useState("");
-  const [engagedBy, setEngagedBy] = useState( "");
+  const [engagedBy, setEngagedBy] = useState("");
 
   const [toggleLoading, setToggleLoading] = useState(false);
-  const [comment, setComment] = useState("");
-  const [commentLoading, setCommentLoading] = useState(false);
   const range = useSelector(state => state.jobs.range);
   const jobsByDate = useSelector(state => state.jobs.jobsByDate);
   const allJobs = jobsByDate.flatMap(day => day.jobs || []);
+  const job = allJobs.find(j => String(j.id) === String(id));
   // const [aeRemark, setAeRemark] = useState(job.ae_remark || "");
   const [aeRemark, setAeRemark] = useState("");
   const [aeRemarkInput, setAeRemarkInput] = useState("");
   // const [saving, setSaving] = useState(false);
-
+  const [commentUser, setCommentUser] = useState("");
+  const [comment, setComment] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
 
 
 
@@ -87,56 +90,62 @@ const JobDetails = () => {
   });
   console.log("Looking for job ID:", id);
   console.log("jobsByDate after refetch:", jobsByDate);
-  const job = allJobs.find(j => String(j.id) === String(id));
+
 
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(job.currentStatus || "not_engaged");
   const [saving, setSaving] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(job.currentStatus || "not_engaged");
   const [statusHistory, setStatusHistory] = useState(job.statusHistory || []);
-  
+
 
   console.log("Redux job status:", job?.status);
 
-  const loadJob = async () => {
-    try {
-      const job = await fetchJobById(id);
+  // const loadJob = async () => {
+  //   try {
+  //     const job = await fetchJobById(id);
+  //     setCurrentStatus(job.currentStatus || "not_engaged");
+  //     setStatusHistory(Array.isArray(job.statusHistory) ? job.statusHistory : []);
+  //     setSelectedStatus(job.currentStatus || "not_engaged");
+  //   } catch (err) {
+  //     // handle error
+  //   }
+  // };
+  useEffect(() => {
+    if (job) {
       setCurrentStatus(job.currentStatus || "not_engaged");
       setStatusHistory(Array.isArray(job.statusHistory) ? job.statusHistory : []);
       setSelectedStatus(job.currentStatus || "not_engaged");
-    } catch (err) {
-      // handle error
+      setAeRemark(job.ae_remark || "");
     }
-  };
-  useEffect(() => {
-    loadJob();
-  }, [id]);
+  }, [job]);
 
-  const handleSaveStatus = async (e) => {
-    e.preventDefault();
-    if (!selectedUser || !selectedStatus) return;
-    setSaving(true);
-    try {
-      await axios.patch(
-        `${API_BASE}/jobs/${id}`,
-        {
-          status: selectedStatus,
-          username: selectedUser,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      await loadJob(); // Refresh job data after update
-    } catch (err) {
-      alert("Failed to update status.");
-    } finally {
-      setSaving(false);
-    }
-  };
+
+  // const handleSaveStatus = async (e) => {
+  //   e.preventDefault();
+  //   if (!selectedUser || !selectedStatus) return;
+  //   setSaving(true);
+  //   try {
+  //     await axios.patch(
+  //       `${API_BASE}/jobs/${id}`,
+  //       {
+  //         status: selectedStatus,
+  //         username: selectedUser,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+  //     await loadJob(); // Refresh job data after update
+  //   } catch (err) {
+  //     alert("Failed to update status.");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
 
 
   // const handleToggleEngaged = async (e) => {
@@ -154,29 +163,46 @@ const JobDetails = () => {
   //   }
   // };
 
-  const handleSaveAeRemark = async (e) => {
+  const handleSaveStatus = async (e) => {
     e.preventDefault();
+    console.log("handleSaveStatus called", { selectedUser, selectedStatus, jobId: job?.id });
+    if (!selectedUser || !selectedStatus) return;
     setSaving(true);
     try {
-      // TODO: Replace with your backend endpoint and job.id
-      // Example:
-      // await axios.post(`/api/jobs/${job.id}/ae-remark`, { remark: aeRemarkInput });
-      setAeRemark(aeRemarkInput); // Optimistic update
-      setAeRemarkInput("");
+      // This should trigger the API call
+      await dispatch(updateJobStatusThunk({ jobId: job.id, status: selectedStatus, username: selectedUser })).unwrap();
+      await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
     } catch (err) {
-      alert("Failed to save AE Remark.");
+      alert("Failed to update status.");
+      console.error("handleSaveStatus error:", err);
     } finally {
       setSaving(false);
     }
   };
+
+  const handleSaveAeRemark = async (e) => {
+  e.preventDefault();
+  setSaving(true);
+  try {
+    await dispatch(updateAeCommentThunk({ jobId: job.id, ae_comment: aeRemarkInput })).unwrap();
+    await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
+    setAeRemark(aeRemarkInput); // Optimistic update
+    setAeRemarkInput("");
+  } catch (err) {
+    alert("Failed to save AE Remark.");
+  } finally {
+    setSaving(false);
+  }
+};
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!comment.trim()) return;
+    if (!commentUser || !comment.trim()) return;
     setCommentLoading(true);
     try {
-      await dispatch(addJobCommentThunk({ jobId: job.id, comment })).unwrap();
-      await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 })); // Refetch jobs to update UI
+      await dispatch(addJobCommentThunk({ jobId: job.id, username: commentUser, comment })).unwrap();
+      await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
       setComment("");
+      setCommentUser("");
     } catch (err) {
       alert("Failed to add comment.");
     } finally {
@@ -187,7 +213,7 @@ const JobDetails = () => {
   if (!job) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Job not found.</div>;
 
   return (
-    
+
     <div className="min-h-screen bg-gray-50 py-8 px-4 flex justify-center">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
         <button
@@ -198,63 +224,63 @@ const JobDetails = () => {
         </button>
 
         <section className="mb-6 border-b pb-4">
-      <h2 className="text-lg font-bold mb-3 text-gray-800">Status Management</h2>
-      <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
-        <select
-          className="border rounded px-2 py-1"
-          value={selectedUser}
-          onChange={e => setSelectedUser(e.target.value)}
-        >
-          <option value="">Select User</option>
-          {USER_LIST.map(user => (
-            <option key={user} value={user}>{user}</option>
-          ))}
-        </select>
-        <select
-          className="border rounded px-2 py-1"
-          value={selectedStatus}
-          onChange={e => setSelectedStatus(e.target.value)}
-        >
-          {STATUS_OPTIONS.map(status => (
-            <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="px-4 py-1 bg-blue-600 text-white rounded"
-          disabled={saving || !selectedUser || !selectedStatus}
-        >
-          {saving ? "Saving..." : "Save"}
-        </button>
-      </form>
-      {/* Show current status */}
-      <div className="mb-2">
-  <span className="font-semibold">Current Status:</span>{" "}
-  <span className="px-2 py-1 rounded bg-gray-100">
-    {(currentStatus || "-").replace(/_/g, " ")}
-  </span>
-</div>
-<div>
-  <span className="font-semibold">Status History:</span>
-  <ul className="mt-1 space-y-1">
-  {Array.isArray(statusHistory) && statusHistory.length === 0 ? (
-  <li className="text-gray-400 text-sm">No status history.</li>
-) : (
-  Array.isArray(statusHistory) && statusHistory.map((entry, idx) => (
-    <li key={idx} className="text-sm">
-      <span className="font-semibold">{entry.username}</span> set status to{" "}
-      <span className="px-2 py-0.5 rounded bg-gray-200">
-        {(entry.status || "-").replace(/_/g, " ")}
-      </span>{" "}
-      <span className="text-xs text-gray-500">
-        ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
-      </span>
-    </li>
-  ))
-)}
-  </ul>
-</div>
-    </section>
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Status Management</h2>
+          <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
+            <select
+              className="border rounded px-2 py-1"
+              value={selectedUser}
+              onChange={e => setSelectedUser(e.target.value)}
+            >
+              <option value="">Select User</option>
+              {USER_LIST.map(user => (
+                <option key={user} value={user}>{user}</option>
+              ))}
+            </select>
+            <select
+              className="border rounded px-2 py-1"
+              value={selectedStatus}
+              onChange={e => setSelectedStatus(e.target.value)}
+            >
+              {STATUS_OPTIONS.map(status => (
+                <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="px-4 py-1 bg-blue-600 text-white rounded"
+              disabled={saving || !selectedUser || !selectedStatus}
+            >
+              {saving ? "Saving..." : "Save"}
+            </button>
+          </form>
+          {/* Show current status */}
+          <div className="mb-2">
+            <span className="font-semibold">Current Status:</span>{" "}
+            <span className="px-2 py-1 rounded bg-gray-100">
+              {(currentStatus || "-").replace(/_/g, " ")}
+            </span>
+          </div>
+          <div>
+            <span className="font-semibold">Status History:</span>
+            <ul className="mt-1 space-y-1">
+              {Array.isArray(statusHistory) && statusHistory.length === 0 ? (
+                <li className="text-gray-400 text-sm">No status history.</li>
+              ) : (
+                Array.isArray(statusHistory) && statusHistory.map((entry, idx) => (
+                  <li key={idx} className="text-sm">
+                    <span className="font-semibold">{entry.username}</span> set status to{" "}
+                    <span className="px-2 py-0.5 rounded bg-gray-200">
+                      {(entry.status || "-").replace(/_/g, " ")}
+                    </span>{" "}
+                    <span className="text-xs text-gray-500">
+                      ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
+                    </span>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </section>
         {/* <section className="mb-4"> */}
         {/* {!selectedUser && (
           <div className="flex items-center gap-2">
@@ -303,9 +329,9 @@ const JobDetails = () => {
             {engagedBy} engaged with this job
           </div>
         )} */}
-      {/* </section> */}
+        {/* </section> */}
 
-        
+
         {/* Job Overview Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">Job Overview</h2>
@@ -391,34 +417,34 @@ const JobDetails = () => {
             </div>
           </section>
         )}
-       {/* AE Remark Section */}
-      <section className="mb-6 border-b pb-4">
-        <h2 className="text-lg font-bold mb-3 text-gray-800">AE Remark</h2>
-        {!aeRemark ? (
-          <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
-            <textarea
-              className="border rounded px-2 py-1 w-full"
-              rows={2}
-              placeholder="Write AE Remark..."
-              value={aeRemarkInput}
-              onChange={e => setAeRemarkInput(e.target.value)}
-              disabled={saving}
-            />
-            <button
-              type="submit"
-              className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-              disabled={saving || !aeRemarkInput.trim()}
-            >
-              {saving ? "Saving..." : "Save"}
-            </button>
-          </form>
-        ) : (
-          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-900">
-            <span className="font-semibold">Saved AE Remark:</span>
-            <div>{aeRemark}</div>
-          </div>
-        )}
-      </section>
+        {/* AE Remark Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Remark</h2>
+          {!aeRemark ? (
+            <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
+              <textarea
+                className="border rounded px-2 py-1 w-full"
+                rows={2}
+                placeholder="Write AE Remark..."
+                value={aeRemarkInput}
+                onChange={e => setAeRemarkInput(e.target.value)}
+                disabled={saving}
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={saving || !aeRemarkInput.trim()}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </form>
+          ) : (
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-900">
+              <span className="font-semibold">Saved AE Remark:</span>
+              <div>{aeRemark}</div>
+            </div>
+          )}
+        </section>
         {/* KPIs Section */}
         <section className="mb-2">
           <h2 className="text-lg font-bold mb-3 text-gray-800">KPIs</h2>
@@ -456,32 +482,52 @@ const JobDetails = () => {
           </div>
         </section>
         {/* Comment Box */}
-        <form onSubmit={handleAddComment} className="mb-4">
-          <input
-            type="text"
-            value={comment}
-            onChange={e => setComment(e.target.value)}
-            placeholder="Add a comment..."
-            className="border px-2 py-1 rounded w-2/3"
-            disabled={commentLoading}
-          />
-          <button
-            type="submit"
-            className="ml-2 px-4 py-1 bg-blue-600 text-white rounded"
-            disabled={commentLoading}
-          >
-            {commentLoading ? "Saving..." : "Add"}
-          </button>
-        </form>
-        <ul className="mb-4">
-          {Array.isArray(job.comments) && job.comments.length > 0 ? (
-            job.comments.map((c, idx) => (
-              <li key={idx} className="text-sm text-gray-700 mb-1">- {c}</li>
-            ))
-          ) : (
-            <li className="text-sm text-gray-400">No comments yet.</li>
-          )}
-        </ul>
+        <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">
+  <select
+    className="border rounded px-2 py-1"
+    value={commentUser}
+    onChange={e => setCommentUser(e.target.value)}
+    required
+  >
+    <option value="">Select User</option>
+    {USER_LIST.map(user => (
+      <option key={user} value={user}>{user}</option>
+    ))}
+  </select>
+  <input
+    type="text"
+    value={comment}
+    onChange={e => setComment(e.target.value)}
+    placeholder="Add a comment..."
+    className="border px-2 py-1 rounded w-full"
+    disabled={commentLoading}
+    required
+  />
+  <button
+    type="submit"
+    className="px-4 py-1 bg-blue-600 text-white rounded"
+    disabled={commentLoading || !commentUser || !comment.trim()}
+  >
+    
+    {commentLoading ? "Saving..." : "Add"}
+  </button>
+</form>
+<ul className="mb-4">
+  {Array.isArray(job.comments) && job.comments.length > 0 ? (
+    job.comments.map((c, idx) => (
+      <li key={idx} className="text-sm text-gray-700 mb-1">
+        <span className="font-semibold">{c.username}:</span> {c.comment}
+        {c.date && (
+          <span className="text-xs text-gray-500 ml-2">
+            ({new Date(c.date).toLocaleString()})
+          </span>
+        )}
+      </li>
+    ))
+  ) : (
+    <li className="text-sm text-gray-400">No comments yet.</li>
+  )}
+</ul>
       </div>
     </div>
   );

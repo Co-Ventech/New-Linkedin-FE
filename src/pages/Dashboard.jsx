@@ -242,7 +242,7 @@ const Dashboard = () => {
     if (!jobsByDate || jobsByDate.length === 0) {
       dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
     }
-  }, [dispatch, range, jobsByDate]);
+  }, [dispatch, range, ]);
 
   const handleJobClick = (job) => {
     navigate(`/jobs/${job.id}`, { state: { job } });
