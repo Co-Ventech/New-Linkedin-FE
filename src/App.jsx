@@ -6,6 +6,7 @@ import UpworkDashboard from "./pages/UpworkDashboard"; // <-- New import
 import UpworkJobDetails from "./pages/UpworkJobDetails";
 import JobDetails from "./pages/JobDetails";
 import { useSelector } from "react-redux"
+import ScrollToTop from "./components/ScrollToTop";
 
 function ProtectedRoute({ children }) {
   const user = useSelector(state => state.user.user);
@@ -18,6 +19,7 @@ function App() {
 
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <Routes>
         <Route
           path="/login"
@@ -28,7 +30,7 @@ function App() {
           element={user ? <Navigate to="/dashboard" /> : <Register />}
         />
          {/* Redirect /dashboard to /dashboard/linkedin */}
-         <Route path="/dashboard" element={<Navigate to="/dashboard/linkedin" />} />
+        <Route path="/dashboard" element={<Navigate to="/dashboard/linkedin" />} />
         <Route
           path="/dashboard/linkedin"
           element={
