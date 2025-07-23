@@ -408,43 +408,7 @@ const JobDetails = () => {
             )}
           </div>
         </section>
-        {/* AI Remark Section */}
-        {job.ai_remark && (
-          <section className="mb-6 border-b pb-4">
-            <h2 className="text-lg font-bold mb-3 text-gray-800">AI Remark</h2>
-            <div className="prose prose-sm max-w-none whitespace-pre-line mb-2 text-blue-900 bg-blue-50 p-3 rounded border border-blue-200">
-              {job.ai_remark}
-            </div>
-          </section>
-        )}
-        {/* AE Remark Section */}
-        <section className="mb-6 border-b pb-4">
-          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Remark</h2>
-          {!aeRemark ? (
-            <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
-              <textarea
-                className="border rounded px-2 py-1 w-full"
-                rows={2}
-                placeholder="Write AE Remark..."
-                value={aeRemarkInput}
-                onChange={e => setAeRemarkInput(e.target.value)}
-                disabled={saving}
-              />
-              <button
-                type="submit"
-                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-                disabled={saving || !aeRemarkInput.trim()}
-              >
-                {saving ? "Saving..." : "Save"}
-              </button>
-            </form>
-          ) : (
-            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-900">
-              <span className="font-semibold">Saved AE Remark:</span>
-              <div>{aeRemark}</div>
-            </div>
-          )}
-        </section>
+       
         {/* KPIs Section */}
         <section className="mb-2">
           <h2 className="text-lg font-bold mb-3 text-gray-800">KPIs</h2>
@@ -480,6 +444,43 @@ const JobDetails = () => {
               <span className="text-xs font-bold min-w-[36px] text-center">{job.final_score !== undefined && job.final_score !== '' ? `${Math.round(parseFloat(job.final_score) * 100)}%` : '-'}</span>
             </div>
           </div>
+        </section>
+         {/* AI Remark Section */}
+         {job.ai_remark && (
+          <section className="mb-6 border-b pb-4">
+            <h2 className="text-lg font-bold mb-3 text-gray-800">AI Remark</h2>
+            <div className="prose prose-sm max-w-none whitespace-pre-line mb-2 text-blue-900 bg-blue-50 p-3 rounded border border-blue-200">
+              {job.ai_remark}
+            </div>
+          </section>
+        )}
+        {/* AE Remark Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Remark</h2>
+          {!aeRemark ? (
+            <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
+              <textarea
+                className="border rounded px-2 py-1 w-full"
+                rows={2}
+                placeholder="Write AE Remark..."
+                value={aeRemarkInput}
+                onChange={e => setAeRemarkInput(e.target.value)}
+                disabled={saving}
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={saving || !aeRemarkInput.trim()}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </form>
+          ) : (
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-900">
+              <span className="font-semibold">Saved AE Remark:</span>
+              <div>{aeRemark}</div>
+            </div>
+          )}
         </section>
         {/* Comment Box */}
         <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">

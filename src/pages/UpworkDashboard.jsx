@@ -3,35 +3,37 @@ import SidebarFilters from "../components/SidebarFilters";
 import UpworkJobCard from "../components/UpworkJobCard";
 import Header from "../components/Header";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
+
 
 const UpworkDashboard = () => {
-  const [jobs, setJobs] = useState([]);
-  const [filters, setFilters] = useState({
+  const dispatch = useDispatch();
+  const { upworkJobsByDate, loading, error } = useSelector(state => state.jobs);
+  const [filters, setFilters] = React.useState({
     level: "",
     country: [],
     category: [],
     jobType: "",
   });
 
-  // Fetch jobs from API
-  useEffect(() => {
-    const fetchJobs = async () => {
-      const res = await axios.get("http://44.214.92.17:3000/api/upwork/jobs-by-date", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
-      });
-      setJobs(res.data.jobs || []);
-    };
-    fetchJobs();
-  }, []);
+  React.useEffect(() => {
+    if (!upworkJobsByDate || upworkJobsByDate.length === 0) {
+      dispatch(fetchUpworkJobsByDateThunk());
+    }
+  }, [dispatch, upworkJobsByDate]);
+
+  // Flatten jobs for filtering
+  const allJobs = upworkJobsByDate.flatMap(day => day.jobs || []);
 
   // Extract unique filter options from jobs
-  const levels = Array.from(new Set(jobs.map(j => j.level).filter(Boolean)));
-  const countries = Array.from(new Set(jobs.map(j => j.country).filter(Boolean)));
-  const categories = Array.from(new Set(jobs.map(j => j.category).filter(Boolean)));
-  const jobTypes = Array.from(new Set(jobs.map(j => j.jobType).filter(Boolean)));
+  const levels = Array.from(new Set(allJobs.map(j => j.level).filter(Boolean)));
+  const countries = Array.from(new Set(allJobs.map(j => j.country).filter(Boolean)));
+  const categories = Array.from(new Set(allJobs.map(j => j.category).filter(Boolean)));
+  const jobTypes = Array.from(new Set(allJobs.map(j => j.jobType).filter(Boolean)));
 
   // Filtering logic
-  const filteredJobs = jobs.filter(job => {
+  const filteredJobs = allJobs.filter(job => {
     if (filters.level && job.level !== filters.level) return false;
     if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
     if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
@@ -65,12 +67,16 @@ const UpworkDashboard = () => {
         {/* Main job list area */}
         <main className="w-full md:w-3/4">
           <h1 className="text-2xl font-bold mb-4">Upwork Jobs</h1>
-          {filteredJobs.length === 0 ? (
+          {loading ? (
+            <div>Loading jobs...</div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : filteredJobs.length === 0 ? (
             <div>No jobs found.</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
               {filteredJobs.map(job => (
-                <UpworkJobCard key={job.jobId} job={job} />
+                <UpworkJobCard key={job.jobId || job.id} job={job} />
               ))}
             </div>
           )}
