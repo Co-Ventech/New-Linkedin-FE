@@ -273,14 +273,15 @@ const Dashboard = () => {
       if (filters.field.length > 0 && !filters.field.includes(job.title)) {
         return false;
       }
+      if (filters.status && job.currentStatus !== filters.status) return false;
       // Domain filter (predicted_domain)
       if (filters.domain.length > 0 && !filters.domain.includes(job.predicted_domain)) {
         return false;
       }
       //status filter
-      if (filters.status && job.status !== filters.status) {
-        return false;
-      }
+      // if (filters.status && job.status !== filters.status) {
+      //   return false;
+      // }
       // Country filter
       if (filters.country.length > 0) {
         let jobCountries = [];
@@ -312,10 +313,21 @@ const Dashboard = () => {
     }),
   }));
 
+  const statusOptions = [
+    "not_engaged",
+    "applied",
+    "engaged",
+    "interview",
+    "offer",
+    "rejected",
+    "archived"
+  ];
   // Extract unique job types, categories, colors, countries, fields, domains
   const jobTypes = Array.from(new Set(allJobs.flatMap((j) => j.employmentType || []).filter(Boolean)));
   const categories = Array.from(new Set(allJobs.map((j) => j.seniority).filter(Boolean)));
-  const colors = Array.from(new Set(allJobs.map((j) => j.tier || j.tierColor).filter(Boolean)));
+  // const colors = Array.from(new Set(allJobs.map((j) => j.tier || j.tierColor).filter(Boolean)));
+  const colors = ["Yellow", "Green", "Red"];
+ 
   const countries = Array.from(
     new Set(
       allJobs
@@ -375,6 +387,8 @@ const Dashboard = () => {
             fields={fields}
             domains={domains}
             filters={filters}
+            statusOptions={statusOptions}
+            status={filters.status}
             onFilterChange={handleFilterChange}
           />
         </aside>

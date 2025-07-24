@@ -7,6 +7,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
 
 
+
 const UpworkDashboard = () => {
   const dispatch = useDispatch();
   const { upworkJobsByDate, loading, error } = useSelector(state => state.jobs);
@@ -15,9 +16,13 @@ const UpworkDashboard = () => {
     country: [],
     category: [],
     jobType: "",
+    color : [],
     paymentVerified: "",
     clientHistory: "",
     projectLength: "",
+    hoursPerWeek: "",
+    jobDuration: "",
+    status: "",
 
   });
 
@@ -34,16 +39,29 @@ const UpworkDashboard = () => {
   const levels = Array.from(new Set(allJobs.map(j => j.level).filter(Boolean)));
   const countries = Array.from(new Set(allJobs.map(j => j.country).filter(Boolean)));
   const categories = Array.from(new Set(allJobs.map(j => j.category).filter(Boolean)));
-  const jobTypes = Array.from(new Set(allJobs.map(j => j.jobType).filter(Boolean)));
+  const jobTypes = ["Full Time", "Part Time", "Contract", "Freelance"];
+  const colors = ["Yellow", "Green", "Red"];
+  // const jobTypes = Array.from(new Set(allJobs.map(j => j.jobType).filter(Boolean)));
+  // const colors = Array.from(new Set(allJobs.map((j) => j.tier || j.tierColor).filter(Boolean)));
   const paymentVerified = Array.from(new Set(allJobs.map(j => j.isPaymentMethodVerified).filter(v => v !== undefined)));
   const clientHistory = Array.from(new Set(allJobs.map(j => j.buyerTotalJobsWithHires).filter(v => v !== undefined)));
   const hourlyWeeks = Array.from(new Set(allJobs.map(j => j.hourlyWeeks).filter(v => v !== undefined)));
+  const statusOptions = [
+    "not_engaged",
+    "applied",
+    "engaged",
+    "interview",
+    "offer",
+    "rejected",
+    "archived"
+  ];
   // Filtering logic
   const filteredJobs = allJobs.filter(job => {
     if (filters.level && job.level !== filters.level) return false;
     if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
     if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
     if (filters.jobType && job.jobType !== filters.jobType) return false;
+    if (filters.status && job.currentStatus !== filters.status) return false;
     if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
   if (filters.clientHistory) {
     const hires = job.buyerTotalJobsWithHires;
@@ -67,6 +85,35 @@ const UpworkDashboard = () => {
     }
     if (filters.projectLength !== group) return false;
   }
+  if (filters.hoursPerWeek) {
+    const minHours = job.minHoursWeek;
+    let group = "";
+    if (minHours === null || minHours === undefined) {
+      group = "not_given";
+    } else if (minHours <= 30) {
+      group = "less_30";
+    } else if (minHours > 30) {
+      group = "more_30";
+    }
+    if (filters.hoursPerWeek !== group) return false;
+  }
+
+  // Job Duration filter
+  if (filters.jobDuration) {
+    const isContractToHire = job.isContractToHire;
+    let group = "";
+    if (isContractToHire === true) {
+      group = "contract_to_hire";
+    } else {
+      group = "not_given";
+    }
+    if (filters.jobDuration !== group) return false;
+  }
+    // Color filter
+    const colorValue = job.tier || job.tierColor;
+    if (filters.color.length > 0 && !filters.color.includes(colorValue)) {
+      return false;
+    }
     return true;
   });
 
@@ -94,6 +141,11 @@ const UpworkDashboard = () => {
             categories={categories}
             filters={filters}
             projectLength={filters.projectLength}
+            hoursPerWeek={filters.hoursPerWeek}
+            jobDuration={filters.jobDuration}
+            statusOptions={statusOptions}
+            status={filters.status}
+            colors={colors}
             onFilterChange={handleFilterChange}
           />
         </aside>

@@ -115,7 +115,7 @@ const UpworkJobCard = ({ job, view = "grid" }) => {
         ))}
       </div>
       <div>
-  <span className={ `px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.projectLength}`} title="Project Length">Project Length:
+  <span className={ `bg-blue-100 text-blue-800 border-blue-300 ${badgeClass.projectLength}`} title="Project Length">Project Length:
   {(() => {
     const weeks = job.hourlyWeeks;
     if (weeks === null || weeks === undefined || weeks < 4) return "Less than 1 month";

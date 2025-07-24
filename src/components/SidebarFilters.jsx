@@ -1,7 +1,6 @@
 import React from "react";
-
-const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange }) => (
-  <div className="bg-white rounded-lg shadow p-4 space-y-6 sticky top-6">
+const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange, statusOptions }) => (
+  <div className="bg-white rounded-lg shadow p-4 space-y-6 scrollbar-hide top-2">
     {/* Job Type */}
     <div>
       <h3 className="font-semibold mb-2">Job Type</h3>
@@ -33,46 +32,65 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
       </div>
     </div>
     {/* Status (engaged/not_engaged) */}
+    {statusOptions && (
   <div>
-  <h3 className="font-semibold mb-2">Status</h3>
-  <div className="space-y-1">
-    <label className="flex items-center space-x-2 cursor-pointer">
-      <input
-        type="radio"
-        name="status"
-        value=""
-        checked={filters.status === ""}
-        onChange={() => onFilterChange("status", "")}
-        className="accent-blue-600"
-      />
-      <span>All</span>
-    </label>
-    <label className="flex items-center space-x-2 cursor-pointer">
-      <input
-        type="radio"
-        name="status"
-        value="engaged"
-        checked={filters.status === "engaged"}
-        onChange={() => onFilterChange("status", "engaged")}
-        className="accent-blue-600"
-      />
-      <span>Engaged</span>
-    </label>
-    <label className="flex items-center space-x-2 cursor-pointer">
-      <input
-        type="radio"
-        name="status"
-        value="not_engaged"
-        checked={filters.status === "not_engaged"}
-        onChange={() => onFilterChange("status", "not_engaged")}
-        className="accent-blue-600"
-      />
-      <span>Not Engaged</span>
-    </label>
+    <h3 className="font-semibold mb-2">Status</h3>
+    <div className="space-y-1">
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="status"
+          value=""
+          checked={filters.status === ""}
+          onChange={() => onFilterChange("status", "")}
+          className="accent-blue-600"
+        />
+        <span>All</span>
+      </label>
+      {statusOptions.map(option => (
+        <label key={option} className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="radio"
+            name="status"
+            value={option}
+            checked={filters.status === option}
+            onChange={() => onFilterChange("status", option)}
+            className="accent-blue-600"
+          />
+          <span>{option.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
+        </label>
+      ))}
+    </div>
   </div>
-</div>
-
+)}
+  {/* Color (multi-select) */}
+  {colors && (
+      <div>
+        <h3 className="font-semibold mb-2">Tier</h3>
+        <div className="space-y-1">
+          {colors.map(color => (
+            <label key={color} className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="color"
+                value={color}
+                checked={filters.color.includes(color)}
+                onChange={() => {
+                  const newColors = filters.color.includes(color)
+                    ? filters.color.filter((c) => c !== color)
+                    : [...filters.color , color];
+                  onFilterChange("color", newColors);
+                }}
+                className="accent-blue-600"
+              />
+              <span>{color === 'Green' ? 'AI Recommended' : color === 'Yellow' ? 'Recommended' : color === 'Red' ? 'Not Recommended' : color}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    )}
 {/* Client History */}
+{typeof filters.clientHistory !== "undefined" && (
 <div>
   <h3 className="font-semibold mb-2">Client History</h3>
   <div className="space-y-1">
@@ -122,6 +140,7 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
     </label>
   </div>
 </div>
+)}
 {/* Payment Verified */}
 {paymentVerified && paymentVerified.length > 0 && (
   <div>
@@ -141,6 +160,7 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
   </div>
 )}
 {/* Project Length */}
+{typeof filters.projectLength !== "undefined" && (
 <div>
   <h3 className="font-semibold mb-2">Project Length</h3>
   <div className="space-y-1">
@@ -200,7 +220,102 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
       <span>More than 6 months</span>
     </label>
   </div>
-</div>
+  </div>
+)}
+{/* Hours per week */}
+{typeof filters.hoursPerWeek !== "undefined" && (
+  <div>
+    <h3 className="font-semibold mb-2">Hours per week</h3>
+    <div className="space-y-1">
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="hoursPerWeek"
+          value=""
+          checked={filters.hoursPerWeek === ""}
+          onChange={() => onFilterChange("hoursPerWeek", "")}
+          className="accent-blue-600"
+        />
+        <span>All</span>
+      </label>
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="hoursPerWeek"
+          value="not_given"
+          checked={filters.hoursPerWeek === "not_given"}
+          onChange={() => onFilterChange("hoursPerWeek", "not_given")}
+          className="accent-blue-600"
+        />
+        <span>Not given</span>
+      </label>
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="hoursPerWeek"
+          value="less_30"
+          checked={filters.hoursPerWeek === "less_30"}
+          onChange={() => onFilterChange("hoursPerWeek", "less_30")}
+          className="accent-blue-600"
+        />
+        <span>Less than 30 hrs/week</span>
+      </label>
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="hoursPerWeek"
+          value="more_30"
+          checked={filters.hoursPerWeek === "more_30"}
+          onChange={() => onFilterChange("hoursPerWeek", "more_30")}
+          className="accent-blue-600"
+        />
+        <span>More than 30 hrs/week</span>
+      </label>
+    </div>
+  </div>
+)}
+
+{/* Job Duration */}
+{typeof filters.jobDuration !== "undefined" && (
+  <div>
+    <h3 className="font-semibold mb-2">Job Duration</h3>
+    <div className="space-y-1">
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="jobDuration"
+          value=""
+          checked={filters.jobDuration === ""}
+          onChange={() => onFilterChange("jobDuration", "")}
+          className="accent-blue-600"
+        />
+        <span>All</span>
+      </label>
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="jobDuration"
+          value="contract_to_hire"
+          checked={filters.jobDuration === "contract_to_hire"}
+          onChange={() => onFilterChange("jobDuration", "contract_to_hire")}
+          className="accent-blue-600"
+        />
+        <span>Contract to Hire</span>
+      </label>
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="jobDuration"
+          value="not_given"
+          checked={filters.jobDuration === "not_given"}
+          onChange={() => onFilterChange("jobDuration", "not_given")}
+          className="accent-blue-600"
+        />
+        <span>Not given</span>
+      </label>
+    </div>
+  </div>
+)}
     {/* Seniority Level (single-select) */}
     {/* <div>
       <h3 className="font-semibold mb-2">Seniority Level</h3>
@@ -267,32 +382,7 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
     </select>
   </div>
 )}
-    {/* Color (multi-select) */}
-    {colors && colors.length > 0 && (
-      <div>
-        <h3 className="font-semibold mb-2">Color</h3>
-        <div className="space-y-1">
-          {colors.map((color) => (
-            <label key={color} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="color"
-                value={color}
-                checked={filters.color.includes(color)}
-                onChange={() => {
-                  const newColors = filters.color.includes(color)
-                    ? filters.color.filter((c) => c !== color)
-                    : [...filters.color, color];
-                  onFilterChange("color", newColors);
-                }}
-                className="accent-blue-600"
-              />
-              <span>{color === 'Green' ? 'AI Recommended' : color === 'Yellow' ? 'Recommended' : color === 'Red' ? 'Not Recommended' : color}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    )}
+  
     {/* Country (single-select) */}
     {countries && countries.length > 0 && (
       <div>

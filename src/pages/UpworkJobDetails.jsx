@@ -222,7 +222,20 @@ const job = useSelector(state =>
             {job.level && <span className="px-2 py-0.5 rounded text-xs font-semibold border bg-gray-100 text-gray-800 border-gray-300">{job.level}</span>}
             {job.contractorTier && <span className="px-2 py-0.5 rounded text-xs font-semibold border bg-gray-100 text-gray-800 border-gray-300">{job.contractorTier}</span>}
           </div>
+
           <div className="flex flex-wrap gap-4 text-xs text-gray-500 mb-2">
+          {/* <span className="font-bold">
+  Project Length:{" "}
+  {(() => {
+    const weeks = job.hourlyWeeks;
+    if (weeks === null || weeks === undefined || weeks < 4) return "Less than 1 month";
+    if (weeks >= 4 && weeks < 13) return "1 to 3 months";
+    if (weeks >= 13 && weeks < 25) return "3 to 6 months";
+    if (weeks >= 25) return "More than 6 months";
+    return "-";
+  })()}
+</span> */}
+
             <span className="font-bold">Country: {job.country || '-'}</span>
             <span className="font-bold">Industry: {job.companyIndustry || '-'}</span>
             <span className="font-bold">Company Size: {job.companySize || '-'}</span>

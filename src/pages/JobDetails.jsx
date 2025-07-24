@@ -6,7 +6,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk,updateAeCommentThunk } from "../slices/jobsSlice";
+import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk,updateAeCommentThunk  } from "../slices/jobsSlice";
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -58,19 +58,12 @@ const JobDetails = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-
-  const [engaged, setEngaged] = useState("");
-  const [engagedBy, setEngagedBy] = useState("");
-
-  const [toggleLoading, setToggleLoading] = useState(false);
   const range = useSelector(state => state.jobs.range);
   const jobsByDate = useSelector(state => state.jobs.jobsByDate);
   const allJobs = jobsByDate.flatMap(day => day.jobs || []);
   const job = allJobs.find(j => String(j.id) === String(id));
-  // const [aeRemark, setAeRemark] = useState(job.ae_remark || "");
-  const [aeRemark, setAeRemark] = useState("");
-  const [aeRemarkInput, setAeRemarkInput] = useState("");
-  // const [saving, setSaving] = useState(false);
+  const [ae_comment, setAe_comment] = useState("");
+  const [ae_commentInput, setAe_commentInput] = useState("");
   const [commentUser, setCommentUser] = useState("");
   const [comment, setComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
@@ -99,24 +92,16 @@ const JobDetails = () => {
   const [statusHistory, setStatusHistory] = useState(job.statusHistory || []);
 
 
+
+
   console.log("Redux job status:", job?.status);
 
-  // const loadJob = async () => {
-  //   try {
-  //     const job = await fetchJobById(id);
-  //     setCurrentStatus(job.currentStatus || "not_engaged");
-  //     setStatusHistory(Array.isArray(job.statusHistory) ? job.statusHistory : []);
-  //     setSelectedStatus(job.currentStatus || "not_engaged");
-  //   } catch (err) {
-  //     // handle error
-  //   }
-  // };
   useEffect(() => {
     if (job) {
       setCurrentStatus(job.currentStatus || "not_engaged");
       setStatusHistory(Array.isArray(job.statusHistory) ? job.statusHistory : []);
       setSelectedStatus(job.currentStatus || "not_engaged");
-      setAeRemark(job.ae_remark || "");
+      // setAe_comment(job.ae_comment || "");
     }
   }, [job]);
 
@@ -184,14 +169,14 @@ const JobDetails = () => {
   e.preventDefault();
   setSaving(true);
   try {
-    await dispatch(updateAeCommentThunk({ jobId: job.id, ae_comment: aeRemarkInput })).unwrap();
+    await dispatch(updateAeCommentThunk({ jobId: job.id, ae_comment: ae_commentInput })).unwrap();
     await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
-    setAeRemark(aeRemarkInput); // Optimistic update
-    setAeRemarkInput("");
+    setAe_comment(ae_commentInput); 
+    setAe_commentInput("");
   } catch (err) {
     alert("Failed to save AE Remark.");
   } finally {
-    setSaving(false);
+   // setSaving(false);
   }
 };
   const handleAddComment = async (e) => {
@@ -457,20 +442,20 @@ const JobDetails = () => {
         {/* AE Remark Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">AE Remark</h2>
-          {!aeRemark ? (
+          {!job.ae_comment ? (
             <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
               <textarea
                 className="border rounded px-2 py-1 w-full"
                 rows={2}
                 placeholder="Write AE Remark..."
-                value={aeRemarkInput}
-                onChange={e => setAeRemarkInput(e.target.value)}
+                value={ae_commentInput}
+                onChange={e => setAe_commentInput(e.target.value)}
                 disabled={saving}
               />
               <button
                 type="submit"
                 className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-                disabled={saving || !aeRemarkInput.trim()}
+                disabled={saving || !ae_commentInput.trim()}
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -478,7 +463,7 @@ const JobDetails = () => {
           ) : (
             <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-900">
               <span className="font-semibold">Saved AE Remark:</span>
-              <div>{aeRemark}</div>
+                  <div>{job.ae_comment}</div>
             </div>
           )}
         </section>
