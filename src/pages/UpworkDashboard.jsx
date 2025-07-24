@@ -15,6 +15,10 @@ const UpworkDashboard = () => {
     country: [],
     category: [],
     jobType: "",
+    paymentVerified: "",
+    clientHistory: "",
+    projectLength: "",
+
   });
 
   React.useEffect(() => {
@@ -31,13 +35,38 @@ const UpworkDashboard = () => {
   const countries = Array.from(new Set(allJobs.map(j => j.country).filter(Boolean)));
   const categories = Array.from(new Set(allJobs.map(j => j.category).filter(Boolean)));
   const jobTypes = Array.from(new Set(allJobs.map(j => j.jobType).filter(Boolean)));
-
+  const paymentVerified = Array.from(new Set(allJobs.map(j => j.isPaymentMethodVerified).filter(v => v !== undefined)));
+  const clientHistory = Array.from(new Set(allJobs.map(j => j.buyerTotalJobsWithHires).filter(v => v !== undefined)));
+  const hourlyWeeks = Array.from(new Set(allJobs.map(j => j.hourlyWeeks).filter(v => v !== undefined)));
   // Filtering logic
   const filteredJobs = allJobs.filter(job => {
     if (filters.level && job.level !== filters.level) return false;
     if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
     if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
     if (filters.jobType && job.jobType !== filters.jobType) return false;
+    if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
+  if (filters.clientHistory) {
+    const hires = job.buyerTotalJobsWithHires;
+    if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
+    if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
+    if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
+  }
+  if (filters.projectLength) {
+    const weeks = job.hourlyWeeks;
+    let group = "";
+    if (weeks === null || weeks === undefined) {
+      group = "less_than_1";
+    } else if (weeks < 4) {
+      group = "less_than_1";
+    } else if (weeks >= 4 && weeks < 13) {
+      group = "1_3";
+    } else if (weeks >= 13 && weeks < 25) {
+      group = "3_6";
+    } else if (weeks >= 25) {
+      group = "more_6";
+    }
+    if (filters.projectLength !== group) return false;
+  }
     return true;
   });
 
@@ -56,17 +85,21 @@ const UpworkDashboard = () => {
         {/* Sidebar */}
         <aside className="hidden md:block md:w-1/4">
           <SidebarFilters
+            paymentVerified={paymentVerified}
+            clientHistory={filters.clientHistory}
+            // onFilterChange={handleFilterChange}
             jobTypes={jobTypes}
             levels={levels}
             countries={countries}
             categories={categories}
             filters={filters}
+            projectLength={filters.projectLength}
             onFilterChange={handleFilterChange}
           />
         </aside>
         {/* Main job list area */}
         <main className="w-full md:w-3/4">
-          <h1 className="text-2xl font-bold mb-4">Upwork Jobs</h1>
+          {/* <h1 className="text-2xl font-bold mb-4">Upwork Jobs</h1> */}
           {loading ? (
             <div>Loading jobs...</div>
           ) : error ? (

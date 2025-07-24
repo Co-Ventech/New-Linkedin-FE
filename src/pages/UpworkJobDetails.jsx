@@ -263,6 +263,13 @@ const job = useSelector(state =>
             ) : (
               <span className="text-xs text-gray-400">No skills listed.</span>
             )}
+          
+          <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
+            <span><span className="font-bold">Client History: buyerTotalJobsWithHires </span> {job.buyerTotalJobsWithHires === null || job.buyerTotalJobsWithHires === undefined
+              ? "No hires"
+              : job.buyerTotalJobsWithHires 
+             }</span>
+          </div>
           </div>
         </section>
         {/* KPIs Section */}
@@ -369,7 +376,7 @@ const job = useSelector(state =>
             // disabled={commentLoading || !commentUser || !comment.trim()}
           >
             {commentLoading ? "Saving..." : "Add"}
-          </button>
+      </button>
         </form>
         <ul className="mb-4">
           {Array.isArray(job.comments) && job.comments.length > 0 ? (

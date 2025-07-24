@@ -1,6 +1,6 @@
 import React from "react";
 
-const SidebarFilters = ({ categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange }) => (
+const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange }) => (
   <div className="bg-white rounded-lg shadow p-4 space-y-6 sticky top-6">
     {/* Job Type */}
     <div>
@@ -68,6 +68,136 @@ const SidebarFilters = ({ categories, jobTypes, colors, countries, levels, domai
         className="accent-blue-600"
       />
       <span>Not Engaged</span>
+    </label>
+  </div>
+</div>
+
+{/* Client History */}
+<div>
+  <h3 className="font-semibold mb-2">Client History</h3>
+  <div className="space-y-1">
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="clientHistory"
+        value=""
+        checked={filters.clientHistory === ""}
+        onChange={() => onFilterChange("clientHistory", "")}
+        className="accent-blue-600"
+      />
+      <span>All</span>
+    </label>
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="clientHistory"
+        value="no_hires"
+        checked={filters.clientHistory === "no_hires"}
+        onChange={() => onFilterChange("clientHistory", "no_hires")}
+        className="accent-blue-600"
+      />
+      <span>No hires</span>
+    </label>
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="clientHistory"
+        value="1_9"
+        checked={filters.clientHistory === "1_9"}
+        onChange={() => onFilterChange("clientHistory", "1_9")}
+        className="accent-blue-600"
+      />
+      <span>1-9</span>
+    </label>
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="clientHistory"
+        value="10_plus"
+        checked={filters.clientHistory === "10_plus"}
+        onChange={() => onFilterChange("clientHistory", "10_plus")}
+        className="accent-blue-600"
+      />
+      <span>10+</span>
+    </label>
+  </div>
+</div>
+{/* Payment Verified */}
+{paymentVerified && paymentVerified.length > 0 && (
+  <div>
+    <h3 className="font-semibold mb-2">Payment Verified</h3>
+    <select
+      className="w-full border rounded px-2 py-1"
+      value={filters.paymentVerified || ""}
+      onChange={e => onFilterChange("paymentVerified", e.target.value)}
+    >
+      <option value="">All</option>
+      {paymentVerified.map(paymentVerified => (
+        <option key={paymentVerified} value={String(paymentVerified)}>
+          {paymentVerified ? "Verified" : "Not Verified"}
+        </option>
+      ))}
+    </select>
+  </div>
+)}
+{/* Project Length */}
+<div>
+  <h3 className="font-semibold mb-2">Project Length</h3>
+  <div className="space-y-1">
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="projectLength"
+        value=""
+        checked={filters.projectLength === ""}
+        onChange={() => onFilterChange("projectLength", "")}
+        className="accent-blue-600"
+      />
+      <span>All</span>
+    </label>
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="projectLength"
+        value="less_than_1"
+        checked={filters.projectLength === "less_than_1"}
+        onChange={() => onFilterChange("projectLength", "less_than_1")}
+        className="accent-blue-600"
+      />
+      <span>Less than 1 month</span>
+    </label>
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="projectLength"
+        value="1_3"
+        checked={filters.projectLength === "1_3"}
+        onChange={() => onFilterChange("projectLength", "1_3")}
+        className="accent-blue-600"
+      />
+      <span>1 to 3 months</span>
+    </label>
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="projectLength"
+        value="3_6"
+        checked={filters.projectLength === "3_6"}
+        onChange={() => onFilterChange("projectLength", "3_6")}
+        className="accent-blue-600"
+      />
+      <span>3 to 6 months</span>
+    </label>
+    <label className="flex items-center space-x-2 cursor-pointer">
+      <input
+        type="radio"
+        name="projectLength"
+        value="more_6"
+        checked={filters.projectLength === "more_6"}
+        onChange={() => onFilterChange("projectLength", "more_6")}
+        className="accent-blue-600"
+      />
+      <span>More than 6 months</span>
     </label>
   </div>
 </div>
@@ -220,6 +350,7 @@ const SidebarFilters = ({ categories, jobTypes, colors, countries, levels, domai
         </select>
       </div>
     )}
+
     
   </div>
 );

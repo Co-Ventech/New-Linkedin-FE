@@ -10,6 +10,7 @@ const badgeClass = {
   },
   jobType: 'bg-blue-100 text-blue-800 border-blue-300',
   occupation: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+  projectLength: 'bg-gray-100 text-gray-800 border-gray-300',
 };
 
 const UpworkJobCard = ({ job, view = "grid" }) => {
@@ -57,7 +58,7 @@ const UpworkJobCard = ({ job, view = "grid" }) => {
             <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass} ml-2`} title="Tier">
               {tier === 'Green' ? 'AI Recommended' :
                 tier === 'Yellow' ? 'Recommended' :
-                tier === 'Red' ? 'Not Recommended' : tier}
+                  tier === 'Red' ? 'Not Recommended' : tier}
             </span>
           )}
         </div>
@@ -82,9 +83,16 @@ const UpworkJobCard = ({ job, view = "grid" }) => {
               {contractorTier}
             </span>
           )}
-        </div>
+        
+          <span className={ `px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.hires}`} title="Hires">Hires:
+          {job.buyerTotalJobsWithHires === null || job.buyerTotalJobsWithHires === undefined
+            ? "No hires"
+            : job.buyerTotalJobsWithHires < 10
+              ? job.buyerTotalJobsWithHires
+              :job.buyerTotalJobsWithHires }</span>
         <div className="text-xs text-gray-500 mb-1 flex gap-2">
-          <span className="font-bold">{country}</span>
+          <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.country}`} title="Country">{country}</span>
+          </div>
           {companyIndustry && <span>{companyIndustry}</span>}
         </div>
         <div className={`text-gray-700 text-sm mb-2 ${!showFullDesc ? 'line-clamp-3' : ''} min-h-[40px]`}>
@@ -106,6 +114,18 @@ const UpworkJobCard = ({ job, view = "grid" }) => {
           <span key={skill} className="bg-gray-100 text-xs px-2 py-1 rounded">{skill}</span>
         ))}
       </div>
+      <div>
+  <span className={ `px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.projectLength}`} title="Project Length">Project Length:
+  {(() => {
+    const weeks = job.hourlyWeeks;
+    if (weeks === null || weeks === undefined || weeks < 4) return "Less than 1 month";
+    if (weeks >= 4 && weeks < 13) return "1 to 3 months";
+    if (weeks >= 13 && weeks < 25) return "3 to 6 months";
+    if (weeks >= 25) return "More than 6 months";
+    return "-";
+  })()}
+</span>
+</div>
       {/* Meta Section */}
       <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-1">
         {minHourlyRate && <span>Min Rate: ${minHourlyRate}</span>}
