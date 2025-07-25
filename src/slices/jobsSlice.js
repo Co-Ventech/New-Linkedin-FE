@@ -57,7 +57,8 @@ export const fetchJobByIdThunk = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const job = await fetchJobById(id);
-      return job;
+      // Normalize the job before returning
+      return normalizeJob(job);
     } catch (err) {
       return rejectWithValue(err.message);
     }
