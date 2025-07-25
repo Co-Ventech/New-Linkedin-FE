@@ -12,7 +12,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
 const PORT = import.meta.env.VITE_PORT;
 
-const Header = ({ onExport, onLogout, user, onRefreshJobs }) => {
+const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel }) => {
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(""); // '', 'fetch', 'filter', 'score'
   const [message, setMessage] = useState("");
@@ -52,6 +52,30 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs }) => {
     setFetchCooldown(Math.floor(diff / 1000));
   };
 
+
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await fetch("http://44.214.92.17:3000/api/jobs-by-date/excel", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to download file");
+      const blob = await response.blob();
+      // Create a link and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "jobs.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Download failed: " + err.message);
+    }
+  };
   // Add this button somewhere in your Header's JSX for testing:
 
   // Updated Fetch Jobs logic (unchanged)
@@ -85,38 +109,38 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs }) => {
   // };
 
   // Unified Process, Save, and Fetch handler
-  const handleProcessSaveAndFetch = async () => {
-    setLoading("process-all");
-    setMessage("");
-    try {
-      // 1. Filter jobs (if needed)
-      await axios.get(`${REMOTE_HOST}:${PORT}/api/apify/filtered`);
-      setMessage("Filter jobs: Success!");
-      // 2. Score jobs
-      await axios.get(`${REMOTE_HOST}:${PORT}/api/apify/score`);
-      setMessage("Score jobs: Success!");
-      // 3. Save jobs to DB
-      await axios.post(
-        `${REMOTE_HOST}:${PORT}/api/save-jobs`,
-        {},
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        }
-      );
-      setMessage("Fetch Jobs from Database: Success!");
-      await axios.get(
-        `${REMOTE_HOST}:${PORT}/api/jobs-by-date`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        }
-      );
-      setMessage("Fetch Jobs from Database!");
+  // const handleProcessSaveAndFetch = async () => {
+  //   setLoading("process-all");
+  //   setMessage("");
+  //   try {
+  //     // 1. Filter jobs (if needed)
+  //     await axios.get(`${REMOTE_HOST}:${PORT}/api/apify/filtered`);
+  //     setMessage("Filter jobs: Success!");
+  //     // 2. Score jobs
+  //     await axios.get(`${REMOTE_HOST}:${PORT}/api/apify/score`);
+  //     setMessage("Score jobs: Success!");
+  //     // 3. Save jobs to DB
+  //     await axios.post(
+  //       `${REMOTE_HOST}:${PORT}/api/save-jobs`,
+  //       {},
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //         },
+  //       }
+  //     );
+  //     setMessage("Fetch Jobs from Database: Success!");
+  //     await axios.get(
+  //       `${REMOTE_HOST}:${PORT}/api/jobs-by-date`,
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //         },
+  //       }
+  //     );
+  //     setMessage("Fetch Jobs from Database!");
       // 3. Fetch scored jobs from backend file (not jobs-by-date)
       // const scoredRes = await axios.get("http://localhost:3001/api/scored-jobs-file", {
       //   headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
@@ -130,13 +154,13 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs }) => {
       //   setMessage("No scored jobs found to save.");
       // }
       // 5. Fetch jobs by date from DB to refresh UI
-      if (onRefreshJobs) onRefreshJobs();
-    } catch (err) {
-      setMessage("Process/Save/Fetch jobs: Failed!");
-    } finally {
-      setLoading("");
-    }
-  };
+    //   if (onRefreshJobs) onRefreshJobs();
+    // } catch (err) {
+    //   setMessage("Process/Save/Fetch jobs: Failed!");
+    // } finally {
+    //   setLoading("");
+    // }
+  
 
   // Helper to format cooldown
   const formatCooldown = (seconds) => {
@@ -146,121 +170,122 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs }) => {
     return `${h}h ${m}m ${s}s`;
   };
 
-  // Handler to fetch scored jobs from backend file and save to DB
-  const handleSaveScoredJobsToDB = async () => {
-    setLoading("save-scored");
-    setMessage("");
-    try {
-      alert("About to fetch scored jobs from backend file");
-      const res = await fetch(`${REMOTE_HOST}:${PORT}/api/jobs-by-date`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      });
-      const data = await res.json();
-      console.log(data.job);
+  // // Handler to fetch scored jobs from backend file and save to DB
+  // const handleSaveScoredJobsToDB = async () => {
+  //   setLoading("save-scored");
+  //   setMessage("");
+  //   try {
+  //     alert("About to fetch scored jobs from backend file");
+  //     const res = await fetch(`${REMOTE_HOST}:${PORT}/api/jobs-by-date`, {
+  //       headers: {
+  //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //       },
+  //     });
+  //     const data = await res.json();
+  //     console.log(data.job);
 
-      const jobs = data;
-      alert(
-        "Fetched " + (jobs?.length || 0) + " scored jobs. Now saving to DB..."
-      );
-      await saveJobsToBackend(jobs);
-      alert("Scored jobs saved to DB!");
-      setMessage("Scored jobs saved to DB!");
-    } catch (err) {
-      alert("Failed to save scored jobs: " + err.message);
-      setMessage("Failed to save scored jobs: " + err.message);
-    } finally {
-      setLoading("");
-    }
-  };
+  //     const jobs = data;
+  //     alert(
+  //       "Fetched " + (jobs?.length || 0) + " scored jobs. Now saving to DB..."
+  //     );
+  //     await saveJobsToBackend(jobs);
+  //     alert("Scored jobs saved to DB!");
+  //     setMessage("Scored jobs saved to DB!");
+  //   } catch (err) {
+  //     alert("Failed to save scored jobs: " + err.message);
+  //     setMessage("Failed to save scored jobs: " + err.message);
+  //   } finally {
+  //     setLoading("");
+  //   }
+  // };
   // Upwork API handlers (implement your real logic here)
-  const handleUpworkFetchJobs = async () => {
-    setLoading("fetch");
-    setMessage("");
-    const now = Date.now();
-    localStorage.setItem("lastFetchJobsTime_upwork", now.toString());
-    setLastFetchTime(now);
-    updateCooldown(now);
-  try {
-    // Call the Upwork API with POST and token
-    const response = await axios.post(
-      "http://44.214.92.17:3000/api/upwork",
-      {}, // If your API expects a body, add it here; otherwise, keep as empty object
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    const jobs = response.data.jobs;
-    if (!jobs || jobs.length === 0) {
-      setMessage("No Upwork jobs found.");
-      setLoading("");
-      return;
-    }
-    await saveJobsToBackend(jobs); // Save jobs to your backend as you do for LinkedIn
-    setMessage("Upwork jobs fetched and saved!");
-    if (onRefreshJobs) onRefreshJobs();
-  } catch (err) {
-    setMessage("Failed to fetch Upwork jobs.");
-  } finally {
-    setLoading("");
-  }
-};
+//   const handleUpworkFetchJobs = async () => {
+//     setLoading("fetch");
+//     setMessage("");
+//     const now = Date.now();
+//     localStorage.setItem("lastFetchJobsTime_upwork", now.toString());
+//     setLastFetchTime(now);
+//     updateCooldown(now);
+//   try {
+//     // Call the Upwork API with POST and token
+//     const response = await axios.post(
+//       `${REMOTE_HOST}:${PORT}/api/upwork`,
+//       // "http://44.214.92.17:3000/api/upwork",
+//       {}, // If your API expects a body, add it here; otherwise, keep as empty object
+//       {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//           "Content-Type": "application/json",
+//         },
+//       }   
+//     );
+//     const jobs = response.data.jobs;
+//     if (!jobs || jobs.length === 0) {
+//       setMessage("No Upwork jobs found.");
+//       setLoading("");
+//       return;
+//     }
+//     await saveJobsToBackend(jobs); // Save jobs to your backend as you do for LinkedIn
+//     setMessage("Upwork jobs fetched and saved!");
+//     if (onRefreshJobs) onRefreshJobs();
+//   } catch (err) {
+//     setMessage("Failed to fetch Upwork jobs.");
+//   } finally {
+//     setLoading("");
+//   }
+// };
 
-const handleUpworkProcessSaveAndFetch = async () => {
-  setLoading("process-all");
-  setMessage("");
-  try {
-    // 1. Filter/deduplicate jobs
-    await axios.get("http://44.214.92.17:3000/api/upwork/filtered", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-    });
-    setMessage("Upwork: Filtered jobs!");
+// const handleUpworkProcessSaveAndFetch = async () => {
+//   setLoading("process-all");
+//   setMessage("");
+//   try {
+//     // 1. Filter/deduplicate jobs
+//     await axios.get(`${REMOTE_HOST}:${PORT}/api/upwork/filtered`, {
+//       headers: {
+//         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//       },
+//     });
+//     setMessage("Upwork: Filtered jobs!");
 
-    // 2. Score jobs and get scored jobs JSON
-    const scoreRes = await axios.get("http://44.214.92.17:3000/api/upwork/score", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-    });
-    setMessage("Upwork: Scored jobs!");
+//     // 2. Score jobs and get scored jobs JSON
+//     const scoreRes = await axios.get(`${REMOTE_HOST}:${PORT}/api/upwork/score`, {
+//       headers: {
+//         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//       },
+//     });
+//     setMessage("Upwork: Scored jobs!");
 
-    // 3. Save scored jobs to DB
-    await axios.post(
-      "http://44.214.92.17:3000/api/upwork/save-jobs",
-      {}, // If your API expects a body, add it here; otherwise, keep as empty object
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    setMessage("Upwork: Jobs saved to DB!");
+//     // 3. Save scored jobs to DB
+//     await axios.post(
+//       `${REMOTE_HOST}:${PORT}/api/upwork/save-jobs`,
+//       {}, // If your API expects a body, add it here; otherwise, keep as empty object
+//       {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     setMessage("Upwork: Jobs saved to DB!");
 
 
-    // 4. Fetch jobs from DB (new step)
-    const jobsRes = await axios.get("http://44.214.92.17:3000/api/upwork/jobs-by-date", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-    });
-    setMessage("Upwork: Jobs fetched from DB!");
+//     // 4. Fetch jobs from DB (new step)
+//     const jobsRes = await axios.get(`${REMOTE_HOST}:${PORT}/api/upwork/jobs-by-date`, {
+//       headers: {
+//         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//       },
+//     });
+//     setMessage("Upwork: Jobs fetched from DB!");
 
-    // Optionally, update your UI with jobsRes.data if needed
-    if (onRefreshJobs) onRefreshJobs(jobsRes.data);
+//     // Optionally, update your UI with jobsRes.data if needed
+//     if (onRefreshJobs) onRefreshJobs(jobsRes.data);
 
-  } catch (err) {
-    setMessage("Upwork: Process/Save/Fetch jobs failed!");
-  } finally {
-    setLoading("");
-  }
-};
+//   } catch (err) {
+//     setMessage("Upwork: Process/Save/Fetch jobs failed!");
+//   } finally {
+//     setLoading("");
+//   }
+// };
 
   return (
     <header className="bg-gradient-to-r from-blue-50 to-white shadow-sm border-b mb-4">
@@ -303,18 +328,20 @@ const handleUpworkProcessSaveAndFetch = async () => {
               </div>
             </Menu.Items>
           </Menu> 
+          {!hideDownloadExcel && (
           <button
         className="ml-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-        onClick={onExport}
-        >
-          Download jobs as Excel 
-        </button>
+        onClick={handleDownloadExcel}
+          >
+            Download jobs as Excel
+          </button>
+        )}
           {/* Action buttons moved right before menu */}
           <div className="flex items-center gap-2">
   {location.pathname.includes("upwork") ? (
     // Upwork Dashboard Buttons
     <>
-      {fetchCooldown === 0 ? (
+      {/* {fetchCooldown === 0 ? (
         <button
           className="px-3 py-1 border border-green-400 text-green-700 bg-green-50 rounded hover:bg-green-100 hover:text-green-900 disabled:opacity-50 transition"
           onClick={handleUpworkFetchJobs}
@@ -326,8 +353,8 @@ const handleUpworkProcessSaveAndFetch = async () => {
         <span className="text-xs text-gray-500">
           You can fetch jobs again in {formatCooldown(fetchCooldown)}
         </span>
-      )}
-      <button
+      )} */}
+      {/* <button
         className="px-3 py-1 border border-green-600 text-green-700 bg-green-50 rounded hover:bg-green-100 hover:text-green-900 disabled:opacity-50 transition font-semibold"
         onClick={handleUpworkProcessSaveAndFetch}
         disabled={loading}
@@ -335,7 +362,7 @@ const handleUpworkProcessSaveAndFetch = async () => {
         {loading === "process-all"
           ? "Processing..."
           : "Process, Save & Show Upwork Jobs"}
-      </button>
+      </button> */}
     </>
   ) : (
     // LinkedIn Dashboard Buttons
