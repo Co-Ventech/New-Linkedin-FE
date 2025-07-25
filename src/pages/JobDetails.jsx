@@ -6,7 +6,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk,updateAeCommentThunk  } from "../slices/jobsSlice";
+import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk,updateAeCommentThunk,fetchJobByIdThunk  } from "../slices/jobsSlice";
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -156,7 +156,7 @@ const JobDetails = () => {
     try {
       // This should trigger the API call
       await dispatch(updateJobStatusThunk({ jobId: job.id, status: selectedStatus, username: selectedUser })).unwrap();
-      await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
+      await dispatch(fetchJobByIdThunk(job.id)).unwrap();
     } catch (err) {
       alert("Failed to update status.");
       console.error("handleSaveStatus error:", err);
@@ -164,7 +164,6 @@ const JobDetails = () => {
       setSaving(false);
     }
   };
-
   const handleSaveAeRemark = async (e) => {
   e.preventDefault();
   setSaving(true);
