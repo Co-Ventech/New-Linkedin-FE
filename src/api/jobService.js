@@ -52,12 +52,10 @@ export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
      );
    }
  }
- export async function fetchJobById(id) {
+ export async function fetchJobById(jobId) {
   try {
-    const res = await axios.get(
-      `${REMOTE_HOST}:${PORT}/api/jobs/${id}`,
-      { headers: getAuthHeaders() }
-    );
+    const url = `${REMOTE_HOST}:${PORT}/api/apify/job?id=${jobId}`;
+    const res = await axios.get(url, { headers: getAuthHeaders() });
     return res.data;
   } catch (err) {
     throw new Error(

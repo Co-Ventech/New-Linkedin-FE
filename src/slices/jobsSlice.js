@@ -224,6 +224,17 @@ const jobsSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Failed to fetch Upwork jobs.';
       })
+      .addCase(fetchJobByIdThunk.fulfilled, (state, action) => {
+        const updatedJob = action.payload;
+        // Find and update the job in jobsByDate
+        for (const day of state.jobsByDate) {
+          const idx = day.jobs.findIndex(j => String(j.id) === String(updatedJob.id));
+          if (idx !== -1) {
+            day.jobs[idx] = updatedJob;
+            break;
+          }
+        }
+      })
 
 
       // .addCase(updateUpworkJobStatusThunk.fulfilled, (state, action) => {
