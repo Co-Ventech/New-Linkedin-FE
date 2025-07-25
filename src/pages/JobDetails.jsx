@@ -165,30 +165,29 @@ const JobDetails = () => {
     }
   };
   const handleSaveAeRemark = async (e) => {
-  e.preventDefault();
-  setSaving(true);
-  try {
-    await dispatch(updateAeCommentThunk({ jobId: job.id, ae_comment: ae_commentInput })).unwrap();
-    await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
-    setAe_comment(ae_commentInput); 
-    setAe_commentInput("");
-  } catch (err) {
-    alert("Failed to save AE Remark.");
-  } finally {
-   // setSaving(false);
-  }
-};
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await dispatch(updateAeCommentThunk({ jobId: job.id, ae_comment: ae_commentInput })).unwrap();
+      await dispatch(fetchJobByIdThunk(job.id)).unwrap();
+      setAe_comment(ae_commentInput); // Optimistic update
+      setAe_commentInput("");
+    } catch (err) {
+      alert("Failed to save AE Remark.");
+    } finally {
+      setSaving(false);
+    }
+  };
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!commentUser || !comment.trim()) return;
     setCommentLoading(true);
     try {
       await dispatch(addJobCommentThunk({ jobId: job.id, username: commentUser, comment })).unwrap();
-      await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
-      setComment("");
-      setCommentUser("");
+      await dispatch(fetchJobByIdThunk(job.id)).unwrap();
     } catch (err) {
-      alert("Failed to add comment.");
+      alert("Failed to update status.");
+      console.error("handleSaveStatus error:", err);
     } finally {
       setCommentLoading(false);
     }
