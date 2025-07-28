@@ -71,15 +71,16 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
           {colors.map(color => (
             <label key={color} className="flex items-center space-x-2 cursor-pointer">
               <input
-                type="checkbox"
+                type="radio"
                 name="color"
                 value={color}
-                checked={filters.color.includes(color)}
+                checked={filters.color === color}
                 onChange={() => {
-                  const newColors = filters.color.includes(color)
-                    ? filters.color.filter((c) => c !== color)
-                    : [...filters.color , color];
-                  onFilterChange("color", newColors);
+                  onFilterChange("color", color);
+                  // const newColors = filters.color.includes(color)
+                  //   ? filters.color.filter((c) => c !== color)
+                  //   : [...filters.color , color];
+                  // onFilterChange("color", newColors);
                 }}
                 className="accent-blue-600"
               />

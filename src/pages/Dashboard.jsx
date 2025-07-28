@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import { useSelector, useDispatch } from "react-redux";
 import JobCard from "../components/JobCard";
 import Header from "../components/Header";
 import SidebarFilters from "../components/SidebarFilters";
+import { fetchlinkedinJobsByDateRange } from "../api/jobService";
 import {
   fetchJobsByDateThunk,
   resetJobsByDate,      
@@ -36,11 +37,31 @@ const statusOptions = [
   "archived"
 ];
 
+const dateRanges = [
+  { label: "Last 24 Hours", value: "1d" },
+  { label: "Last 3 Days", value: "3d" },
+  { label: "Last 7 Days", value: "7d" },
+];
+
+function getStartDate(range) {
+  const today = new Date();
+  let start = new Date(today);
+  if (range === "1d") start.setDate(today.getDate() - 1);
+  if (range === "3d") start.setDate(today.getDate() - 3);
+  if (range === "7d") start.setDate(today.getDate() - 7);
+  return start.toISOString().slice(0, 10);
+}
+
+function getEndDate() {
+  const today = new Date();
+  return today.toISOString().slice(0, 10);
+}
+
 const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-
+ 
   const { jobsByDate, loading, error, range } = useSelector(
     (state) => state.jobs
   );
@@ -63,6 +84,29 @@ const Dashboard = () => {
   const [filters, setFilters] = React.useState(getFiltersFromUrl());
   const [view, setView] = React.useState("grid");
 
+  
+  const [dateRange, setDateRange] = useState("7d");
+  const [filteredJobByDate, setFilteredJobByDate] = useState([]);
+  const [loadingRange, setLoadingRange] = useState(false);
+  // Fetch jobs when dateRange changes
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoadingRange(true);
+      try {
+        const startdate = getStartDate(dateRange);
+        const enddate = getEndDate();
+        const data = await fetchlinkedinJobsByDateRange(startdate, enddate);
+        setFilteredJobByDate(data);
+      } catch (err) {
+        setFilteredJobByDate([]);
+      } finally {
+        setLoadingRange(false);
+      }
+    };
+    fetchJobs();
+  }, [dateRange]);
+
+
   // 4. Keep filters in sync with URL (for browser navigation)
   useEffect(() => {
     setFilters(getFiltersFromUrl());
@@ -71,7 +115,7 @@ const Dashboard = () => {
 
   // 5. Fetch jobs only if not already loaded or when range changes
   useEffect(() => {
-    if (!jobsByDate || jobsByDate.length === 0) {
+    if (!jobsByDate || jobsByDate.length === 0 || jobsByDate.every(day => !day.jobs || day.jobs.length ===0 )) {
       dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
     }
   }, [dispatch, range, jobsByDate]);
@@ -190,6 +234,12 @@ const Dashboard = () => {
     navigate("/login");
   };
 
+  
+  // Dropdown handler
+  const handleDateRangeChange = (e) => {
+    setDateRange(e.target.value);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <Header source="linkedin" user={user} onLogout={handleLogout} onExport={handleExport} />
@@ -210,6 +260,32 @@ const Dashboard = () => {
         </aside>
         {/* Main job list area */}
         <main className="w-full md:w-3/4">
+        <div className="flex items-center mb-4">
+            <label htmlFor="date-range" className="mr-2 font-semibold">Show jobs from:</label>
+            <select
+              id="date-range"
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              className="border rounded px-2 py-1"
+            >
+              {dateRanges.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          {loadingRange ? (
+            <div>Loading jobs...</div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : filteredJobByDate.length === 0 ? (
+            <div>No jobs found.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                {filteredJobByDate.map(job => (
+                <JobCard key={job.jobId || job.id} job={job} />
+              ))}
+            </div>
+          )}
           <div className="flex items-center mb-4 gap-2">
             {/* <label htmlFor="date-range" className="font-semibold">Show jobs from:</label>
             <select
@@ -243,7 +319,7 @@ const Dashboard = () => {
             filteredJobsByDate.length === 0 || filteredJobsByDate.every((d) => d.jobs.length === 0) ? (
               <div className="col-span-full text-center text-gray-500">No jobs found.</div>
             ) : (
-              filteredJobsByDate.map((day) => (
+              filteredJobByDate.map((day) => (
                 <section key={day.date} className="mb-8">
                   <h2 className="text-lg font-bold mb-2">{day.date}</h2>
                   <div className={view === "grid"

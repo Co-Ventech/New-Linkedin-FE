@@ -8,6 +8,8 @@ import { fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
 import queryString from "query-string";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { fetchUpworkJobsByDateRange } from "../api/jobService";
+
 const defaultFilters = { 
   level: "",
   country: [],
@@ -35,10 +37,33 @@ const defaultFilters = {
     "archived"
   ];
 
+
+  const dateRanges = [
+    { label: "Last 24 Hours", value: "1d" },
+    { label: "Last 3 Days", value: "3d" },
+    { label: "Last 7 Days", value: "7d" },
+  ];
+  
+  function getStartDate(range) {
+    const today = new Date();
+    let start = new Date(today);
+    if (range === "1d") start.setDate(today.getDate() - 1);
+    if (range === "3d") start.setDate(today.getDate() - 3);
+    if (range === "7d") start.setDate(today.getDate() - 7);
+    return start.toISOString().slice(0, 10);
+  }
+  
+  function getEndDate() {
+    const today = new Date();
+    return today.toISOString().slice(0, 10);
+  }
+
 const UpworkDashboard = () => {
   const dispatch = useDispatch();
   const { upworkJobsByDate, loading, error } = useSelector(state => state.jobs);
-  
+  const [dateRange, setDateRange] = useState("7d");
+  const [filteredJobsByDate, setFilteredJobsByDate] = useState([]);
+  const [loadingRange, setLoadingRange] = useState(false);
 
   // const [filters, setFilters] = React.useState({
   //   level: "",
@@ -83,10 +108,29 @@ const navigate = useNavigate();
 
   // 4. Fetch jobs on mount
   useEffect(() => {
-    if (!upworkJobsByDate || upworkJobsByDate.length === 0) {
+    if (!upworkJobsByDate || upworkJobsByDate.length === 0 || upworkJobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
       dispatch(fetchUpworkJobsByDateThunk());
     }
   }, [dispatch, upworkJobsByDate]);
+
+ // Fetch jobs when dateRange changes
+ useEffect(() => {
+  const fetchJobs = async () => {
+    setLoadingRange(true);
+    try {
+      const startdate = getStartDate(dateRange);
+      const enddate = getEndDate();
+      const data = await fetchUpworkJobsByDateRange(startdate, enddate);
+      setFilteredJobsByDate(data);
+    } catch (err) {
+      setFilteredJobsByDate([]);
+    } finally {
+      setLoadingRange(false);
+    }
+  };
+  fetchJobs();
+}, [dateRange]);
+
 
 
   // React.useEffect(() => {
@@ -97,6 +141,7 @@ const navigate = useNavigate();
 
   // Flatten jobs for filtering
   const allJobs = upworkJobsByDate.flatMap(day => day.jobs || []);
+ 
 
   const levels = Array.from(new Set(allJobs.map(j => j.level).filter(Boolean)));
   const countries = Array.from(new Set(allJobs.map(j => j.country).filter(Boolean)));
@@ -171,6 +216,11 @@ const navigate = useNavigate();
     return true;
   });
 
+    // Dropdown handler
+    const handleDateRangeChange = (e) => {
+      setDateRange(e.target.value);
+    };
+
   const handleExport = () => {
     alert("Exporting jobs...");
   };
@@ -218,6 +268,32 @@ const navigate = useNavigate();
         </aside>
         {/* Main job list area */}
         <main className="w-full md:w-3/4">
+        <div className="flex items-center mb-4">
+            <label htmlFor="date-range" className="mr-2 font-semibold">Show jobs from:</label>
+            <select
+              id="date-range"
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              className="border rounded px-2 py-1"
+            >
+              {dateRanges.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          {loadingRange ? (
+            <div>Loading jobs...</div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : filteredJobs.length === 0 ? (
+            <div>No jobs found.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+              {filteredJobs.map(job => (
+                <UpworkJobCard key={job.jobId || job.id} job={job} />
+              ))}
+            </div>
+          )}
           {/* <h1 className="text-2xl font-bold mb-4">Upwork Jobs</h1> */}
           {loading ? (
             <div>Loading jobs...</div>
