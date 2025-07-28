@@ -55,7 +55,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await fetch("http://44.214.92.17:3000/api/jobs-by-date/excel", {
+      const response = await fetch("http://REMOTE_HOST:PORT/api/jobs-by-date/excel", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,

@@ -38,6 +38,8 @@ const defaultFilters = {
 const UpworkDashboard = () => {
   const dispatch = useDispatch();
   const { upworkJobsByDate, loading, error } = useSelector(state => state.jobs);
+  
+
   // const [filters, setFilters] = React.useState({
   //   level: "",
   //   country: [],

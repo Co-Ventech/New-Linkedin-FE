@@ -63,3 +63,15 @@ export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
     );
   }
 }
+
+ export async function upworkfetchJobById(jobId) {
+  try {
+    const url = `${REMOTE_HOST}:${PORT}/api/upwork/job?id=${jobId}`;
+    const res = await axios.get(url, { headers: getAuthHeaders() });
+    return res.data;
+  } catch (err) {
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to fetch job by ID."
+    );
+  }
+}

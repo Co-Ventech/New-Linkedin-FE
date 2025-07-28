@@ -83,7 +83,7 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
                 }}
                 className="accent-blue-600"
               />
-              <span>{color === 'Green' ? 'AI Recommended' : color === 'Yellow' ? 'Recommended' : color === 'Red' ? 'Not Recommended' : color}</span>
+              <span>{color === 'Green' ? 'AI Recommended' : color === 'Yellow' ? 'AI Not Recommended' : color === 'Red' ? 'AI Not Eligible' : color}</span>
             </label>
           ))}
         </div>

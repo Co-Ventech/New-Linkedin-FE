@@ -13,7 +13,9 @@ import {
 } from '../api/updateJobStatus';
 import axios from "axios";
 import { normalizeJob } from '../utils/normalizeJob';
-import { fetchJobById } from '../api/jobService'; 
+import { fetchJobById , upworkfetchJobById} from '../api/jobService'; 
+const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
+const PORT = import.meta.env.VITE_PORT;
 
 // Async thunk to add a comment to a job
 export const addJobCommentThunk = createAsyncThunk(
@@ -65,6 +67,19 @@ export const fetchJobByIdThunk = createAsyncThunk(
   }
 );
 
+export const upworkfetchJobByIdThunk = createAsyncThunk(
+  'jobs/upworkfetchJobById',
+  async (jobId, { rejectWithValue }) => {
+    try {
+      const job = await upworkfetchJobById(jobId);
+      // Normalize the job before returning
+      return job;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 // Async thunk to fetch jobs grouped by date from backend
 export const fetchJobsByDateThunk = createAsyncThunk('jobs/fetchJobsByDate', async ({ range, page, limit }, { rejectWithValue }) => {
   try {
@@ -97,7 +112,7 @@ export const fetchUpworkJobsByDateThunk = createAsyncThunk(
   'jobs/fetchUpworkJobsByDate',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get("http://44.214.92.17:3000/api/upwork/jobs-by-date", {
+      const res = await axios.get(`${REMOTE_HOST}:${PORT}/api/upwork/jobs-by-date`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
       });
       const jobs = res.data.jobs || [];
@@ -124,6 +139,7 @@ export const updateUpworkJobStatusThunk = createAsyncThunk(
       const updated = await updateUpworkJobStatus(jobId, { status, username }); // points to Upwork API
       return { jobId, status: updated.status, currentStatus: updated.currentStatus, statusHistory: updated.statusHistory };
     } catch (err) {
+      console.error("updateUpworkJobStatusThunk error:", err, err.response?.data);
       return rejectWithValue(err.message);
     }
   }
@@ -229,6 +245,18 @@ const jobsSlice = createSlice({
         const updatedJob = action.payload;
         // Find and update the job in jobsByDate
         for (const day of state.jobsByDate) {
+          const idx = day.jobs.findIndex(j => String(j.id) === String(updatedJob.id));
+          if (idx !== -1) {
+            day.jobs[idx] = updatedJob;
+            break;
+          }
+        }
+      })
+
+       .addCase( upworkfetchJobByIdThunk.fulfilled, (state, action) => {
+        const updatedJob = action.payload;
+        // Find and update the job in upworkJobsByDate
+        for (const day of state.upworkJobsByDate) {
           const idx = day.jobs.findIndex(j => String(j.id) === String(updatedJob.id));
           if (idx !== -1) {
             day.jobs[idx] = updatedJob;

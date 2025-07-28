@@ -104,11 +104,12 @@ export async function updateAeComment(jobId, ae_comment) {
 export async function updateUpworkJobStatus(jobId, { status, username }) {
   try {
     const url = `${API_BASE}/upwork/job/${jobId}`;
+    const payload = { status, username };
     console.log("PATCH URL (status):", url);
     console.log("PATCH DATA (status):", { status, username });
     const res = await axios.patch(
       url,
-      { status, username },
+      payload,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -156,6 +157,7 @@ export async function updateUpworkJobStatus(jobId, { status, username }) {
 //   const url = `${API_BASE}/upwork/job/${jobId}`;
 //   // ...same as before, but with Upwork endpoint...
 export async function addUpworkJobComment(jobId, { username, comment }) {
+  // console.log("jobId",localJob?.jobId,localJob);
   try {
     const url = `${API_BASE}/upwork/job/${jobId}`;
     const payload = { username, comment };
