@@ -96,7 +96,7 @@ export const fetchUpworkJobsByDateThunk = createAsyncThunk(
   'jobs/fetchUpworkJobsByDate',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get("http://44.214.92.17:3000/api/upwork/jobs-by-date", {
+      const res = await axios.get("http://localhost:3000/api/upwork/jobs-by-date", {
         headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` },
       });
       const jobs = res.data.jobs || [];
@@ -123,6 +123,7 @@ export const updateUpworkJobStatusThunk = createAsyncThunk(
       const updated = await updateUpworkJobStatus(jobId, { status, username }); // points to Upwork API
       return { jobId, status: updated.status, currentStatus: updated.currentStatus, statusHistory: updated.statusHistory };
     } catch (err) {
+      console.error("updateUpworkJobStatusThunk error:", err, err.response?.data);
       return rejectWithValue(err.message);
     }
   }
