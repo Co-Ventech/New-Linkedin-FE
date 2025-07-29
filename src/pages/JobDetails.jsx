@@ -1,12 +1,12 @@
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
 const PORT = import.meta.env.VITE_PORT;
-const API_BASE = `${REMOTE_HOST}:${PORT}/api`;
+const API_BASE = `${REMOTE_HOST}/api`;
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk,updateAeCommentThunk,fetchJobByIdThunk  } from "../slices/jobsSlice";
+import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk, updateAeCommentThunk, fetchJobByIdThunk, updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk } from "../slices/jobsSlice";
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -72,14 +72,23 @@ const JobDetails = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("not_engaged");
   const [saving, setSaving] = useState(false);
+  const [aeSaving, setAeSaving] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(job?.currentStatus || "not_engaged");
   const [statusHistory, setStatusHistory] = useState(job?.statusHistory || []);
 
-const [localJob, setLocalJob] = useState(jobFromRedux || null);
-const [loadingJob, setLoadingJob] = useState(false);
-const [jobError, setJobError] = useState(null);
-
-
+  const [localJob, setLocalJob] = useState(jobFromRedux || null);
+  const [loadingJob, setLoadingJob] = useState(false);
+  const [jobError, setJobError] = useState(null);
+  const [estimatedBudgetInput, setEstimatedBudgetInput] = useState(localJob?.estimated_budget || "");
+  const [budgetSaving, setBudgetSaving] = useState(false);
+  const [budgetError, setBudgetError] = useState("");
+  const [aePitchedInput, setAePitchedInput] = useState(localJob?.ae_pitched || "");
+  const [aePitchedSaving, setAePitchedSaving] = useState(false);
+  const [aePitchedError, setAePitchedError] = useState("");
+  const [aeScoreInput, setAeScoreInput] = useState(localJob?.ae_score || "");
+  const [aeScoreUser, setAeScoreUser] = useState("");
+  const [aeScoreSaving, setAeScoreSaving] = useState(false);
+  const [aeScoreError, setAeScoreError] = useState("");
 
   // Log the first job object to inspect structure
   console.log("First job object in jobsByDate:", allJobs[0]);
@@ -94,7 +103,7 @@ const [jobError, setJobError] = useState(null);
   });
   console.log("Looking for job ID:", id);
   console.log("jobsByDate after refetch:", jobsByDate);
-  console.log("Redux job status:", localJob?.status);   
+  console.log("Redux job status:", localJob?.status);
 
   useEffect(() => {
     if (localJob) {
@@ -109,7 +118,7 @@ const [jobError, setJobError] = useState(null);
     if (!jobFromRedux && id) {
       setLoadingJob(true);
       setJobError(null);
-      axios.get(`${API_BASE}/apify/job?id=${id}`, {
+      axios.get(`${API_BASE}/linkedin/job?id=${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
@@ -199,19 +208,19 @@ const [jobError, setJobError] = useState(null);
     }
   };
   const handleSaveAeRemark = async (e) => {
-  e.preventDefault();
-  setSaving(true);
-  try {
-    await dispatch(updateAeCommentThunk({ jobId: localJob.id, ae_comment: ae_commentInput })).unwrap();
-    await dispatch(fetchJobsByIdThunk(localJob.id)).unwrap();
-    setAe_comment(ae_commentInput); 
-    setAe_commentInput("");
-  } catch (err) {
-    alert("Failed to save AE Remark.");
-  } finally {
-   // setSaving(false);
-  }
-};
+    e.preventDefault();
+    setAeSaving(true);
+    try {
+      await dispatch(updateAeCommentThunk({ jobId: localJob.id, ae_comment: ae_commentInput })).unwrap();
+      await dispatch(fetchJobsByIdThunk(localJob.id)).unwrap();
+      setAe_comment(ae_commentInput);
+      setAe_commentInput("");
+    } catch (err) {
+      alert("Failed to save AE Remark.");
+    } finally {
+      setAeSaving(false);
+    }
+  };
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!commentUser || !comment.trim()) return;
@@ -224,6 +233,69 @@ const [jobError, setJobError] = useState(null);
       console.error("handleSaveStatus error:", err);
     } finally {
       setCommentLoading(false);
+    }
+  };
+
+  const handleSaveEstimatedBudget = async (e) => {
+    e.preventDefault();
+    setBudgetSaving(true);
+    setBudgetError("");
+    try {
+      const value = Number(estimatedBudgetInput);
+      if (isNaN(value) || value <= 0) {
+        setBudgetError("Please enter a valid number.");
+        setBudgetSaving(false);
+        return;
+      }
+      await dispatch(updateEstimatedBudgetThunk({ jobId: localJob.id, estimated_budget: value })).unwrap();
+      setEstimatedBudgetInput(value);
+    } catch (err) {
+      setBudgetError("Failed to save estimated budget.");
+    } finally {
+      setBudgetSaving(false);
+    }
+  };
+
+  const handleSaveAePitched = async (e) => {
+    e.preventDefault();
+    setAePitchedSaving(true);
+    setAePitchedError("");
+    try {
+      if (!aePitchedInput.trim()) {
+        setAePitchedError("Please enter a value.");
+        setAePitchedSaving(false);
+        return;
+      }
+      await dispatch(updateAePitchedThunk({ jobId: localJob.id, ae_pitched: aePitchedInput.trim() })).unwrap();
+      setAePitchedInput(aePitchedInput.trim());
+    } catch (err) {
+      setAePitchedError("Failed to save AE Pitched.");
+    } finally {
+      setAePitchedSaving(false);
+    }
+  };
+  const handleSaveAeScore = async (e) => {
+    e.preventDefault();
+    setAeScoreSaving(true);
+    setAeScoreError("");
+    try {
+      const value = Number(aeScoreInput);
+      if (!aeScoreUser) {
+        setAeScoreError("Please select a user.");
+        setAeScoreSaving(false);
+        return;
+      }
+      if (isNaN(value) || value < 0 || value > 100) {
+        setAeScoreError("Please enter a valid score (0-100).");
+        setAeScoreSaving(false);
+        return;
+      }
+      await dispatch(updateAeScoreThunk({ jobId: localJob.id, username: aeScoreUser, ae_score: value })).unwrap();
+      setAeScoreInput(value);
+    } catch (err) {
+      setAeScoreError("Failed to save AE Score.");
+    } finally {
+      setAeScoreSaving(false);
     }
   };
 
@@ -240,7 +312,7 @@ const [jobError, setJobError] = useState(null);
           &larr; Back to Jobs
         </button>
 
-       
+
         {/* <section className="mb-4"> */}
         {/* {!selectedUser && (
           <div className="flex items-center gap-2">
@@ -370,7 +442,7 @@ const [jobError, setJobError] = useState(null);
             )}
           </div>
         </section>
-       
+
         {/* KPIs Section */}
         <section className="mb-2">
           <h2 className="text-lg font-bold mb-3 text-gray-800">KPIs</h2>
@@ -411,7 +483,7 @@ const [jobError, setJobError] = useState(null);
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">Status Management</h2>
           <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
-              <select
+            <select
               className="border rounded px-2 py-1"
               value={selectedUser}
               onChange={e => setSelectedUser(e.target.value)}
@@ -466,9 +538,81 @@ const [jobError, setJobError] = useState(null);
             </ul>
           </div>
         </section>
-        
-         {/* AI Remark Section */}
-         {localJob.ai_remark && (
+
+        {/* AE Score Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
+          {localJob.ae_score ? (
+            <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+              <span className="font-semibold">AI Score:</span> {localJob.ae_score}%
+            </div>
+          ) : (
+            <form onSubmit={handleSaveAeScore} className="flex flex-col gap-2 mb-2">
+              <select
+                className="border rounded px-2 py-1"
+                value={aeScoreUser}
+                onChange={e => setAeScoreUser(e.target.value)}
+                required
+              >
+                <option value="">Select User</option>
+                {USER_LIST.map(user => (
+                  <option key={user} value={user}>{user}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Enter AE Score (0-100)"
+                value={aeScoreInput}
+                onChange={e => setAeScoreInput(e.target.value)}
+                disabled={aeScoreSaving}
+                min={0}
+                max={100}
+                required
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={aeScoreSaving || !aeScoreUser || !aeScoreInput}
+              >
+                {aeScoreSaving ? "Saving..." : "Save"}
+              </button>
+              {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
+            </form>
+          )}
+        </section>
+        {/* AE Pitched Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Pitched</h2>
+          {localJob.ae_pitched ? (
+            <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+              <span className="font-semibold">AE Pitched:</span> {localJob.ae_pitched}
+            </div>
+          ) : (
+            <form onSubmit={handleSaveAePitched} className="flex flex-col gap-2 mb-2">
+              <textarea
+                className="border rounded px-2 py-1 w-full"
+                rows={2}
+                placeholder="Write AE Pitched..."
+                value={aePitchedInput}
+                onChange={e => setAePitchedInput(e.target.value)}
+                disabled={aePitchedSaving}
+                required
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={aePitchedSaving || !aePitchedInput.trim()}
+              >
+                {aePitchedSaving ? "Saving..." : "Save"}
+              </button>
+              {aePitchedError && <div className="text-red-500 text-sm">{aePitchedError}</div>}
+            </form>
+          )}
+        </section>
+
+        {/* AI Remark Section */}
+        {localJob.ai_remark && (
           <section className="mb-6 border-b pb-4">
             <h2 className="text-lg font-bold mb-3 text-gray-800">AI Remark</h2>
             <div className="prose prose-sm max-w-none whitespace-pre-line mb-2 text-blue-900 bg-blue-50 p-3 rounded border border-blue-200">
@@ -487,70 +631,102 @@ const [jobError, setJobError] = useState(null);
                 placeholder="Write AE Remark..."
                 value={ae_commentInput}
                 onChange={e => setAe_commentInput(e.target.value)}
-                disabled={saving}
+                disabled={aeSaving} 
               />
               <button
                 type="submit"
                 className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-                disabled={saving || !ae_commentInput.trim()}
+                disabled={aeSaving || !ae_commentInput.trim()}
               >
-                {saving ? "Saving..." : "Save"}
+                {aeSaving ? "Saving..." : "Save"}
               </button>
             </form>
           ) : (
             <div className="bg-blue-50 border border-blue-200 rounded p-3 text-blue-900">
               <span className="font-semibold">Saved AE Remark:</span>
-                  <div>{localJob.ae_comment}</div>
+              <div>{localJob.ae_comment}</div>
             </div>
           )}
         </section>
+        {/* Estimated Budget Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Estimated Budget</h2>
+          {localJob.estimated_budget ? (
+            <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+              <span className="font-semibold">Estimated Budget:</span> ${localJob.estimated_budget}
+            </div>
+          ) : (
+            <form onSubmit={handleSaveEstimatedBudget} className="flex flex-col gap-2 mb-2">
+              <input
+                type="number"
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Enter estimated budget"
+                value={estimatedBudgetInput}
+                onChange={e => setEstimatedBudgetInput(e.target.value)}
+                disabled={budgetSaving}
+                min={1}
+                required
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={budgetSaving || !estimatedBudgetInput}
+              >
+                {budgetSaving ? "Saving..." : "Save"}
+              </button>
+              {budgetError && <div className="text-red-500 text-sm">{budgetError}</div>}
+            </form>
+          )}
+        </section>
+
+
         {/* Comment Box */}
         <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">
-  <select
-    className="border rounded px-2 py-1"
-    value={commentUser}
-    onChange={e => setCommentUser(e.target.value)}
-    required
-  >
-    <option value="">Select User</option>
-    {USER_LIST.map(user => (
-      <option key={user} value={user}>{user}</option>
-    ))}
-  </select>
-  <input
-    type="text"
-    value={comment}
-    onChange={e => setComment(e.target.value)}
-    placeholder="Add a comment..."
-    className="border px-2 py-1 rounded w-full"
-    disabled={commentLoading}
-    required
-  />
-  <button
-    type="submit"
-    className="px-4 py-1 bg-blue-600 text-white rounded"
-    disabled={commentLoading || !commentUser || !comment.trim()}
-  >
-    
-    {commentLoading ? "Saving..." : "Add"}
-  </button>
-</form>
-<ul className="mb-4">
-  {Array.isArray(localJob.comments) && localJob.comments.length > 0 ? (
-    localJob.comments.map((c, idx) => (
-      <li key={idx} className="text-sm text-gray-700 mb-1">
-        <span className="font-semibold">{c.username}:</span> {c.comment}
-        {c.date && (
-          <span className="text-xs text-gray-500 ml-2">
-            ({new Date(c.date).toLocaleString()})
-          </span>
-        )}
-      </li>
-    ))
-  ) : (
-    <li className="text-sm text-gray-400">No comments yet.</li>
-  )}
-</ul>
+          <select
+            className="border rounded px-2 py-1"
+            value={commentUser}
+            onChange={e => setCommentUser(e.target.value)}
+            required
+          >
+            <option value="">Select User</option>
+            {USER_LIST.map(user => (
+              <option key={user} value={user}>{user}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            placeholder="Add a comment..."
+            className="border px-2 py-1 rounded w-full"
+            disabled={commentLoading}
+            required
+          />
+          <button
+            type="submit"
+            className="px-4 py-1 bg-blue-600 text-white rounded"
+            disabled={commentLoading || !commentUser || !comment.trim()}
+          >
+
+            {commentLoading ? "Saving..." : "Add"}
+          </button>
+        </form>
+        <ul className="mb-4">
+          {Array.isArray(localJob.comments) && localJob.comments.length > 0 ? (
+            localJob.comments.map((c, idx) => (
+              <li key={idx} className="text-sm text-gray-700 mb-1">
+                <span className="font-semibold">{c.username}:</span> {c.comment}
+                {c.date && (
+                  <span className="text-xs text-gray-500 ml-2">
+                    ({new Date(c.date).toLocaleString()})
+                  </span>
+                )}
+              </li>
+            ))
+          ) : (
+            <li className="text-sm text-gray-400">No comments yet.</li>
+          )}
+        </ul>
       </div>
     </div>
   );

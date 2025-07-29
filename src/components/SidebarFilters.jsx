@@ -63,32 +63,47 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
     </div>
   </div>
 )}
-  {/* Color (multi-select) */}
+  {/* Color (single-select with radio buttons) */}
   {colors && (
-      <div>
-        <h3 className="font-semibold mb-2">Tier</h3>
-        <div className="space-y-1">
-          {colors.map(color => (
-            <label key={color} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="color"
-                value={color}
-                checked={filters.color.includes(color)}
-                onChange={() => {
-                  const newColors = filters.color.includes(color)
-                    ? filters.color.filter((c) => c !== color)
-                    : [...filters.color , color];
-                  onFilterChange("color", newColors);
-                }}
-                className="accent-blue-600"
-              />
-              <span>{color === 'Green' ? 'AI Recommended' : color === 'Yellow' ? 'AI Not Recommended' : color === 'Red' ? 'AI Not Eligible' : color}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    )}
+  <div>
+    <h3 className="font-semibold mb-2">Tier</h3>
+    <div className="space-y-1">
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="color"
+          value=""
+          checked={filters.color === "" || !filters.color}
+          onChange={() => onFilterChange("color", "")}
+          className="accent-blue-600"
+        />
+        <span>All</span>
+      </label>
+      {colors.map(color => (
+        <label key={color} className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="radio"
+            name="color"
+            value={color}
+            checked={filters.color === color}
+            onChange={() => onFilterChange("color", color)}
+            className="accent-blue-600"
+          />
+          <span>
+            {color === 'Green'
+              ? 'AI Recommended'
+              : color === 'Yellow'
+              ? 'AI Not Recommended'
+              : color === 'Red'
+              ? 'AI Not Eligible'
+              : color}
+          </span>
+        </label>
+      ))}
+    </div>
+  </div>
+)}
+
 {/* Client History */}
 {typeof filters.clientHistory !== "undefined" && (
 <div>
@@ -145,18 +160,32 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
 {paymentVerified && paymentVerified.length > 0 && (
   <div>
     <h3 className="font-semibold mb-2">Payment Verified</h3>
-    <select
-      className="w-full border rounded px-2 py-1"
-      value={filters.paymentVerified || ""}
-      onChange={e => onFilterChange("paymentVerified", e.target.value)}
-    >
-      <option value="">All</option>
-      {paymentVerified.map(paymentVerified => (
-        <option key={paymentVerified} value={String(paymentVerified)}>
-          {paymentVerified ? "Verified" : "Not Verified"}
-        </option>
+    <div className="space-y-1">
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="paymentVerified"
+          value=""
+          checked={filters.paymentVerified === ""}
+          onChange={() => onFilterChange("paymentVerified", "")}
+          className="accent-blue-600"
+        />
+        <span>All</span>
+      </label>
+      {paymentVerified.map(option => (
+        <label key={String(option)} className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="radio"
+            name="paymentVerified"
+            value={String(option)}
+            checked={filters.paymentVerified === String(option)}
+            onChange={() => onFilterChange("paymentVerified", String(option))}
+            className="accent-blue-600"
+          />
+          <span>{option ? "Verified" : "Not Verified"}</span>
+        </label>
       ))}
-    </select>
+    </div>
   </div>
 )}
 {/* Project Length */}

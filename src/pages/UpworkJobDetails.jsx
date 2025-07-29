@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {useSelector, useDispatch } from "react-redux";
 
-import { fetchUpworkJobsByDateThunk, updateUpworkJobStatusThunk , updateUpworkAeCommentThunk, addUpworkJobCommentThunk, upworkfetchJobByIdThunk  } from "../slices/jobsSlice";
+import { fetchUpworkJobsByDateThunk, updateUpworkJobStatusThunk , updateUpworkAeCommentThunk, addUpworkJobCommentThunk, upworkfetchJobByIdThunk, updateUpworkAeScoreThunk, updateUpworkAePitchedThunk , updateUpworkEstimatedBudgetThunk} from "../slices/jobsSlice";
 import axios from "axios";
 // import { updateUpworkAeCommentThunk, updateUpworkJobStatusThunk, addUpworkJobCommentThunk } from "../slices/jobsSlice";
 // await dispatch(updateUpworkJobStatusThunk({ jobId: job.id, status: ..., username:  }))
@@ -62,15 +62,25 @@ const jobFromRedux = useSelector(state =>
   const [comment, setComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
   const [localJob, setLocalJob] = useState(jobFromRedux || null);
-const [loadingJob, setLoadingJob] = useState(false);
-const [jobError, setJobError] = useState(null);
+  const [loadingJob, setLoadingJob] = useState(false);
+  const [jobError, setJobError] = useState(null);
+  const [aeScoreInput, setAeScoreInput] = useState(localJob?.ae_score || "");
+  const [aeScoreUser, setAeScoreUser] = useState("");
+  const [aeScoreSaving, setAeScoreSaving] = useState(false);
+  const [aeScoreError, setAeScoreError] = useState("");
+  const [aePitchedInput, setAePitchedInput] = useState(localJob?.ae_pitched || "");
+const [aePitchedSaving, setAePitchedSaving] = useState(false);
+const [aePitchedError, setAePitchedError] = useState("");
+const [estimatedBudgetInput, setEstimatedBudgetInput] = useState(localJob?.estimated_budget || "");
+const [budgetSaving, setBudgetSaving] = useState(false);
+const [budgetError, setBudgetError] = useState("");
 
   
 useEffect(() => {
   if (!jobFromRedux && id) {
     setLoadingJob(true);
     setJobError(null);
-    axios.get(`${REMOTE_HOST}:${PORT}/api/upwork/job?id=${id}`, {
+    axios.get(`${REMOTE_HOST}/api/upwork/job?id=${id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
@@ -172,6 +182,71 @@ const handleSaveAeRemark = async (e) => {
       alert("Failed to add comment.");
     } finally {
       setCommentLoading(false);
+    }
+  };
+
+  const handleSaveUpworkAeScore = async (e) => {
+    e.preventDefault();
+    setAeScoreSaving(true);
+    setAeScoreError("");
+    try {
+      const value = Number(aeScoreInput);
+      if (!aeScoreUser) {
+        setAeScoreError("Please select a user.");
+        setAeScoreSaving(false);
+        return;
+      }
+      if (isNaN(value) || value < 0 || value > 100) {
+        setAeScoreError("Please enter a valid score (0-100).");
+        setAeScoreSaving(false);
+        return;
+      }
+      await dispatch(updateUpworkAeScoreThunk({ jobId: localJob.jobId || localJob.id, username: aeScoreUser, ae_score: value })).unwrap();
+      setAeScoreInput(value);
+      console.log(localJob.ae_score);
+      
+    } catch (err) {
+      setAeScoreError("Failed to save AE Score.");
+    } finally {
+      setAeScoreSaving(false);
+    }
+  };
+  const handleSaveAePitched = async (e) => {
+    e.preventDefault();
+    setAePitchedSaving(true);
+    setAePitchedError("");
+    try {
+      if (!aePitchedInput.trim()) {
+        setAePitchedError("Please enter a value.");
+        setAePitchedSaving(false);
+        return;
+      }
+      await dispatch(updateUpworkAePitchedThunk({ jobId: localJob.jobId || localJob.id, ae_pitched: aePitchedInput.trim() })).unwrap();
+      setAePitchedInput(aePitchedInput.trim());
+    } catch (err) {
+      setAePitchedError("Failed to save AE Pitched.");
+    } finally {
+      setAePitchedSaving(false);
+    }
+  };
+
+  const handleSaveEstimatedBudget = async (e) => {
+    e.preventDefault();
+    setBudgetSaving(true);
+    setBudgetError("");
+    try {
+      const value = Number(estimatedBudgetInput);
+      if (isNaN(value) || value <= 0) {
+        setBudgetError("Please enter a valid number.");
+        setBudgetSaving(false);
+        return;
+      }
+      await dispatch(updateUpworkEstimatedBudgetThunk({ jobId: localJob.jobId || localJob.id, estimated_budget: value })).unwrap();
+      setEstimatedBudgetInput(value);
+    } catch (err) {
+      setBudgetError("Failed to save estimated budget.");
+    } finally {
+      setBudgetSaving(false);
     }
   };
 
@@ -371,7 +446,109 @@ const handleSaveAeRemark = async (e) => {
             </ul>
           </div>
         </section>
-       
+
+     {/* AE Score Section */}
+<section className="mb-6 border-b pb-4">
+  <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
+  {localJob.ae_score ? (
+    <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+      <span className="font-semibold">AI Score:</span> {localJob.ae_score}
+    </div>
+  ) : (
+    <form onSubmit={handleSaveUpworkAeScore} className="flex flex-col gap-2 mb-2">
+      <select
+        className="border rounded px-2 py-1"
+        value={aeScoreUser}
+        onChange={e => setAeScoreUser(e.target.value)}
+        required
+      >
+        <option value="">Select User</option>
+        {USER_LIST.map(user => (
+          <option key={user} value={user}>{user}</option>
+        ))}
+      </select>
+      <input
+        type="number"
+        className="border rounded px-2 py-1 w-full"
+        placeholder="Enter AE Score (0-100)"
+        value={aeScoreInput}
+        onChange={e => setAeScoreInput(e.target.value)}
+        disabled={aeScoreSaving}
+        min={0}
+        max={100}
+        required
+      />
+      <button
+        type="submit"
+        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+        disabled={aeScoreSaving || !aeScoreUser || !aeScoreInput}
+      >
+        {aeScoreSaving ? "Saving..." : "Save"}
+      </button>
+      {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
+    </form>
+  )}
+</section>
+      {/* AE Pitched Section */}
+<section className="mb-6 border-b pb-4">
+  <h2 className="text-lg font-bold mb-3 text-gray-800">AE Pitched</h2>
+  {localJob.ae_pitched ? (
+    <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+      <span className="font-semibold">AE Pitched:</span> {localJob.ae_pitched}
+    </div>
+  ) : (
+    <form onSubmit={handleSaveAePitched} className="flex flex-col gap-2 mb-2">
+      <textarea
+        className="border rounded px-2 py-1 w-full"
+        rows={2}
+        placeholder="Write AE Pitched..."
+        value={aePitchedInput}
+        onChange={e => setAePitchedInput(e.target.value)}
+        disabled={aePitchedSaving}
+        required
+      />
+      <button
+        type="submit"
+        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+        disabled={aePitchedSaving || !aePitchedInput.trim()}
+      >
+        {aePitchedSaving ? "Saving..." : "Save"}
+      </button>
+      {aePitchedError && <div className="text-red-500 text-sm">{aePitchedError}</div>}
+    </form>
+  )}
+</section>
+
+{/* Estimated Budget Section */}
+<section className="mb-6 border-b pb-4">
+  <h2 className="text-lg font-bold mb-3 text-gray-800">Estimated Budget</h2>
+  {localJob.estimated_budget ? (
+    <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+      <span className="font-semibold">Estimated Budget:</span> ${localJob.estimated_budget}
+    </div>
+  ) : (
+    <form onSubmit={handleSaveEstimatedBudget} className="flex flex-col gap-2 mb-2">
+      <input
+        type="number"
+        className="border rounded px-2 py-1 w-full"
+        placeholder="Enter estimated budget"
+        value={estimatedBudgetInput}
+        onChange={e => setEstimatedBudgetInput(e.target.value)}
+        disabled={budgetSaving}
+        min={1}
+        required
+      />
+      <button
+        type="submit"
+        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+        disabled={budgetSaving || !estimatedBudgetInput}
+      >
+        {budgetSaving ? "Saving..." : "Save"}
+      </button>
+      {budgetError && <div className="text-red-500 text-sm">{budgetError}</div>}
+    </form>
+  )}
+</section>
         {/* AI Remark Section */}
         {localJob.ai_remark && (
           <section className="mb-6 border-b pb-4">

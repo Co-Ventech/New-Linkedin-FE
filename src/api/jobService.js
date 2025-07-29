@@ -5,9 +5,9 @@ import axios from "axios";
 
 
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST
-const PORT = import.meta.env.VITE_PORT 
+// const PORT = import.meta.env.VITE_PORT 
 //api 
-const API_BASE = `${REMOTE_HOST}:${PORT}/api`;
+const API_BASE = `${REMOTE_HOST}/api`;
 
 
 
@@ -20,7 +20,7 @@ export async function saveJobsToBackend(jobs) {
   try {
     console.log("[saveJobsToBackend] Sending jobs to backend:", jobs);
     const res = await axios.post(
-      `${REMOTE_HOST}:${PORT}/api/save-jobs`,
+      `${REMOTE_HOST}/api/linkedin/save-jobs`,
       jobs,
       { headers: getAuthHeaders() }
     );
@@ -34,10 +34,10 @@ export async function saveJobsToBackend(jobs) {
   }
 }
 
-export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
+export async function fetchJobsByDate() {
    try {
      const res = await axios.get(
-       `${REMOTE_HOST}:${PORT}/api/jobs-by-date`,
+       `${REMOTE_HOST}/api/linkdin/jobs-by-date`,
        { headers: getAuthHeaders() }
      );
      const data = res.data || [];
@@ -54,7 +54,7 @@ export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
  }
  export async function fetchJobById(jobId) {
   try {
-    const url = `${REMOTE_HOST}:${PORT}/api/apify/job?id=${jobId}`;
+    const url = `${REMOTE_HOST}/api/linkedin/job?id=${jobId}`;
     const res = await axios.get(url, { headers: getAuthHeaders() });
     return res.data;
   } catch (err) {
@@ -66,12 +66,37 @@ export async function fetchJobsByDate(range = "7d", page = 1, limit = 20) {
 
  export async function upworkfetchJobById(jobId) {
   try {
-    const url = `${REMOTE_HOST}:${PORT}/api/upwork/job?id=${jobId}`;
+    const url = `${REMOTE_HOST}/api/upwork/job?id=${jobId}`;
     const res = await axios.get(url, { headers: getAuthHeaders() });
     return res.data;
   } catch (err) {
     throw new Error(
       err.response?.data?.message || err.message || "Failed to fetch job by ID."
+    );
+  }
+}
+
+export async function fetchUpworkJobsByDateRange(start, end) {
+  try {
+    const url = `${REMOTE_HOST}/api/upwork/jobs-by-date?start=${start}&end=${end}`;
+    const res = await axios.get(url, { headers: getAuthHeaders() });
+    return res.data; // Should be [{date, jobs: [...]}, ...]
+  } catch (err) {
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to fetch jobs by date range."
+    );
+  }
+}
+
+
+export async function fetchlinkedinJobsByDateRange(start, end) {
+  try {
+    const url = `${REMOTE_HOST}/api/linkedin/jobs-by-date?start=${start}&end=${end}`;
+    const res = await axios.get(url, { headers: getAuthHeaders() });
+    return res.data; // Should be [{date, jobs: [...]}, ...]
+  } catch (err) {
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to fetch jobs by date range."
     );
   }
 }
