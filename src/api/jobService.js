@@ -37,7 +37,7 @@ export async function saveJobsToBackend(jobs) {
 export async function fetchJobsByDate() {
    try {
      const res = await axios.get(
-       `${REMOTE_HOST}/api/linkdin/jobs-by-date`,
+       `${REMOTE_HOST}/api/linkedin/jobs-by-date`,
        { headers: getAuthHeaders() }
      );
      const data = res.data || [];
