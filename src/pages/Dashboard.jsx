@@ -73,7 +73,8 @@ const Dashboard = () => {
     return {
       ...defaultFilters,
       ...params,
-      color: params.color ? (Array.isArray(params.color) ? params.color : [params.color]) : [],
+      // color: params.color ? (Array.isArray(params.color) ? params.color : [params.color]) : [],\
+      color: Array.isArray(params.color) ? params.color[0] : (params.color || ""),
       country: params.country ? (Array.isArray(params.country) ? params.country : [params.country]) : [],
       field: params.field ? (Array.isArray(params.field) ? params.field : [params.field]) : [],
       domain: params.domain ? (Array.isArray(params.domain) ? params.domain : [params.domain]) : [],
@@ -85,7 +86,7 @@ const Dashboard = () => {
   const [view, setView] = React.useState("grid");
 
   
-  const [dateRange, setDateRange] = useState("7d");
+  const [dateRange, setDateRange] = useState("1d");
   const [filteredJobByDate, setFilteredJobByDate] = useState([]);
   const [loadingRange, setLoadingRange] = useState(false);
   // Fetch jobs when dateRange changes
@@ -138,6 +139,9 @@ const Dashboard = () => {
         delete filtersForUrl[k];
       }
     });
+    if (filtersForUrl.color && Array.isArray(filtersForUrl.color)) {
+  filtersForUrl.color = filtersForUrl.color[0];
+}
 
     const query = queryString.stringify(filtersForUrl, { arrayFormat: 'bracket' });
     navigate(`?${query}`, { replace: true });
@@ -181,7 +185,7 @@ const Dashboard = () => {
         }
       }
       const colorValue = job.tier || job.tierColor;
-      if (filters.color.length > 0 && !filters.color.includes(colorValue)) {
+      if (filters.color && filters.color !== "" && colorValue !== filters.color) {
         return false;
       }
       return true;
@@ -273,19 +277,19 @@ const Dashboard = () => {
               ))}
             </select>
           </div>
-          {loadingRange ? (
+          {/* {loadingRange ? (
             <div>Loading jobs...</div>
           ) : error ? (
             <div className="text-red-500">{error}</div>
-          ) : filteredJobByDate.length === 0 ? (
+          ) : filteredJobsByDate.length === 0 ? (
             <div>No jobs found.</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-                {filteredJobByDate.map(job => (
+                {filteredJobsByDate.map(job => (
                 <JobCard key={job.jobId || job.id} job={job} />
               ))}
             </div>
-          )}
+          )} */}
           <div className="flex items-center mb-4 gap-2">
             {/* <label htmlFor="date-range" className="font-semibold">Show jobs from:</label>
             <select
@@ -311,33 +315,35 @@ const Dashboard = () => {
               List
             </button>
           </div>
-          {loading ? (
-            <div className="text-center text-gray-500">Loading jobs...</div>
-          ) : error ? (
-            <div className="text-center text-red-500">{error}</div>
-          ) : (
-            filteredJobsByDate.length === 0 || filteredJobsByDate.every((d) => d.jobs.length === 0) ? (
-              <div className="col-span-full text-center text-gray-500">No jobs found.</div>
-            ) : (
-              filteredJobByDate.map((day) => (
-                <section key={day.date} className="mb-8">
-                  <h2 className="text-lg font-bold mb-2">{day.date}</h2>
-                  <div className={view === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
-                    : "flex flex-col gap-4"}>
-                    {day.jobs.map((job) => (
-                      <JobCard
-                        key={job.id}
-                        job={job}
-                        onClick={() => handleJobClick(job)}
-                        view={view}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))
-            )
-          )}
+          {loadingRange ? (
+  <div>Loading jobs...</div>
+) : error ? (
+  <div className="text-red-500">{error}</div>
+  ) : filteredJobsByDate.length === 0 ? (
+  <div>No jobs found.</div>
+) : (
+  filteredJobsByDate.map((day) => (
+    <section key={day.date} className="mb-8">
+      <h2 className="text-lg font-bold mb-2">{day.date}</h2>
+      <div className={view === "grid"
+        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
+        : "flex flex-col gap-4"}>
+        {Array.isArray(day.jobs) && day.jobs.length > 0 ? (
+          day.jobs.map((job) => (
+            <JobCard
+              key={job.id}
+              job={job}
+              onClick={() => handleJobClick(job)}
+              view={view}
+            />
+          ))
+        ) : (
+          <div className="col-span-full text-gray-500">No jobs for this date.</div>
+        )}
+      </div>
+    </section>
+  ))
+)}
         </main>
       </div>
     </div>

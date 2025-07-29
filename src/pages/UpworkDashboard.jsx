@@ -61,7 +61,7 @@ const defaultFilters = {
 const UpworkDashboard = () => {
   const dispatch = useDispatch();
   const { upworkJobsByDate, loading, error } = useSelector(state => state.jobs);
-  const [dateRange, setDateRange] = useState("7d");
+  const [dateRange, setDateRange] = useState("1d");
   const [filteredJobsByDate, setFilteredJobsByDate] = useState([]);
   const [loadingRange, setLoadingRange] = useState(false);
 
@@ -93,7 +93,9 @@ const navigate = useNavigate();
       // Ensure multi-selects are always arrays
       country: params.country ? (Array.isArray(params.country) ? params.country : [params.country]) : [],
       category: params.category ? (Array.isArray(params.category) ? params.category : [params.category]) : [],
-      color: params.color ? (Array.isArray(params.color) ? params.color : [params.color]) : [],
+      // // color: params.color ? (Array.isArray(params.color) ? params.color : [params.color]) : [],
+      // color: typeof params.color === "string" ? params.color : "",
+      color: Array.isArray(params.color) ? params.color[0] : (params.color || ""),
     };
   };
 
@@ -209,10 +211,10 @@ const navigate = useNavigate();
     if (filters.jobDuration !== group) return false;
   }
     // Color filter
-    const colorValue = job.tier || job.tierColor;
-    if (filters.color.length > 0 && !filters.color.includes(colorValue)) {
-      return false;
-    }
+      const colorValue = job.tier || job.tierColor;
+      if (filters.color && filters.color !== "" && colorValue !== filters.color) {
+        return false;
+      }
     return true;
   });
 
@@ -239,6 +241,9 @@ const navigate = useNavigate();
         delete filtersForUrl[k];
       }
     });
+    if (filtersForUrl.color && Array.isArray(filtersForUrl.color)) {
+      filtersForUrl.color = filtersForUrl.color[0];
+    }
 
     const query = queryString.stringify(filtersForUrl, { arrayFormat: 'bracket' });
     navigate(`?${query}`, { replace: true });

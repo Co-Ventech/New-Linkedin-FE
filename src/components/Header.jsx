@@ -55,7 +55,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await fetch("http://REMOTE_HOST:PORT/api/jobs-by-date/excel", {
+      const response = await fetch(`${REMOTE_HOST}/linkedin/jobs-by-date/excel`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -87,7 +87,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
   //   setLastFetchTime(now);
   //   updateCooldown(now);
   //   try {
-  //     const fetchRes = await axios.get(`${REMOTE_HOST}:${PORT}/api/apify`, {
+  //     const fetchRes = await axios.get(`${REMOTE_HOST}/api/apify`, {
   //       headers: {
   //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
   //       },
@@ -114,14 +114,14 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
   //   setMessage("");
   //   try {
   //     // 1. Filter jobs (if needed)
-  //     await axios.get(`${REMOTE_HOST}:${PORT}/api/apify/filtered`);
+  //     await axios.get(`${REMOTE_HOST}/api/apify/filtered`);
   //     setMessage("Filter jobs: Success!");
   //     // 2. Score jobs
-  //     await axios.get(`${REMOTE_HOST}:${PORT}/api/apify/score`);
+  //     await axios.get(`${REMOTE_HOST}/api/apify/score`);
   //     setMessage("Score jobs: Success!");
   //     // 3. Save jobs to DB
   //     await axios.post(
-  //       `${REMOTE_HOST}:${PORT}/api/save-jobs`,
+  //       `${REMOTE_HOST}/api/save-jobs`,
   //       {},
   //       {
   //         headers: {
@@ -132,7 +132,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
   //     );
   //     setMessage("Fetch Jobs from Database: Success!");
   //     await axios.get(
-  //       `${REMOTE_HOST}:${PORT}/api/jobs-by-date`,
+  //       `${REMOTE_HOST}/api/jobs-by-date`,
   //       {
   //         headers: {
   //           "Content-Type": "application/json",
@@ -176,7 +176,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
   //   setMessage("");
   //   try {
   //     alert("About to fetch scored jobs from backend file");
-  //     const res = await fetch(`${REMOTE_HOST}:${PORT}/api/jobs-by-date`, {
+  //     const res = await fetch(`${REMOTE_HOST}/api/jobs-by-date`, {
   //       headers: {
   //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
   //       },
@@ -209,7 +209,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
 //   try {
 //     // Call the Upwork API with POST and token
 //     const response = await axios.post(
-//       `${REMOTE_HOST}:${PORT}/api/upwork`,
+//       `${REMOTE_HOST}/api/upwork`,
 //       // "http://44.214.92.17:3000/api/upwork",
 //       {}, // If your API expects a body, add it here; otherwise, keep as empty object
 //       {
@@ -240,7 +240,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
 //   setMessage("");
 //   try {
 //     // 1. Filter/deduplicate jobs
-//     await axios.get(`${REMOTE_HOST}:${PORT}/api/upwork/filtered`, {
+//     await axios.get(`${REMOTE_HOST}/api/upwork/filtered`, {
 //       headers: {
 //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
 //       },
@@ -248,7 +248,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
 //     setMessage("Upwork: Filtered jobs!");
 
 //     // 2. Score jobs and get scored jobs JSON
-//     const scoreRes = await axios.get(`${REMOTE_HOST}:${PORT}/api/upwork/score`, {
+//     const scoreRes = await axios.get(`${REMOTE_HOST}/api/upwork/score`, {
 //       headers: {
 //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
 //       },
@@ -257,7 +257,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
 
 //     // 3. Save scored jobs to DB
 //     await axios.post(
-//       `${REMOTE_HOST}:${PORT}/api/upwork/save-jobs`,
+//       `${REMOTE_HOST}/api/upwork/save-jobs`,
 //       {}, // If your API expects a body, add it here; otherwise, keep as empty object
 //       {
 //         headers: {
@@ -270,7 +270,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
 
 
 //     // 4. Fetch jobs from DB (new step)
-//     const jobsRes = await axios.get(`${REMOTE_HOST}:${PORT}/api/upwork/jobs-by-date`, {
+//     const jobsRes = await axios.get(`${REMOTE_HOST}/api/upwork/jobs-by-date`, {
 //       headers: {
 //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
 //       },

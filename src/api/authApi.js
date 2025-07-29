@@ -3,9 +3,9 @@ import { setUser } from "../slices/userSlice";
 
 
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST
-const PORT = import.meta.env.VITE_PORT 
+// const PORT = import.meta.env.VITE_PORT 
 //api 
-const API_BASE = `${REMOTE_HOST}:${PORT}/api`;
+const API_BASE = `${REMOTE_HOST}/api`;
 console.log(API_BASE);
 
 export const loginUser = async (dispatch, email, password) => {
