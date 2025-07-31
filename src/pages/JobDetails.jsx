@@ -6,7 +6,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk, updateAeCommentThunk, fetchJobByIdThunk, updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk } from "../slices/jobsSlice";
+import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk, updateAeCommentThunk, fetchJobByIdThunk,
+ updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk , generateProposalThunk , updateProposalThunk} from "../slices/jobsSlice";
+import { setProposalLoading } from "../slices/jobsSlice"; // You'll add this action
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -52,6 +54,14 @@ const STATUS_OPTIONS = [
 ];
 
 const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
+const SERVICE_CATEGORIES = [
+  "AI/ML", "QA", "SoftwareDevelopment", "MobileAppDevelopment", "UI/UX",
+  "DevOps", "CloudDevOps", "VAPT", "Cybersecurity", "DataEngineering"
+];
+const PRODUCT_CATEGORIES = [
+  "Recruitinn", "SkillBuilder", "CoVental"
+];
+
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -89,6 +99,30 @@ const JobDetails = () => {
   const [aeScoreUser, setAeScoreUser] = useState("");
   const [aeScoreSaving, setAeScoreSaving] = useState(false);
   const [aeScoreError, setAeScoreError] = useState("");
+  const jobId = localJob?.id;
+const proposalState = useSelector(state => state.jobs.proposals?.[jobId] || { text: '', locked: false });
+const proposalLoading = useSelector(state => state.jobs.proposalLoading);
+const proposalError = useSelector(state => state.jobs.proposalError);
+
+const [proposalType, setProposalType] = useState(""); // "Services" or "Products"
+const [proposalCategory, setProposalCategory] = useState("");
+const [showProposalUI, setShowProposalUI] = useState(true);
+const [isEditingProposal, setIsEditingProposal] = useState(false);
+const [editableProposal, setEditableProposal] = useState(proposalState.text || "");
+const proposalSaving = useSelector(state => state.jobs.proposalSaving);
+const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
+
+//   const [proposalType, setProposalType] = useState(""); // "Services" or "Products"
+// const [proposalCategory, setProposalCategory] = useState("");
+// const [editableProposal, setEditableProposal] = useState("");
+
+// const proposalLoading = useSelector(state => state.jobs.proposalLoading);
+// const proposalError = useSelector(state => state.jobs.proposalError);
+// const proposalSaving = useSelector(state => state.jobs.proposalSaving);
+// const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
+// const jobProposal = useSelector(state => state.jobs.proposals?.[localJob?.id] || { text: '', locked: false });
+
+
 
   // Log the first job object to inspect structure
   console.log("First job object in jobsByDate:", allJobs[0]);
@@ -113,6 +147,35 @@ const JobDetails = () => {
       // setAe_comment(job.ae_comment || "");
     }
   }, [localJob]);
+
+  useEffect(() => {
+    if (proposalState.text) {
+      setShowProposalUI(false);
+    }
+  }, [proposalState.text]);
+  
+  const handleGenerateProposal = (e) => {
+    e.preventDefault();
+    if (!proposalType || !proposalCategory) return;
+    console.log("Dispatching generateProposalThunk", { jobId, proposalType, proposalCategory });
+    dispatch(generateProposalThunk({
+      jobId,
+      selectedCategory: proposalCategory,
+      isProduct: proposalType === "Products"
+    }));
+  };
+
+  useEffect(() => {
+    // Reset proposalLoading when job changes or component unmounts
+    return () => {
+      dispatch(setProposalLoading(false));
+    };
+  }, [id, dispatch]);
+  useEffect(() => {
+    setEditableProposal(proposalState.text || "");
+  }, [proposalState.text]);
+
+
 
   useEffect(() => {
     if (!jobFromRedux && id) {
@@ -300,7 +363,12 @@ const JobDetails = () => {
   };
 
   if (!localJob) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Job not found.</div>;
-
+  // console.log("proposalType:", proposalType);
+  // console.log("proposalCategory:", proposalCategory);
+  // console.log("proposalLoading:", proposalLoading);
+  // console.log("localJob:", localJob);
+  // console.log("jobProposal:", jobProposal);
+  // console.log("proposalError:", proposalError);
   return (
 
     <div className="min-h-screen bg-gray-50 py-8 px-4 flex justify-center">
@@ -727,6 +795,108 @@ const JobDetails = () => {
             <li className="text-sm text-gray-400">No comments yet.</li>
           )}
         </ul>
+        <section className="mb-6 border-b pb-4">
+  <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>
+  {showProposalUI ? (
+    <form onSubmit={handleGenerateProposal} className="flex flex-col gap-2 mb-2">
+      <select
+        className="border rounded px-2 py-1"
+        value={proposalType}
+        onChange={e => {
+          setProposalType(e.target.value);
+          setProposalCategory(""); // Reset category on type change
+        }}
+        required
+      >
+        <option value="">Select Type</option>
+        <option value="Services">Services</option>
+        <option value="Products">Products</option>
+      </select>
+      {proposalType === "Services" && (
+        <select
+          className="border rounded px-2 py-1"
+          value={proposalCategory}
+          onChange={e => setProposalCategory(e.target.value)}
+          required
+        >
+          <option value="">Select Service Category</option>
+          {SERVICE_CATEGORIES.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      )}
+      {proposalType === "Products" && (
+        <select
+          className="border rounded px-2 py-1"
+          value={proposalCategory}
+          onChange={e => setProposalCategory(e.target.value)}
+          required
+        >
+          <option value="">Select Product Category</option>
+          {PRODUCT_CATEGORIES.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      )}
+      <button
+        type="submit"
+        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+        disabled={proposalLoading || !proposalType || !proposalCategory}
+      >
+        {proposalLoading ? "Generating..." : "Generate Proposal"}
+      </button>
+      {proposalError && <div className="text-red-500 text-sm">{proposalError}</div>}
+    </form>
+  ) : (
+    <div>
+      <label className="block font-semibold mb-1">Generated Proposal:</label>
+      <textarea
+        className="border rounded px-2 py-1 w-full"
+        rows={8}
+        value={isEditingProposal ? editableProposal : proposalState.text}
+        onChange={e => setEditableProposal(e.target.value)}
+        readOnly={!isEditingProposal}
+      />
+      <div className="flex gap-2 mt-2">
+        {!isEditingProposal && !proposalState.locked && (
+          <button
+            className="px-4 py-1 bg-yellow-500 text-white rounded"
+            onClick={() => setIsEditingProposal(true)}
+          >
+            Edit
+          </button>
+        )}
+        {isEditingProposal && (
+          <>
+            <button
+              className="px-4 py-1 bg-blue-600 text-white rounded"
+              onClick={async () => {
+                if (!editableProposal.trim()) return;
+                await dispatch(updateProposalThunk({ jobId, proposal: editableProposal.trim() }));
+                setIsEditingProposal(false);
+              }}
+              disabled={proposalSaving}
+            >
+              {proposalSaving ? "Saving..." : "Save"}
+            </button>
+            <button
+              className="px-4 py-1 bg-gray-400 text-white rounded"
+              onClick={() => {
+                setEditableProposal(proposalState.text || "");
+                setIsEditingProposal(false);
+              }}
+              disabled={proposalSaving}
+            >
+              Cancel
+            </button>
+          </>
+        )}
+      </div>
+      {proposalSaveError && <div className="text-red-500 text-sm">{proposalSaveError}</div>}
+    </div>
+  )}
+</section>
+       
       </div>
     </div>
   );

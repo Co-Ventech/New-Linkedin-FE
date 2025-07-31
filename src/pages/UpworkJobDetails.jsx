@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {useSelector, useDispatch } from "react-redux";
 
-import { fetchUpworkJobsByDateThunk, updateUpworkJobStatusThunk , updateUpworkAeCommentThunk, addUpworkJobCommentThunk, upworkfetchJobByIdThunk, updateUpworkAeScoreThunk, updateUpworkAePitchedThunk , updateUpworkEstimatedBudgetThunk} from "../slices/jobsSlice";
+import { fetchUpworkJobsByDateThunk, updateUpworkJobStatusThunk , updateUpworkAeCommentThunk, addUpworkJobCommentThunk, upworkfetchJobByIdThunk, updateUpworkAeScoreThunk, 
+  updateUpworkAePitchedThunk , updateUpworkEstimatedBudgetThunk , generateUpworkProposalThunk , updateUpworkProposalThunk, setUpworkProposalLoading } from "../slices/jobsSlice";
 import axios from "axios";
+
+
 // import { updateUpworkAeCommentThunk, updateUpworkJobStatusThunk, addUpworkJobCommentThunk } from "../slices/jobsSlice";
 // await dispatch(updateUpworkJobStatusThunk({ jobId: job.id, status: ..., username:  }))
 // const dispatch = useDispatch();
@@ -14,6 +17,18 @@ const PORT = import.meta.env.VITE_PORT;
 const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 const STATUS_OPTIONS = [
   'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'archived'
+];
+const UPWORK_SERVICE_CATEGORIES = [
+  "AI/ML",
+  "QA",
+  "Software Development",
+  "Mobile App Development",
+  "UI/UX",
+  "DevOps",
+  "Cloud DevOps",
+  "VAPT",
+  "Cybersecurity",
+  "Data Engineering"
 ];
 
 const badgeClass = {
@@ -34,6 +49,19 @@ const getKpiBadge = (score) => {
   if (score >= 0.5) return { color: 'bg-yellow-100 text-yellow-800 border-yellow-400', tag: 'Yellow' };
   return { color: 'bg-red-100 text-red-800 border-red-400', tag: 'Red' };
 };
+
+// const UPWORK_SERVICE_CATEGORIES = [
+//   "AI/ML",
+//   "QA",
+//   "Software Development",
+//   "Mobile App Development",
+//   "UI/UX",
+//   "DevOps",
+//   "Cloud DevOps",
+//   "VAPT",
+//   "Cybersecurity",
+//   "Data Engineering"
+// ];
 
 const UpworkJobDetails = () => {
   const location = useLocation();
@@ -74,6 +102,35 @@ const [aePitchedError, setAePitchedError] = useState("");
 const [estimatedBudgetInput, setEstimatedBudgetInput] = useState(localJob?.estimated_budget || "");
 const [budgetSaving, setBudgetSaving] = useState(false);
 const [budgetError, setBudgetError] = useState("");
+const jobId = localJob?.jobId || localJob?.id;
+const upworkProposalState = useSelector(state => {
+  const proposals = state.jobs.upworkProposals || {};
+  return proposals[jobId] || { text: '', locked: false };
+});
+const upworkProposalLoading = useSelector(state => state.jobs.upworkProposalLoading);
+console.log("upworkProposalLoading", upworkProposalLoading);
+const upworkProposalError = useSelector(state => state.jobs.upworkProposalError);
+const upworkProposalSaving = useSelector(state => state.jobs.upworkProposalSaving);
+const upworkProposalSaveError = useSelector(state => state.jobs.upworkProposalSaveError);
+
+const [proposalCategory, setProposalCategory] = useState("");
+const [showProposalUI, setShowProposalUI] = useState(true);
+const [isEditingProposal, setIsEditingProposal] = useState(false);
+const [editableProposal, setEditableProposal] = useState(upworkProposalState.text || "");
+
+// const [proposalCategory, setProposalCategory] = useState("");
+// const [editableProposal, setEditableProposal] = useState("");
+
+// const upworkProposalLoading = useSelector(state => state.jobs.upworkProposalLoading);
+// const upworkProposalError = useSelector(state => state.jobs.upworkProposalError);
+// const upworkProposalSaving = useSelector(state => state.jobs.upworkProposalSaving);
+// const upworkProposalSaveError = useSelector(state => state.jobs.upworkProposalSaveError);
+// const jobId = localJob?.jobId || localJob?.id;
+// const jobProposal = useSelector(state => (state.jobs.upworkProposals && jobId ? state.jobs.upworkProposals[jobId] : { text: '', locked: false }));
+
+// useEffect(() => {
+//   setEditableProposal(jobProposal.text || "");
+// }, [jobProposal.text]);
 
   
 useEffect(() => {
@@ -112,6 +169,24 @@ if (!localJob) {
   return null;
 }
 
+useEffect(() => {
+  setEditableProposal(upworkProposalState.text || "");
+  if (upworkProposalState.text) setShowProposalUI(false);
+}, [upworkProposalState.text]);
+
+useEffect(() => {
+  // Reset proposalLoading when job changes or component unmounts
+  return () => {
+    dispatch(setUpworkProposalLoading(false));
+  };
+}, [id, dispatch]);
+
+useEffect(() => {
+  if (upworkProposalState.text) {
+    setShowProposalUI(false);
+  }
+}, [upworkProposalState.text]);
+
 // if (loading) {
   //   return <div className="p-8">Loading job details...</div>;
   // }
@@ -132,6 +207,18 @@ if (!localJob) {
 // if (!job) {
 //   return <div className="p-8">No job details found.</div>;
 // }
+
+const handleGenerateProposal = async (e) => {
+  e.preventDefault();
+  if (!proposalCategory) return;
+  await dispatch(generateUpworkProposalThunk({ jobId, selectedCategory: proposalCategory }));
+};
+
+const handleSaveProposal = async () => {
+  if (!editableProposal.trim()) return;
+  await dispatch(updateUpworkProposalThunk({ jobId, proposal: editableProposal.trim() }));
+  setIsEditingProposal(false);
+};
 
 const handleSaveAeRemark = async (e) => {
   e.preventDefault();
@@ -632,7 +719,76 @@ const handleSaveAeRemark = async (e) => {
             <li className="text-sm text-gray-400">No comments yet.</li>
           )}
         </ul>
-
+        <section className="mb-6 border-b pb-4">
+  <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>
+  {showProposalUI ? (
+    <form onSubmit={handleGenerateProposal} className="flex flex-col gap-2 mb-2">
+      <select
+        className="border rounded px-2 py-1"
+        value={proposalCategory}
+        onChange={e => setProposalCategory(e.target.value)}
+        required
+      >
+        <option value="">Select Service Category</option>
+        {UPWORK_SERVICE_CATEGORIES.map(cat => (
+          <option key={cat} value={cat}>{cat}</option>
+        ))}
+      </select>
+      <button
+        type="submit"
+        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+        disabled={upworkProposalLoading || !proposalCategory}
+      >
+        {upworkProposalLoading ? "Generating..." : "Generate Proposal"}
+      </button>
+      {upworkProposalError && <div className="text-red-500 text-sm">{upworkProposalError}</div>}
+    </form>
+  ) : (
+    <div>
+      <label className="block font-semibold mb-1">Generated Proposal:</label>
+      <textarea
+        className="border rounded px-2 py-1 w-full"
+        rows={8}
+        value={isEditingProposal ? editableProposal : upworkProposalState.text}
+        onChange={e => setEditableProposal(e.target.value)}
+        readOnly={!isEditingProposal}
+      />
+      <div className="flex gap-2 mt-2">
+  {!isEditingProposal && !upworkProposalState.locked && (
+    <button
+      className="px-4 py-1 bg-yellow-500 text-white rounded"
+      onClick={() => setIsEditingProposal(true)}
+    >
+      Edit
+    </button>
+  )}
+  {isEditingProposal && (
+    <>
+      <button
+        className="px-4 py-1 bg-blue-600 text-white rounded"
+        onClick={handleSaveProposal}
+        disabled={upworkProposalSaving}
+      >
+        {upworkProposalSaving ? "Saving..." : "Save"}
+      </button>
+      <button
+        className="px-4 py-1 bg-gray-400 text-white rounded"
+        onClick={() => {
+          setEditableProposal(upworkProposalState.text || "");
+          setIsEditingProposal(false);
+        }}
+        disabled={upworkProposalSaving}
+      >
+        Cancel
+      </button>
+    </>
+  )}
+</div>
+      {upworkProposalSaveError && <div className="text-red-500 text-sm">{upworkProposalSaveError}</div>}
+    </div>
+  )}
+</section>
+      
         {/* Raw JSON for debugging
         <details className="mt-4">
           <summary className="cursor-pointer text-xs text-gray-400">Raw Job Data</summary>

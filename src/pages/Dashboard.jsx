@@ -12,6 +12,7 @@ import {
 } from "../slices/jobsSlice";
 import { logoutUser } from "../api/authApi";
 
+
 // 1. Define your default filters
 const defaultFilters = {
   type: "",
@@ -57,10 +58,39 @@ function getEndDate() {
   return today.toISOString().slice(0, 10);
 }
 
+// // Helper to get start/end based on filter
+// const getDateRangeForFilter = (filter) => {
+//   const end = new Date();
+//   let start = new Date();
+//   switch (filter) {
+//     case "24hours":
+//       start.setDate(end.getDate() - 1);
+//       break;
+//     case "7days":
+//       start.setDate(end.getDate() - 7);
+//       break;
+//     case "30days":
+//       start.setDate(end.getDate() - 30);
+//       break;
+//     default:
+//       start.setDate(end.getDate() - 1);
+//   }
+//   return {
+//     start: start.toISOString().split("T")[0],
+//     end: end.toISOString().split("T")[0],
+//   };
+// };
+
 const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  //const selectedFilter = useSelector(state => state.jobs.selectedFilter);
+  //const jobs = useSelector(state => state.jobs.jobsByFilter[selectedFilter] || []);
+  // const selectedFilter = useSelector((state) => state.jobs.selectedFilter);
+  // const jobsByFilter = useSelector((state) => state.jobs.jobsByFilter);
+  // const jobs = jobsByFilter[selectedFilter] || [];
+  // const loading = useSelector((state) => state.jobs.loading);
  
   const { jobsByDate, loading, error, range } = useSelector(
     (state) => state.jobs
@@ -108,6 +138,7 @@ const Dashboard = () => {
   }, [dateRange]);
 
 
+  
   // 4. Keep filters in sync with URL (for browser navigation)
   useEffect(() => {
     setFilters(getFiltersFromUrl());
@@ -243,6 +274,7 @@ const Dashboard = () => {
   const handleDateRangeChange = (e) => {
     setDateRange(e.target.value);
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

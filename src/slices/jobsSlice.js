@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { saveJobsToBackend, fetchJobsByDate } from '../api/jobService';
-import { updateEstimatedBudget, updateAePitched, updateAeScore, updateUpworkEstimatedBudget,updateUpworkAePitched,updateUpworkAeScore} from '../api/updateJobStatus';
+import { updateEstimatedBudget, updateAePitched, updateAeScore, 
+  updateUpworkEstimatedBudget,updateUpworkAePitched,updateUpworkAeScore,generateProposal ,
+  updateProposal,generateUpworkProposal,updateUpworkProposal
+ } from '../api/updateJobStatus';
 // import { updateJobStatus, addJobComment} from '../api/updateJobStatus';
 // import { updateJobStatus, addJobComment, updateUpworkJobStatus, updateUpworkAeComment, addUpworkJobComment } from '../api/updateJobStatus';
 // import { updateAeComment } from '../api/updateJobStatus';
@@ -243,17 +246,76 @@ export const updateUpworkEstimatedBudgetThunk = createAsyncThunk(
   }
 );
 
+// Generate proposal thunk
+export const generateProposalThunk = createAsyncThunk(
+  'jobs/generateProposal',
+  async ({ jobId, selectedCategory, isProduct }, { rejectWithValue }) => {
+    try {
+      const data = await generateProposal(jobId, selectedCategory, isProduct);
+      return { jobId, proposal: data.proposal };
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+// Update proposal thunk
+export const updateProposalThunk = createAsyncThunk(
+  'jobs/updateProposal',
+  async ({ jobId, proposal }, { rejectWithValue }) => {
+    try {
+      const data = await updateProposal(jobId, proposal);
+      return { jobId, proposal: data.proposal };
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+export const generateUpworkProposalThunk = createAsyncThunk(
+  'jobs/generateUpworkProposal',
+  async ({ jobId, selectedCategory }, { rejectWithValue }) => {
+    try {
+      const data = await generateUpworkProposal(jobId, selectedCategory);
+      return { jobId, proposal: data.proposal };
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const updateUpworkProposalThunk = createAsyncThunk(
+  'jobs/updateUpworkProposal',
+  async ({ jobId, proposal }, { rejectWithValue }) => {
+    try {
+      const data = await updateUpworkProposal(jobId, proposal);
+      return { jobId, proposal: data.proposal };
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+const initialState = {
+  jobsByDate: [], // [{date, jobs:[]}, ...]
+  upworkJobsByDate: [], // <-- add this
+  loading: false,
+  error: null,
+  hasMore: true,
+  page: 1,
+  range: '7d',
+  proposals: {}, // { [jobId]: { text, locked } }
+  proposalLoading: false,
+  proposalError: null,
+  upworkProposals: {}, // { [jobId]: { text, locked } }
+upworkProposalLoading: false,
+upworkProposalError: null,
+upworkProposalSaving: false,
+upworkProposalSaveError: null,
+
+}
+
 const jobsSlice = createSlice({
   name: 'jobs',
-  initialState: {
-    jobsByDate: [], // [{date, jobs:[]}, ...]
-    upworkJobsByDate: [], // <-- add this
-    loading: false,
-    error: null,
-    hasMore: true,
-    page: 1,
-    range: '7d',
-  },
+  initialState,
   reducers: {
     resetJobsByDate(state) {
       state.jobsByDate = [];
@@ -266,9 +328,17 @@ const jobsSlice = createSlice({
       state.page = 1;
       state.hasMore = true;
     },
+    setProposalLoading(state, action) {
+      state.proposalLoading = action.payload;
+    },
+    setUpworkProposalLoading(state, action) {
+      state.upworkProposalLoading = action.payload;
+    },
+    
   },
   extraReducers: (builder) => {
     builder
+    
       .addCase(saveJobsToBackendThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -315,9 +385,45 @@ const jobsSlice = createSlice({
         state.loading = false;
         state.error = action.payload || 'Failed to fetch Upwork jobs.';
       })
+      .addCase(generateProposalThunk.pending, (state) => {
+        state.proposalLoading = true;
+        state.proposalError = null;
+      })
+      .addCase(generateProposalThunk.fulfilled, (state, action) => {
+        state.proposalLoading = false;
+        state.proposalError = null;
+        const { jobId, proposal } = action.payload;
+        if (!state.proposals) state.proposals = {};
+        state.proposals[jobId] = { text: proposal, locked: false };
+      })
+      .addCase(generateProposalThunk.rejected, (state, action) => {
+        state.proposalLoading = false;
+        state.proposalError = action.payload || 'Failed to generate proposal.';
+      })
+      
+      .addCase(updateProposalThunk.pending, (state) => {
+        state.proposalSaving = true;
+        state.proposalSaveError = null;
+      })
+
+      .addCase(updateProposalThunk.fulfilled, (state, action) => {
+        state.proposalSaving = false;
+        state.proposalSaveError = null;
+        const { jobId, proposal } = action.payload;
+        if (!state.proposals) state.proposals = {};
+        state.proposals[jobId] = { text: proposal, locked: true };
+      })
+      
+      .addCase(updateProposalThunk.rejected, (state, action) => {
+        state.proposalSaving = false;
+        state.proposalSaveError = action.payload || 'Failed to save proposal.';
+      })
+    
+    
+      
+      // When fetching a job, if it has a proposal, set it as locked
       .addCase(fetchJobByIdThunk.fulfilled, (state, action) => {
         const updatedJob = action.payload;
-        // Find and update the job in jobsByDate
         for (const day of state.jobsByDate) {
           const idx = day.jobs.findIndex(j => String(j.id) === String(updatedJob.id));
           if (idx !== -1) {
@@ -325,19 +431,88 @@ const jobsSlice = createSlice({
             break;
           }
         }
+        if (updatedJob.proposal) {
+          if (!state.proposals) state.proposals = {};
+          state.proposals[updatedJob.id] = { text: updatedJob.proposal, locked: true };
+        }
       })
 
-       .addCase( upworkfetchJobByIdThunk.fulfilled, (state, action) => {
+      // .addCase(fetchJobByIdThunk.fulfilled, (state, action) => {
+      //   const updatedJob = action.payload;
+      //   // Find and update the job in jobsByDate
+      //   for (const day of state.jobsByDate) {
+      //     const idx = day.jobs.findIndex(j => String(j.id) === String(updatedJob.id));
+      //     if (idx !== -1) {
+      //       day.jobs[idx] = updatedJob;
+      //       break;
+      //     }
+      //   }
+      // })
+
+  .addCase(generateUpworkProposalThunk.pending, (state) => {
+  state.upworkProposalLoading = true;
+  state.upworkProposalError = null;
+})
+.addCase(generateUpworkProposalThunk.fulfilled, (state, action) => {
+  state.upworkProposalLoading = false;
+  state.upworkProposalError = null;
+  const { jobId, proposal } = action.payload;
+  if (!state.upworkProposals) state.upworkProposals = {};
+  state.upworkProposals[jobId] = { text: proposal, locked: false };
+})
+.addCase(generateUpworkProposalThunk.rejected, (state, action) => {
+  state.upworkProposalLoading = false;
+  state.upworkProposalError = action.payload || 'Failed to generate proposal.';
+})
+      
+      
+.addCase(updateUpworkProposalThunk.pending, (state) => {
+  state.upworkProposalSaving = true;
+  state.upworkProposalSaveError = null;
+})
+.addCase(updateUpworkProposalThunk.fulfilled, (state, action) => {
+  state.upworkProposalSaving = false;
+  state.upworkProposalSaveError = null;
+  const { jobId, proposal,locked } = action.payload;
+  if (!state.upworkProposals[jobId]) {
+    state.upworkProposals[jobId] = {};
+  state.upworkProposals[jobId] = {  }
+  }
+  state.upworkProposals[jobId].text = proposal;
+  state.upworkProposals[jobId].locked = locked;
+  state.upworkProposalSaving = false;
+  state.upworkProposalSaveError = null;
+})
+.addCase(updateUpworkProposalThunk.rejected, (state, action) => {
+  state.upworkProposalSaving = false;
+  state.upworkProposalSaveError = action.payload || 'Failed to save proposal.';
+})
+      // When fetching a job, if it has a proposal, set it as locked
+      .addCase(upworkfetchJobByIdThunk.fulfilled, (state, action) => {
+        if (!state.upworkProposals) state.upworkProposals = {};
         const updatedJob = action.payload;
-        // Find and update the job in upworkJobsByDate
         for (const day of state.upworkJobsByDate) {
-          const idx = day.jobs.findIndex(j => String(j.id) === String(updatedJob.id));
+          const idx = day.jobs.findIndex(j => String(j.jobId) === String(updatedJob.jobId) || String(j.id) === String(updatedJob.id));
           if (idx !== -1) {
             day.jobs[idx] = updatedJob;
             break;
           }
         }
+        if (updatedJob.proposal) {
+          state.upworkProposals[updatedJob.jobId || updatedJob.id] = { text: updatedJob.proposal, locked: true };
+        }
       })
+      //  .addCase( upworkfetchJobByIdThunk.fulfilled, (state, action) => {
+      //   const updatedJob = action.payload;
+      //   // Find and update the job in upworkJobsByDate
+      //   for (const day of state.upworkJobsByDate) {
+      //     const idx = day.jobs.findIndex(j => String(j.id) === String(updatedJob.id));
+      //     if (idx !== -1) {
+      //       day.jobs[idx] = updatedJob;
+      //       break;
+      //     }
+      //   }
+      // })
 
 
       // .addCase(updateUpworkJobStatusThunk.fulfilled, (state, action) => {
@@ -485,11 +660,13 @@ const jobsSlice = createSlice({
       }
     });
   });
+  
 })
+
   },
 });
 
 
 
-export const { resetJobsByDate, setRange } = jobsSlice.actions;
+export const { resetJobsByDate, setRange , setProposalLoading , setUpworkProposalLoading } = jobsSlice.actions;
 export default jobsSlice.reducer; 

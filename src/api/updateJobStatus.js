@@ -312,3 +312,140 @@ export async function updateUpworkEstimatedBudget(jobId, estimated_budget) {
     );
   }
 }
+// Generate a proposal for a job
+export async function generateProposal(jobId, selectedCategory, isProduct) {
+  console.log("API CALL: generateProposal", jobId, selectedCategory, isProduct);
+  try {
+    const url = `${API_BASE}/linkedin/job/${jobId}/generate-proposal`;
+    const payload = { selectedCategory, isProduct };
+    const res = await axios.post(
+      url,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return res.data; // Should contain { proposal: "..." }
+  } catch (err) {
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to generate proposal."
+    );
+  }
+}
+
+// Update (save) a proposal for a job
+export async function updateProposal(jobId, proposal) {
+  try {
+    const url = `${API_BASE}/linkedin/job/${jobId}/proposal`;
+    const payload = { proposal };
+    const res = await axios.patch(
+      url,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return res.data; // { proposal: "..." }
+  } catch (err) {
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to update proposal."
+    );
+  }
+}
+
+// Generate Upwork Proposal
+export async function generateUpworkProposal(jobId, selectedCategory) {
+  try {
+    const url = `${API_BASE}/upwork/job/${jobId}/generate-proposal`;
+    const payload = { selectedCategory };
+    const res = await axios.post(
+      url,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return res.data; // { proposal: "..." }
+  } catch (err) {
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to generate proposal."
+    );
+  }
+}
+
+// Update Upwork Proposal
+export async function updateUpworkProposal(jobId, proposal) {
+  try {
+    const url = `${API_BASE}/upwork/job/${jobId}/proposal`;
+    const payload = { proposal };
+    const res = await axios.patch(
+      url,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return res.data; // { proposal: "..." }
+  } catch (err) {
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to update proposal."
+    );
+  }
+}
+// // Generate proposal for Upwork job
+// export async function generateUpworkProposal(jobId, selectedCategory) {
+//   try {
+//     const url = `${API_BASE}/upwork/job/${jobId}/generate-proposal`;
+//     const payload = { selectedCategory };
+//     const res = await axios.post(
+//       url,
+//       payload,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     return res.data; // { proposal: "..." }
+//   } catch (err) {
+//     throw new Error(
+//       err.response?.data?.message || err.message || "Failed to generate proposal."
+//     );
+//   }
+// }
+
+// // Update (save) proposal for Upwork job
+// export async function updateUpworkProposal(jobId, proposal) {
+//   try {
+//     const url = `${API_BASE}/upwork/job/${jobId}/proposal`;
+//     const payload = { proposal };
+//     const res = await axios.patch(
+//       url,
+//       payload,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     return res.data; // { proposal: "..." }
+//   } catch (err) {
+//     throw new Error(
+//       err.response?.data?.message || err.message || "Failed to update proposal."
+//     );
+//   }
+// }
