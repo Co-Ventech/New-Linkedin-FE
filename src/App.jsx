@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
+// import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import UpworkDashboard from "./pages/UpworkDashboard"; // <-- New import
 import UpworkJobDetails from "./pages/UpworkJobDetails";
@@ -25,10 +25,10 @@ function App() {
           path="/login"
           element={user ? <Navigate to="/dashboard" /> : <Login />}
         />
-        <Route
+        {/* <Route
           path="/register"
           element={user ? <Navigate to="/dashboard" /> : <Register />}
-        />
+        /> */}
          {/* Redirect /dashboard to /dashboard/linkedin */}
         <Route path="/dashboard" element={<Navigate to="/dashboard/linkedin" />} />
         <Route

@@ -4,8 +4,8 @@ import { updateEstimatedBudget, updateAePitched, updateAeScore,
   updateUpworkEstimatedBudget,updateUpworkAePitched,updateUpworkAeScore,generateProposal ,
   updateProposal,generateUpworkProposal,updateUpworkProposal
  } from '../api/updateJobStatus';
- import {persistReducer} from 'redux-persist';
- import storage from 'redux-persist/lib/storage';
+//  import {persistReducer} from 'redux-persist';
+//  import storage from 'redux-persist/lib/storage';
 
 // import { updateJobStatus, addJobComment} from '../api/updateJobStatus';
 // import { updateJobStatus, addJobComment, updateUpworkJobStatus, updateUpworkAeComment, addUpworkJobComment } from '../api/updateJobStatus';
@@ -299,21 +299,21 @@ export const updateUpworkProposalThunk = createAsyncThunk(
 
   
 );
-export const fetchLinkedInJobsByDateThunk = createAsyncThunk(
-  'jobs/fetchLinkedInJobsByDate',
-  async ({ filter, start, end }, { getState, rejectWithValue }) => {
-    const state = getState();
-    if (state.jobs.jobsByFilter[filter]) {
-      // Already have data, skip fetch
-      return rejectWithValue('Already loaded');
-    }
-    // ...fetch from API...
-    const response = await api.get(`/api/linkedin/jobs-by-date?start=${start}&end=${end}`);
-    return { filter, jobs: response.data.jobs };
-  }
-);
+// export const fetchLinkedInJobsByDateThunk = createAsyncThunk(
+//   'jobs/fetchLinkedInJobsByDate',
+//   async ({ filter, start, end }, { getState, rejectWithValue }) => {
+//     const state = getState();
+//     if (state.jobs.jobsByFilter[filter]) {
+//       // Already have data, skip fetch
+//       return rejectWithValue('Already loaded');
+//     }
+//     // ...fetch from API...
+//     const response = await api.get(`/api/linkedin/jobs-by-date?start=${start}&end=${end}`);
+//     return { filter, jobs: response.data.jobs };
+//   }
+// );
 
-// Repeat for Upwork
+// // Repeat for Upwork
 const initialState = {
   jobsByDate: [], // [{date, jobs:[]}, ...]
   upworkJobsByDate: [], // <-- add this
@@ -330,9 +330,9 @@ upworkProposalLoading: false,
 upworkProposalError: null,
 upworkProposalSaving: false,
 upworkProposalSaveError: null,
-selectedFilter: "24hours",
-jobsByFilter: {}, // { "24hours": [...], "7days": [...] }
-upworkJobsByFilter: {},
+// selectedFilter: "24hours",
+// jobsByFilter: {}, // { "24hours": [...], "7days": [...] }
+// upworkJobsByFilter: {},
 
 }
 
@@ -340,9 +340,9 @@ const jobsSlice = createSlice({
   name: 'jobs',
   initialState,
   reducers: {
-    setSelectedFilter(state, action) {
-      state.selectedFilter = action.payload;
-    },
+    // setSelectedFilter(state, action) {
+    //   state.selectedFilter = action.payload;
+    // },
     resetJobsByDate(state) {
       state.jobsByDate = [];
       state.upworkJobsByDate = [];
@@ -365,14 +365,6 @@ const jobsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-    .addCase(fetchLinkedInJobsByDateThunk.fulfilled, (state, action) => {
-      const { filter, jobs } = action.payload;
-      state.jobsByFilter[filter] = jobs;
-    })
-    // .addCase(fetchUpworkJobsByDateThunk.fulfilled, (state, action) => {
-    //   const { filter, jobs } = action.payload;
-    //   state.upworkJobsByFilter[filter] = jobs;
-    // })
 
       .addCase(saveJobsToBackendThunk.pending, (state) => {
         state.loading = true;
@@ -701,19 +693,6 @@ const jobsSlice = createSlice({
 
 
 
-export const { resetJobsByDate, setRange , setProposalLoading , setUpworkProposalLoading, setSelectedFilter } = jobsSlice.actions;
-// Persist config
-// const persistConfig = {
-//   key: 'jobs',
-//   storage,
-//   whitelist: ['selectedFilter', 'jobsByFilter', 'upworkJobsByFilter'],
-// };
-const persistConfig = {
-  key: 'jobs',
-  storage,
-  whitelist: ['selectedFilter', 'jobsByFilter', 'upworkJobsByFilter'],
-};
-
-export default persistReducer(persistConfig, jobsSlice.reducer);
-//export default jobsSlice.reducer; 
+export const { resetJobsByDate, setRange , setProposalLoading , setUpworkProposalLoading } = jobsSlice.actions;
+export default jobsSlice.reducer; 
 
