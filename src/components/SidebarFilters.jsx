@@ -1,7 +1,28 @@
 import React from "react";
-const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange, statusOptions }) => (
+const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange, statusOptions ,jobTypeOptions, jobTypeLabel}) => (
   <div className="bg-white rounded-lg shadow p-4 space-y-6 scrollbar-hide top-2">
-    {/* Job Type */}
+   {jobTypeOptions && (
+  <div>
+    <h3 className="font-semibold mb-2">{jobTypeLabel || "Job Type"}</h3>
+    <div className="space-y-1">
+      {jobTypeOptions.map(opt => (
+        <label key={opt.value} className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="radio"
+            name="jobType"
+            value={opt.value}
+            checked={filters.jobType === opt.value}
+            onChange={() => onFilterChange("jobType", opt.value)}
+            className="accent-blue-600"
+          />
+          <span>{opt.label}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+)}
+   
+    {/* Job Type
     <div>
       <h3 className="font-semibold mb-2">Job Type</h3>
       <div className="space-y-1">
@@ -30,7 +51,8 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
           <span>All</span>
         </label>
       </div>
-    </div>
+    </div> */}
+    
     {/* Status (engaged/not_engaged) */}
     {statusOptions && (
   <div>

@@ -118,6 +118,8 @@ const [showProposalUI, setShowProposalUI] = useState(true);
 const [isEditingProposal, setIsEditingProposal] = useState(false);
 const [editableProposal, setEditableProposal] = useState(upworkProposalState.text || "");
 
+
+
 // const [proposalCategory, setProposalCategory] = useState("");
 // const [editableProposal, setEditableProposal] = useState("");
 
@@ -154,10 +156,12 @@ useEffect(() => {
         setJobError("Job not found.");
         setLoadingJob(false);
       });
+    
   } else if (jobFromRedux) {
     setLocalJob(jobFromRedux);
     setSaving(true);
   }
+  console.log("local jobs",localJob);
 }, [jobFromRedux, id]);
 if (loadingJob) {
   return <div className="p-8">Loading job details...</div>;
@@ -222,8 +226,7 @@ const handleSaveProposal = async () => {
 
 const handleSaveAeRemark = async (e) => {
   e.preventDefault();
-  if (!selectedUser || !selectedStatus) return;
-  setSaving(true);
+  setSavingAeRemark(true);
   const jobId = localJob.jobId || localJob.id;
   console.log('jobId', jobId);
   try {
@@ -233,7 +236,7 @@ const handleSaveAeRemark = async (e) => {
   } catch (err) {
     alert("Failed to save AE Remark.");
   } finally {
-    setSaving(false);
+    setSavingAeRemark(false);
   }
 };
   const handleSaveStatus = async (e) => {
@@ -289,15 +292,14 @@ const handleSaveAeRemark = async (e) => {
         return;
       }
       await dispatch(updateUpworkAeScoreThunk({ jobId: localJob.jobId || localJob.id, username: aeScoreUser, ae_score: value })).unwrap();
+      await dispatch(upworkfetchJobByIdThunk(localJob.jobId || localJob.id)).unwrap();
       setAeScoreInput(value);
-      console.log(localJob.ae_score);
-      
     } catch (err) {
       setAeScoreError("Failed to save AE Score.");
     } finally {
       setAeScoreSaving(false);
     }
-  };
+  };;
   const handleSaveAePitched = async (e) => {
     e.preventDefault();
     setAePitchedSaving(true);
@@ -474,107 +476,48 @@ const handleSaveAeRemark = async (e) => {
             </div>
           </div>
         </section>
-         {/* Status Management Section */}
-         <section className="mb-6 border-b pb-4">
-          <h2 className="text-lg font-bold mb-3 text-gray-800">Status Management</h2>
-          <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
-            <select
-              className="border rounded px-2 py-1"
-              value={selectedUser}
-              onChange={e => setSelectedUser(e.target.value)}
-            >
-              <option value="">Select User</option>
-              {USER_LIST.map(user => (
-                <option key={user} value={user}>{user}</option>
-              ))}
-            </select>
-            <select
-              className="border rounded px-2 py-1"
-              value={selectedStatus}
-              onChange={e => setSelectedStatus(e.target.value)}
-            >
-              {STATUS_OPTIONS.map(status => (
-                <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="px-4 py-1 bg-blue-600 text-white rounded"
-              // disabled={saving || !selectedUser || !selectedStatus}
-            >
-              { "Save"}
-            </button>
-          </form>
-          {/* Show current status */}
-          <div className="mb-2">
-            <span className="font-semibold">Current Status:</span>{" "}
-            <span className="px-2 py-1 rounded bg-gray-100">
-              {(localJob.currentStatus || "-").replace(/_/g, " ")}
-            </span>
-          </div>
-          <div>
-            <span className="font-semibold">Status History:</span>
-            <ul className="mt-1 space-y-1">
-              {Array.isArray(localJob.statusHistory) && localJob.statusHistory.length === 0 ? (
-                <li className="text-gray-400 text-sm">No status history.</li>
-              ) : (
-                Array.isArray(localJob.statusHistory) && localJob.statusHistory.map((entry, idx) => (
-                  <li key={idx} className="text-sm">
-                    <span className="font-semibold">{entry.username}</span> set status to{" "}
-                    <span className="px-2 py-0.5 rounded bg-gray-200">
-                      {(entry.status || "-").replace(/_/g, " ")}
-                    </span>{" "}
-                    <span className="text-xs text-gray-500">
-                      ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
-                    </span>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        </section>
-
+        
      {/* AE Score Section */}
-<section className="mb-6 border-b pb-4">
+     <section className="mb-6 border-b pb-4">
   <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
-  {localJob.ae_score ? (
-    <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
-      <span className="font-semibold">AI Score:</span> {localJob.ae_score}
-    </div>
-  ) : (
-    <form onSubmit={handleSaveUpworkAeScore} className="flex flex-col gap-2 mb-2">
-      <select
-        className="border rounded px-2 py-1"
-        value={aeScoreUser}
-        onChange={e => setAeScoreUser(e.target.value)}
-        required
-      >
-        <option value="">Select User</option>
-        {USER_LIST.map(user => (
-          <option key={user} value={user}>{user}</option>
-        ))}
-      </select>
-      <input
-        type="number"
-        className="border rounded px-2 py-1 w-full"
-        placeholder="Enter AE Score (0-100)"
-        value={aeScoreInput}
-        onChange={e => setAeScoreInput(e.target.value)}
-        disabled={aeScoreSaving}
-        min={0}
-        max={100}
-        required
-      />
-      <button
-        type="submit"
-        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-        disabled={aeScoreSaving || !aeScoreUser || !aeScoreInput}
-      >
-        {aeScoreSaving ? "Saving..." : "Save"}
-      </button>
-      {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
-    </form>
-  )}
+  {Array.isArray(localJob.ae_score) && localJob.ae_score.length > 0 ? (
+  <div className="bg-green-50 border border-green-200 rounded p-3">
+    <span className="font-semibold">AE Score:</span> {localJob.ae_score[0].value}%
+  </div>
+ ) : (
+  <form onSubmit={handleSaveUpworkAeScore} className="flex flex-col gap-2 mb-2">
+    <select
+      className="border rounded px-2 py-1"
+      value={aeScoreUser}
+      onChange={e => setAeScoreUser(e.target.value)}
+      required
+    >
+      <option value="">Select User</option>
+      {USER_LIST.map(user => (
+        <option key={user} value={user}>{user}</option>
+      ))}
+    </select>
+    <input
+      type="number"
+      className="border rounded px-2 py-1 w-full"
+      placeholder="Enter AE Score (0-100)"
+      value={aeScoreInput}
+      onChange={e => setAeScoreInput(e.target.value)}
+      disabled={aeScoreSaving}
+      min={0}
+      max={100}
+      required
+    />
+    <button
+      type="submit"
+      className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+      disabled={aeScoreSaving || !aeScoreUser || !aeScoreInput}
+    >
+      {aeScoreSaving ? "Saving..." : "Save"}
+    </button>
+    {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
+  </form>
+)}
 </section>
       {/* AE Pitched Section */}
 <section className="mb-6 border-b pb-4">
@@ -652,7 +595,7 @@ const handleSaveAeRemark = async (e) => {
             <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
               <textarea
                 className="border rounded px-2 py-1 w-full"
-                rows={2}
+                rows={4}
                 placeholder="Write AE Remark..."
                 value={aeRemarkInput}
                 onChange={e => setAeRemarkInput(e.target.value)}
@@ -661,7 +604,7 @@ const handleSaveAeRemark = async (e) => {
               <button
                 type="submit"
                 className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-                disabled={saving || !aeRemarkInput.trim()}
+                disabled={savingAeRemark || !aeRemarkInput.trim()}
               >
                 {savingAeRemark ? "Saving..." : "Save"}
               </button>
@@ -674,6 +617,8 @@ const handleSaveAeRemark = async (e) => {
           )}
         </section>
         {/* Comments Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Add Comments</h2>
         <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">
           <select
             className="border rounded px-2 py-1"
@@ -719,6 +664,67 @@ const handleSaveAeRemark = async (e) => {
             <li className="text-sm text-gray-400">No comments yet.</li>
           )}
         </ul>
+        </section>
+         {/* Status Management Section */}
+         <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Add Status</h2>
+          <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
+            <select
+              className="border rounded px-2 py-1"
+              value={selectedUser}
+              onChange={e => setSelectedUser(e.target.value)}
+            >
+              <option value="">Select User</option>
+              {USER_LIST.map(user => (
+                <option key={user} value={user}>{user}</option>
+              ))}
+            </select>
+            <select
+              className="border rounded px-2 py-1"
+              value={selectedStatus}
+              onChange={e => setSelectedStatus(e.target.value)}
+            >
+              {STATUS_OPTIONS.map(status => (
+                <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="px-4 py-1 bg-blue-600 text-white rounded"
+              // disabled={saving || !selectedUser || !selectedStatus, }
+            >
+              { "Save"}
+            </button>
+          </form>
+          {/* Show current status */}
+          <div className="mb-2">
+            <span className="font-semibold">Current Status:</span>{" "}
+            <span className="px-2 py-1 rounded bg-gray-100">
+              {(localJob.currentStatus || "-").replace(/_/g, " ")}
+            </span>
+          </div>
+          <div>
+            <span className="font-semibold">Status History:</span>
+            <ul className="mt-1 space-y-1">
+              {Array.isArray(localJob.statusHistory) && localJob.statusHistory.length === 0 ? (
+                <li className="text-gray-400 text-sm">No status history.</li>
+              ) : (
+                Array.isArray(localJob.statusHistory) && localJob.statusHistory.map((entry, idx) => (
+                  <li key={idx} className="text-sm">
+                    <span className="font-semibold">{entry.username}</span> set status to{" "}
+                    <span className="px-2 py-0.5 rounded bg-gray-200">
+                      {(entry.status || "-").replace(/_/g, " ")}
+                    </span>{" "}
+                    <span className="text-xs text-gray-500">
+                      ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
+                    </span>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </section>
+
         <section className="mb-6 border-b pb-4">
   <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>
   {showProposalUI ? (

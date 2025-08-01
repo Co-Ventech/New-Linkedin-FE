@@ -21,10 +21,16 @@ const defaultFilters = {
   status: "",
   hoursPerWeek: "",
   jobDuration: "",
-  color: [],
+  color: []
 };
 
-  const jobTypes = ["Full Time", "Part Time", "Contract", "Freelance"];
+
+  // const jobTypes = ["Full Time", "Part Time", "Contract", "Freelance"];
+  const upworkJobTypeOptions = [
+    { value: "", label: "All" },
+    { value: "FIXED", label: "Fixed" },
+    { value: "HOURLY", label: "Hourly" },
+  ];
   const colors = ["Yellow", "Green", "Red"];
 
   const statusOptions = [
@@ -96,6 +102,7 @@ const navigate = useNavigate();
       // // color: params.color ? (Array.isArray(params.color) ? params.color : [params.color]) : [],
       // color: typeof params.color === "string" ? params.color : "",
       color: Array.isArray(params.color) ? params.color[0] : (params.color || ""),
+      type: params.type ? (Array.isArray(params.type) ? params.type : [params.type]) : [],
     };
   };
 
@@ -155,12 +162,15 @@ const navigate = useNavigate();
   const jobDuration = ["contract_to_hire", "not_given"]; // static for sidebar
   const statusOptions = ["not_engaged", "applied", "engaged", "interview", "offer", "rejected", "archived"]; // static for sidebar
   const colors = ["Yellow", "Green", "Red"]; // static for sidebar
+  const jobTypes = ["Full Time", "Part Time", "Contract", "Freelance"];
 
   // Filtering logic
   const filteredJobs = allJobs.filter(job => {
     if (filters.level && job.level !== filters.level) return false;
     if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
     if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
+    // if (filters.jobType && job.jobType !== filters.jobType) return false;
+    // if (filters.jobType && job.jobType !== filters.jobType) return false;
     if (filters.jobType && job.jobType !== filters.jobType) return false;
     if (filters.status && job.currentStatus !== filters.status) return false;
     if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
@@ -268,6 +278,9 @@ const navigate = useNavigate();
             jobDuration={jobDuration}
             statusOptions={statusOptions}
             colors={colors}
+            jobTypeOptions={upworkJobTypeOptions}
+            jobTypeLabel="Job Type"
+            // filters={filters}
             onFilterChange={handleFilterChange}
           />
         </aside>

@@ -4,6 +4,9 @@ import { updateEstimatedBudget, updateAePitched, updateAeScore,
   updateUpworkEstimatedBudget,updateUpworkAePitched,updateUpworkAeScore,generateProposal ,
   updateProposal,generateUpworkProposal,updateUpworkProposal
  } from '../api/updateJobStatus';
+ import {persistReducer} from 'redux-persist';
+ import storage from 'redux-persist/lib/storage';
+
 // import { updateJobStatus, addJobComment} from '../api/updateJobStatus';
 // import { updateJobStatus, addJobComment, updateUpworkJobStatus, updateUpworkAeComment, addUpworkJobComment } from '../api/updateJobStatus';
 // import { updateAeComment } from '../api/updateJobStatus';
@@ -293,7 +296,24 @@ export const updateUpworkProposalThunk = createAsyncThunk(
       return rejectWithValue(err.message);
     }
   }
+
+  
 );
+export const fetchLinkedInJobsByDateThunk = createAsyncThunk(
+  'jobs/fetchLinkedInJobsByDate',
+  async ({ filter, start, end }, { getState, rejectWithValue }) => {
+    const state = getState();
+    if (state.jobs.jobsByFilter[filter]) {
+      // Already have data, skip fetch
+      return rejectWithValue('Already loaded');
+    }
+    // ...fetch from API...
+    const response = await api.get(`/api/linkedin/jobs-by-date?start=${start}&end=${end}`);
+    return { filter, jobs: response.data.jobs };
+  }
+);
+
+// Repeat for Upwork
 const initialState = {
   jobsByDate: [], // [{date, jobs:[]}, ...]
   upworkJobsByDate: [], // <-- add this
@@ -310,6 +330,9 @@ upworkProposalLoading: false,
 upworkProposalError: null,
 upworkProposalSaving: false,
 upworkProposalSaveError: null,
+selectedFilter: "24hours",
+jobsByFilter: {}, // { "24hours": [...], "7days": [...] }
+upworkJobsByFilter: {},
 
 }
 
@@ -317,6 +340,9 @@ const jobsSlice = createSlice({
   name: 'jobs',
   initialState,
   reducers: {
+    setSelectedFilter(state, action) {
+      state.selectedFilter = action.payload;
+    },
     resetJobsByDate(state) {
       state.jobsByDate = [];
       state.upworkJobsByDate = [];
@@ -334,11 +360,20 @@ const jobsSlice = createSlice({
     setUpworkProposalLoading(state, action) {
       state.upworkProposalLoading = action.payload;
     },
+
     
   },
   extraReducers: (builder) => {
     builder
-    
+    .addCase(fetchLinkedInJobsByDateThunk.fulfilled, (state, action) => {
+      const { filter, jobs } = action.payload;
+      state.jobsByFilter[filter] = jobs;
+    })
+    // .addCase(fetchUpworkJobsByDateThunk.fulfilled, (state, action) => {
+    //   const { filter, jobs } = action.payload;
+    //   state.upworkJobsByFilter[filter] = jobs;
+    // })
+
       .addCase(saveJobsToBackendThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -473,15 +508,13 @@ const jobsSlice = createSlice({
 .addCase(updateUpworkProposalThunk.fulfilled, (state, action) => {
   state.upworkProposalSaving = false;
   state.upworkProposalSaveError = null;
-  const { jobId, proposal,locked } = action.payload;
+  const { jobId, proposal } = action.payload;
+  if (!state.upworkProposals) state.upworkProposals = {};
   if (!state.upworkProposals[jobId]) {
     state.upworkProposals[jobId] = {};
-  state.upworkProposals[jobId] = {  }
   }
   state.upworkProposals[jobId].text = proposal;
-  state.upworkProposals[jobId].locked = locked;
-  state.upworkProposalSaving = false;
-  state.upworkProposalSaveError = null;
+  state.upworkProposals[jobId].locked = true; // Always lock after saving
 })
 .addCase(updateUpworkProposalThunk.rejected, (state, action) => {
   state.upworkProposalSaving = false;
@@ -668,5 +701,19 @@ const jobsSlice = createSlice({
 
 
 
-export const { resetJobsByDate, setRange , setProposalLoading , setUpworkProposalLoading } = jobsSlice.actions;
-export default jobsSlice.reducer; 
+export const { resetJobsByDate, setRange , setProposalLoading , setUpworkProposalLoading, setSelectedFilter } = jobsSlice.actions;
+// Persist config
+// const persistConfig = {
+//   key: 'jobs',
+//   storage,
+//   whitelist: ['selectedFilter', 'jobsByFilter', 'upworkJobsByFilter'],
+// };
+const persistConfig = {
+  key: 'jobs',
+  storage,
+  whitelist: ['selectedFilter', 'jobsByFilter', 'upworkJobsByFilter'],
+};
+
+export default persistReducer(persistConfig, jobsSlice.reducer);
+//export default jobsSlice.reducer; 
+

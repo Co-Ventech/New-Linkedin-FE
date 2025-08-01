@@ -6,11 +6,15 @@ import JobCard from "../components/JobCard";
 import Header from "../components/Header";
 import SidebarFilters from "../components/SidebarFilters";
 import { fetchlinkedinJobsByDateRange } from "../api/jobService";
+// import { fetchLinkedInJobsByDateThunk } from "../slices/jobsSlice";
+// import FilterBar from "../components/FilterBar"; // adjust path as needed
+// import JobsList from "../components/JobsList"; 
 import {
   fetchJobsByDateThunk,
   resetJobsByDate,      
 } from "../slices/jobsSlice";
 import { logoutUser } from "../api/authApi";
+
 
 
 // 1. Define your default filters
@@ -26,7 +30,13 @@ const defaultFilters = {
 };
 
 // 2. Define static filter options
-const jobTypes = ["Full Time", "Part Time", "Contract", "Freelance"];
+const linkedInJobTypeOptions = [
+  { value: "", label: "All" },
+  { value: "full_time", label: "Full Time" },
+  { value: "part_time", label: "Part Time" },
+  { value: "contract", label: "Contract" },
+  { value: "freelance", label: "Freelance" },
+];
 const colors = ["Yellow", "Green", "Red"];
 const statusOptions = [
   "not_engaged",
@@ -37,6 +47,7 @@ const statusOptions = [
   "rejected",
   "archived"
 ];
+
 
 const dateRanges = [
   { label: "Last 24 Hours", value: "1d" },
@@ -219,6 +230,7 @@ const Dashboard = () => {
       if (filters.color && filters.color !== "" && colorValue !== filters.color) {
         return false;
       }
+      if (filters.jobType && job.employmentType !== filters.jobType) return false;
       return true;
     }),
   }));
@@ -284,12 +296,14 @@ const Dashboard = () => {
         <aside className="hidden md:block md:w-1/4">
           <SidebarFilters
             categories={categories}
-            jobTypes={jobTypes}
+            jobTypeOptions={linkedInJobTypeOptions}
+            jobTypeLabel="Employment Type"
+            filters={filters}
             colors={colors}
             countries={countries}
             fields={fields}
             domains={domains}
-            filters={filters}
+            // filters={filters}
             statusOptions={statusOptions}
             onFilterChange={handleFilterChange}
           />
