@@ -21,36 +21,36 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
   const navigate = useNavigate();
   const location = useLocation();
   // Auto-hide message after 2 seconds
-  useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => setMessage(""), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
-  const getCurrentSource = () => (location.pathname.includes("upwork") ? "upwork" : "linkedin");
-  // On mount, check last fetch time from localStorage
-  useEffect(() => {
-    const source = getCurrentSource();
-    const last = localStorage.getItem(`lastFetchJobsTime_${source}`);
-    if (last) {
-      setLastFetchTime(Number(last));
-      updateCooldown(Number(last));
-    }
-    // Update timer every second
-    const interval = setInterval(() => {
-      if (lastFetchTime) updateCooldown(lastFetchTime);
-    }, 1000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line
-  }, [location.pathname, lastFetchTime]);
+  // useEffect(() => {
+  //   if (message) {
+  //     const timer = setTimeout(() => setMessage(""), 2000);
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [message]);
+  // const getCurrentSource = () => (location.pathname.includes("upwork") ? "upwork" : "linkedin");
+  // // On mount, check last fetch time from localStorage
+  // useEffect(() => {
+  //   const source = getCurrentSource();
+  //   const last = localStorage.getItem(`lastFetchJobsTime_${source}`);
+  //   if (last) {
+  //     setLastFetchTime(Number(last));
+  //     updateCooldown(Number(last));
+  //   }
+  //   // Update timer every second
+  //   const interval = setInterval(() => {
+  //     if (lastFetchTime) updateCooldown(lastFetchTime);
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  //   // eslint-disable-next-line
+  // }, [location.pathname, lastFetchTime]);
 
   // Helper to update cooldown
-  const updateCooldown = (last) => {
-    const now = Date.now();
-    // Restore: 24 hour cooldown (86,400,000 ms)
-    const diff = Math.max(0, 24 * 60 * 60 * 1000 - (now - last));
-    setFetchCooldown(Math.floor(diff / 1000));
-  };
+  // const updateCooldown = (last) => {
+  //   const now = Date.now();
+  //   // Restore: 24 hour cooldown (86,400,000 ms)
+  //   const diff = Math.max(0, 24 * 60 * 60 * 1000 - (now - last));
+  //   setFetchCooldown(Math.floor(diff / 1000));
+  // };
 
 
   const handleDownloadExcel = async () => {
@@ -162,13 +162,13 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
     // }
   
 
-  // Helper to format cooldown
-  const formatCooldown = (seconds) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h}h ${m}m ${s}s`;
-  };
+  // // Helper to format cooldown
+  // const formatCooldown = (seconds) => {
+  //   const h = Math.floor(seconds / 3600);
+  //   const m = Math.floor((seconds % 3600) / 60);
+  //   const s = seconds % 60;
+  //   return `${h}h ${m}m ${s}s`;
+  // };
 
   // // Handler to fetch scored jobs from backend file and save to DB
   // const handleSaveScoredJobsToDB = async () => {
