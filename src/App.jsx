@@ -7,6 +7,8 @@ import UpworkJobDetails from "./pages/UpworkJobDetails";
 import JobDetails from "./pages/JobDetails";
 import { useSelector } from "react-redux"
 import ScrollToTop from "./components/ScrollToTop";
+import AdminDashboard from './pages/AdminDashboard'; // adjust path as needed
+
 
 function ProtectedRoute({ children }) {
   const user = useSelector(state => state.user.user);
@@ -63,6 +65,8 @@ function App() {
             </ProtectedRoute>
             }
         />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
