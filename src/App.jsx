@@ -7,7 +7,7 @@ import UpworkJobDetails from "./pages/UpworkJobDetails";
 import JobDetails from "./pages/JobDetails";
 import { useSelector } from "react-redux"
 import ScrollToTop from "./components/ScrollToTop";
-import AdminDashboard from './pages/AdminDashboard'; // adjust path as needed
+import AdminDashboard from './pages/AdminDashboard'; 
 
 
 function ProtectedRoute({ children }) {
