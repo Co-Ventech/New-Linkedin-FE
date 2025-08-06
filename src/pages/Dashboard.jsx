@@ -11,7 +11,7 @@ import { fetchlinkedinJobsByDateRange } from "../api/jobService";
 // import JobsList from "../components/JobsList"; 
 import {
   fetchJobsByDateThunk,
-  resetJobsByDate,      
+  resetJobsByDate,setRange    
 } from "../slices/jobsSlice";
 import { logoutUser } from "../api/authApi";
 
@@ -127,29 +127,38 @@ const Dashboard = () => {
   const [view, setView] = React.useState("grid");
 
   
-  const [dateRange, setDateRange] = useState("1d");
-  const [filteredJobByDate, setFilteredJobByDate] = useState([]);
-  const [loadingRange, setLoadingRange] = useState(false);
+  const [dateRange, setDateRange] = useState(range);
+  // const [filteredJobByDate, setFilteredJobByDate] = useState([]);
+  // const [loadingRange, setLoadingRange] = useState(false);
   // Fetch jobs when dateRange changes
-  useEffect(() => {
-    const fetchJobs = async () => {
-      setLoadingRange(true);
-      try {
-        const startdate = getStartDate(dateRange);
-        const enddate = getEndDate();
-        const data = await fetchlinkedinJobsByDateRange(startdate, enddate);
-        setFilteredJobByDate(data);
-      } catch (err) {
-        setFilteredJobByDate([]);
-      } finally {
-        setLoadingRange(false);
-      }
-    };
-    fetchJobs();
-  }, [dateRange]);
+  // useEffect(() => {
+  //   const fetchJobs = async () => {
+  //     setLoadingRange(true);
+  //     try {
+  //       const startdate = getStartDate(dateRange);
+  //       const enddate = getEndDate();
+  //       const data = await fetchlinkedinJobsByDateRange(startdate, enddate);
+  //       setFilteredJobByDate(data);
+  //     } catch (err) {
+  //       setFilteredJobByDate([]);
+  //     } finally {
+  //       setLoadingRange(false);
+  //     }
+  //   };
+  //   fetchJobs();
+  // }, [dateRange]);
 
 
+  const handleDateRangeChange = (e) => {
+    setDateRange(e.target.value);
+    dispatch(setRange(e.target.value));
+    dispatch(fetchJobsByDateThunk({ range: e.target.value, page: 1, limit: 1000 }));
+  };
   
+    // Update local storage when jobsByDate changes
+    useEffect(() => {
+      localStorage.setItem("jobsByDate", JSON.stringify(jobsByDate));
+    }, [jobsByDate]);
   // 4. Keep filters in sync with URL (for browser navigation)
   useEffect(() => {
     setFilters(getFiltersFromUrl());
@@ -188,12 +197,18 @@ const Dashboard = () => {
     const query = queryString.stringify(filtersForUrl, { arrayFormat: 'bracket' });
     navigate(`?${query}`, { replace: true });
   };
+// Keep filters in sync with URL
+useEffect(() => {
+  setFilters(getFiltersFromUrl());
+  // eslint-disable-next-line
+}, [location.search]);
 
   // Flatten all jobs for filter options (for dynamic filters only)
   const allJobs = jobsByDate.flatMap((d) => d.jobs);
 
   // Filtering logic (apply type, field, country, color, and domain filters)
   const filteredJobsByDate = jobsByDate.map((day) => ({
+    date:day.date,
     jobs: day.jobs.filter((job) => {
       if (filters.type && !(Array.isArray(job.employmentType) ? job.employmentType.includes(filters.type) : job.employmentType === filters.type)) {
         return false;
@@ -282,10 +297,10 @@ const Dashboard = () => {
   };
 
   
-  // Dropdown handler
-  const handleDateRangeChange = (e) => {
-    setDateRange(e.target.value);
-  };
+  // // Dropdown handler
+  // const handleDateRangeChange = (e) => {
+  //   setDateRange(e.target.value);
+  // };
 
 
   return (
@@ -361,7 +376,7 @@ const Dashboard = () => {
               List
             </button>
           </div>
-          {loadingRange ? (
+          {loading ? (
   <div>Loading jobs...</div>
 ) : error ? (
   <div className="text-red-500">{error}</div>
@@ -370,7 +385,7 @@ const Dashboard = () => {
 ) : (
   filteredJobsByDate.map((day) => (
     <section key={day.date} className="mb-8">
-      <h2 className="text-lg font-bold mb-2">{day.date}</h2>
+    {/* <h2 className="text-lg font-bold mb-2">{day.date}</h2> */}
       <div className={view === "grid"
         ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
         : "flex flex-col gap-4"}>
