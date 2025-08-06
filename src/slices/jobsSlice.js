@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { saveJobsToBackend, fetchJobsByDate } from '../api/jobService';
 import { updateEstimatedBudget, updateAePitched, updateAeScore, 
   updateUpworkEstimatedBudget,updateUpworkAePitched,updateUpworkAeScore,generateProposal ,
-  updateProposal,generateUpworkProposal,updateUpworkProposal
+  updateProposal,generateUpworkProposal,updateUpworkProposal,fetchLinkedinStatusHistory , fetchUpworkStatusHistory
  } from '../api/updateJobStatus';
 //  import {persistReducer} from 'redux-persist';
 //  import storage from 'redux-persist/lib/storage';
@@ -299,6 +299,53 @@ export const updateUpworkProposalThunk = createAsyncThunk(
 
   
 );
+
+export const fetchLinkedinStatusHistoryThunk = createAsyncThunk(
+  'jobs/fetchLinkedinStatusHistory',
+  async ({ date, start, end }, { rejectWithValue }) => {
+    try {
+      const data = await fetchLinkedinStatusHistory({ date, start, end });
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+export const fetchUpworkStatusHistoryThunk = createAsyncThunk(
+  'jobs/fetchUpworkStatusHistory',
+  async ({ date, start, end }, { rejectWithValue }) => {
+    try {
+      const data = await fetchUpworkStatusHistory({ date, start, end });
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const fetchCombinedStatusHistoryThunk = createAsyncThunk(
+  'jobs/fetchCombinedStatusHistory',
+  async ({ date, start, end }, { rejectWithValue }) => {
+    try {
+      const params = {};
+      if (date) params.date = date;
+      if (start) params.start = start;
+      if (end) params.end = end;
+      const token = localStorage.getItem("authToken");
+      const res = await axios.get(
+        `${import.meta.env.VITE_REMOTE_HOST}/api/combined/status-history`,
+        {
+          params,
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 // export const fetchLinkedInJobsByDateThunk = createAsyncThunk(
 //   'jobs/fetchLinkedInJobsByDate',
 //   async ({ filter, start, end }, { getState, rejectWithValue }) => {
@@ -330,6 +377,27 @@ upworkProposalLoading: false,
 upworkProposalError: null,
 upworkProposalSaving: false,
 upworkProposalSaveError: null,
+linkedinStatusHistory: {
+  users: [],
+  dailyTotals: [],
+  grandTotal: {},
+},
+linkedinStatusLoading: false,
+linkedinStatusError: null,
+upworkStatusHistory: {
+  users: [],
+  dailyTotals: [],
+  grandTotal: {},
+},
+upworkStatusLoading: false,
+upworkStatusError: null,
+combinedStatusHistory: {
+  users: [],
+  dailyTotals: [],
+  grandTotal: {},
+},
+combinedStatusLoading: false,
+combinedStatusError: null,
 // selectedFilter: "24hours",
 // jobsByFilter: {}, // { "24hours": [...], "7days": [...] }
 // upworkJobsByFilter: {},
@@ -343,6 +411,8 @@ const jobsSlice = createSlice({
     // setSelectedFilter(state, action) {
     //   state.selectedFilter = action.payload;
     // },
+
+  
     resetJobsByDate(state) {
       state.jobsByDate = [];
       state.upworkJobsByDate = [];
@@ -360,12 +430,49 @@ const jobsSlice = createSlice({
     setUpworkProposalLoading(state, action) {
       state.upworkProposalLoading = action.payload;
     },
+ 
 
     
   },
   extraReducers: (builder) => {
     builder
 
+    .addCase(fetchCombinedStatusHistoryThunk.pending, (state) => {
+      state.combinedStatusLoading = true;
+      state.combinedStatusError = null;
+    })
+    .addCase(fetchCombinedStatusHistoryThunk.fulfilled, (state, action) => {
+      state.combinedStatusLoading = false;
+      state.combinedStatusHistory = action.payload;
+    })
+    .addCase(fetchCombinedStatusHistoryThunk.rejected, (state, action) => {
+      state.combinedStatusLoading = false;
+      state.combinedStatusError = action.payload;
+    })
+    .addCase(fetchLinkedinStatusHistoryThunk.pending, (state) => {
+      state.linkedinStatusLoading = true;
+      state.linkedinStatusError = null;
+    })
+    .addCase(fetchLinkedinStatusHistoryThunk.fulfilled, (state, action) => {
+      state.linkedinStatusLoading = false;
+      state.linkedinStatusHistory = action.payload;
+    })
+    .addCase(fetchLinkedinStatusHistoryThunk.rejected, (state, action) => {
+      state.linkedinStatusLoading = false;
+      state.linkedinStatusError = action.payload;
+    })
+.addCase(fetchUpworkStatusHistoryThunk.pending, (state) => {
+  state.upworkStatusLoading = true;
+  state.upworkStatusError = null;
+})
+.addCase(fetchUpworkStatusHistoryThunk.fulfilled, (state, action) => {
+  state.upworkStatusLoading = false;
+  state.upworkStatusHistory = action.payload;
+})
+.addCase(fetchUpworkStatusHistoryThunk.rejected, (state, action) => {
+  state.upworkStatusLoading = false;
+  state.upworkStatusError = action.payload;
+})
       .addCase(saveJobsToBackendThunk.pending, (state) => {
         state.loading = true;
         state.error = null;

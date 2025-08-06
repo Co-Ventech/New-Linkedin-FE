@@ -457,9 +457,9 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
                       className={`w-full text-left px-4 py-2 text-gray-700 ${
                         active ? "bg-gray-100" : ""
                       }`}
-                      onClick={() => {}}
+                      onClick={() => navigate("/admin-dashboard")}
                     >
-                      Settings
+                      Admin 
                     </button>
                   )}
                 </Menu.Item>

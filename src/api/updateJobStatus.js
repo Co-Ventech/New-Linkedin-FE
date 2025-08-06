@@ -404,6 +404,49 @@ export async function updateUpworkProposal(jobId, proposal) {
     );
   }
 }
+
+
+export async function fetchLinkedinStatusHistory({ date, start, end }) {
+  const params = {};
+  if (date) params.date = date;
+  if (start) params.start = start;
+  if (end) params.end = end;
+  const token = localStorage.getItem("authToken");
+  const res = await axios.get(`${API_BASE}/linkedin/status-history`, {
+    params,
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data;
+
+
+}
+
+export async function fetchUpworkStatusHistory({ date, start, end }) {
+  const params = {};
+  if (date) params.date = date;
+  if (start) params.start = start;
+  if (end) params.end = end;
+  const token = localStorage.getItem("authToken");
+  const res = await axios.get(`${API_BASE}/upwork/status-history`, {
+    params,
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data;
+}
+
+// export async function fetchCombinedStatusHistory({ date, start, end }) {
+//   const params = {};
+//   if (date) params.date = date;
+//   if (start) params.start = start;
+//   if (end) params.end = end;
+//   const token = localStorage.getItem("authToken");
+//   const res = await axios.get(`${API_BASE}/combined/status-history`, {
+//     params,
+//     headers: { Authorization: `Bearer ${token}` }
+//   });
+//   return res.data;
+// }
+
 // // Generate proposal for Upwork job
 // export async function generateUpworkProposal(jobId, selectedCategory) {
 //   try {
