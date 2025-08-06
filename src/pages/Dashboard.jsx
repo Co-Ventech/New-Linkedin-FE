@@ -11,11 +11,31 @@ import { fetchlinkedinJobsByDateRange } from "../api/jobService";
 // import JobsList from "../components/JobsList"; 
 import {
   fetchJobsByDateThunk,
-  resetJobsByDate,setRange    
+  resetJobsByDate,setRange,
+  updateJobStatusThunk
 } from "../slices/jobsSlice";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { logoutUser } from "../api/authApi";
 
+const statusLabels = {
+  not_engaged: "Not Engaged",
+  applied: "Applied",
+  engaged: "Engaged",
+  interview: "Interview",
+  offer: "Offer",
+  rejected: "Rejected",
+  archived: "Archived",
+};
 
+const statusOrder = [
+  "not_engaged",
+  "applied",
+  "engaged",
+  "interview",
+  "offer",
+  "rejected",
+  "archived",
+];
 
 // 1. Define your default filters
 const defaultFilters = {
@@ -68,6 +88,7 @@ function getEndDate() {
   const today = new Date();
   return today.toISOString().slice(0, 10);
 }
+const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 
 // // Helper to get start/end based on filter
 // const getDateRangeForFilter = (filter) => {
@@ -102,6 +123,12 @@ const Dashboard = () => {
   // const jobsByFilter = useSelector((state) => state.jobs.jobsByFilter);
   // const jobs = jobsByFilter[selectedFilter] || [];
   // const loading = useSelector((state) => state.jobs.loading);
+  const [kanbanView, setKanbanView] = useState(false);
+const [kanbanJobs, setKanbanJobs] = useState({});
+const [kanbanLoading, setKanbanLoading] = useState(false);
+const [kanbanError, setKanbanError] = useState(null);
+const [kanbanUser, setKanbanUser] = useState("");
+const [kanbanUserError, setKanbanUserError] = useState("");
  
   const { jobsByDate, loading, error, range } = useSelector(
     (state) => state.jobs
@@ -147,6 +174,67 @@ const Dashboard = () => {
   //   };
   //   fetchJobs();
   // }, [dateRange]);
+
+  // Group jobs by status for Kanban
+useEffect(() => {
+  if (!kanbanView) return;
+  // Flatten and filter jobs as needed
+  const jobs = jobsByDate.flatMap(day => day.jobs);
+  const grouped = {};
+  statusOrder.forEach(status => {
+    grouped[status] = jobs.filter(job => job.currentStatus === status);
+  });
+  setKanbanJobs(grouped);
+}, [jobsByDate, kanbanView]);
+
+// Handle drag end
+const onDragEnd = async (result) => {
+  const { source, destination } = result;
+  if (!destination) return;
+  if (
+    source.droppableId === destination.droppableId &&
+    source.index === destination.index
+  ) {
+    return;
+  }
+
+  if (!kanbanUser) {
+    setKanbanUserError("Please select a user before changing status.");
+    return;
+  }
+
+  const sourceStatus = source.droppableId;
+  const destStatus = destination.droppableId;
+  const job = kanbanJobs[sourceStatus][source.index];
+  if (!job) return;
+
+  // Optimistically update UI
+  const newKanbanJobs = { ...kanbanJobs };
+  newKanbanJobs[sourceStatus] = Array.from(newKanbanJobs[sourceStatus]);
+  newKanbanJobs[sourceStatus].splice(source.index, 1);
+  newKanbanJobs[destStatus] = Array.from(newKanbanJobs[destStatus]);
+  const updatedJob = { ...job, currentStatus: destStatus };
+  newKanbanJobs[destStatus].splice(destination.index, 0, updatedJob);
+  setKanbanJobs(newKanbanJobs);
+
+  setKanbanLoading(true);
+  setKanbanError(null);
+  try {
+    // Use the Redux thunk, not the direct API!
+    await dispatch(updateJobStatusThunk({
+      jobId: job.id,
+      status: destStatus,
+      username: kanbanUser,
+    })).unwrap();
+    await dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
+    // Optionally: refetch jobs or update Redux state if needed
+  } catch (err) {
+    setKanbanJobs(kanbanJobs); // revert
+    setKanbanError("Failed to update job status. Please try again.");
+  } finally {
+    setKanbanLoading(false);
+  }
+};
 
 
   const handleDateRangeChange = (e) => {
@@ -363,47 +451,154 @@ useEffect(() => {
               <option value="7d">Last 7 days</option>
               <option value="30d">Last 30 days</option>
             </select> */}
-            <button
-              className={`ml-auto px-3 py-1 rounded ${view === "grid" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-              onClick={() => setView("grid")}
-            >
-              Grid
-            </button>
-            <button
-              className={`px-3 py-1 rounded ${view === "list" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-              onClick={() => setView("list")}
-            >
-              List
-            </button>
+           {/* <div className="flex items-center mb-4 gap-2"> */}
+           <div className="flex items-center mb-4 gap-2">
+  <button
+    className={`px-3 py-1 rounded ${!kanbanView ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    onClick={() => setKanbanView(false)}
+  >
+    List/Grid View
+  </button>
+  <button
+    className={`px-3 py-1 rounded ${kanbanView ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    onClick={() => setKanbanView(true)}
+  >
+    Pipeline View
+  </button>
+  <button
+    className={`ml-auto px-3 py-1 rounded ${view === "grid" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    onClick={() => setView("grid")}
+    disabled={kanbanView}
+  >
+    Grid
+  </button>
+  <button
+    className={`px-3 py-1 rounded ${view === "list" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+    onClick={() => setView("list")}
+    disabled={kanbanView}
+  >
+    List
+  </button>
+</div>
+
           </div>
-          {loading ? (
-  <div>Loading jobs...</div>
-) : error ? (
-  <div className="text-red-500">{error}</div>
-  ) : filteredJobsByDate.length === 0 ? (
-  <div>No jobs found.</div>
-) : (
-  filteredJobsByDate.map((day) => (
-    <section key={day.date} className="mb-8">
-    {/* <h2 className="text-lg font-bold mb-2">{day.date}</h2> */}
-      <div className={view === "grid"
-        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
-        : "flex flex-col gap-4"}>
-        {Array.isArray(day.jobs) && day.jobs.length > 0 ? (
-          day.jobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={job}
-              onClick={() => handleJobClick(job)}
-              view={view}
-            />
-          ))
-        ) : (
-          <div className="col-span-full text-gray-500">No jobs for this date.</div>
-        )}
+          {kanbanView && (
+  <div className="mb-4 flex items-center gap-2">
+    <label className="font-semibold">Select User for Status Change:</label>
+    <select
+      className="border rounded px-2 py-1"
+      value={kanbanUser}
+      onChange={e => {
+        setKanbanUser(e.target.value);
+        setKanbanUserError("");
+      }}
+    >
+      <option value="">-- Select User --</option>
+      {USER_LIST.map(user => (
+        <option key={user} value={user}>{user}</option>
+      ))}
+    </select>
+    {kanbanUserError && (
+      <span className="text-red-500 text-sm ml-2">{kanbanUserError}</span>
+    )}
+  </div>
+)}
+          {kanbanView ? (
+  // --- KANBAN VIEW ---
+  <div className="overflow-x-auto pb-4">
+    {kanbanError && (
+      <div className="text-red-500 mb-2">{kanbanError}</div>
+    )}
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="flex gap-4 min-w-[1200px]">
+        {statusOrder.map((status) => (
+          <Droppable droppableId={status} key={status}>
+            {(provided, snapshot) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className={`bg-white rounded-lg shadow flex-1 min-w-[250px] max-w-[300px] flex flex-col
+                  ${snapshot.isDraggingOver ? "bg-blue-50" : ""}
+                `}
+                style={{ maxHeight: "70vh", overflowY: "auto" }}
+              >
+                <div className="p-3 border-b font-bold text-center sticky top-0 bg-white z-10">
+                  {statusLabels[status]}
+                </div>
+                <div className="p-2 flex-1">
+                  {kanbanJobs[status] && kanbanJobs[status].length === 0 && (
+                    <div className="text-gray-400 text-center py-4">No jobs</div>
+                  )}
+                  {kanbanJobs[status] &&
+                    kanbanJobs[status].map((job, idx) => (
+                      <Draggable
+                        key={job.id}
+                        draggableId={job.id.toString()}
+                        index={idx}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`bg-white rounded shadow mb-3 p-3 cursor-pointer transition
+                              ${snapshot.isDragging ? "ring-2 ring-blue-400" : ""}
+                              hover:shadow-lg
+                            `}
+                            onClick={() => handleJobClick(job)}
+                          >
+                            <div className="font-semibold">{job.title}</div>
+                            <div className="text-sm text-gray-500">{job.company || job.companyName}</div>
+                            <div className="mt-1 text-xs text-blue-600">{statusLabels[job.currentStatus]}</div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                </div>
+              </div>
+            )}
+          </Droppable>
+        ))}
       </div>
-    </section>
-  ))
+    </DragDropContext>
+    {kanbanLoading && (
+      <div className="fixed left-0 right-0 bottom-0 bg-blue-100 text-blue-700 text-center py-2 z-50">
+        Updating status...
+      </div>
+    )}
+  </div>
+) : (
+  // --- LIST/GRID VIEW ---
+  loading ? (
+    <div>Loading jobs...</div>
+  ) : error ? (
+    <div className="text-red-500">{error}</div>
+  ) : filteredJobsByDate.length === 0 ? (
+    <div>No jobs found.</div>
+  ) : (
+    filteredJobsByDate.map((day) => (
+      <section key={day.date} className="mb-8">
+        {/* <h2 className="text-lg font-bold mb-2">{day.date}</h2> */}
+        <div className={view === "grid"
+          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6"
+          : "flex flex-col gap-4"}>
+          {Array.isArray(day.jobs) && day.jobs.length > 0 ? (
+            day.jobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={job}
+                onClick={() => handleJobClick(job)}
+                view={view}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-gray-500">No jobs for this date.</div>
+          )}
+        </div>
+      </section>
+    ))
+  )
 )}
         </main>
       </div>

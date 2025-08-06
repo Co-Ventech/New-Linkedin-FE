@@ -293,7 +293,7 @@ const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
       await dispatch(addJobCommentThunk({ jobId: localJob.id, username: commentUser, comment })).unwrap();
       await dispatch(fetchJobByIdThunk(localJob.id)).unwrap();
     } catch (err) {
-      alert("Failed to update status.");
+      alert("Failed to update comment.");
       console.error("handleSaveStatus error:", err);
     } finally {
       setCommentLoading(false);
