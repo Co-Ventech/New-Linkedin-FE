@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import SidebarFilters from "../components/SidebarFilters";
 import UpworkJobCard from "../components/UpworkJobCard";
@@ -7,12 +8,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
 import queryString from "query-string";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import { fetchUpworkJobsByDateRange } from "../api/jobService";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { updateUpworkJobStatusThunk } from "../slices/jobsSlice";
+import { updateUpworkJobStatusThunk, upworkfetchJobByIdThunk } from "../slices/jobsSlice";
+import { logoutUser } from "../api/authApi";
+import { setRange } from "../slices/jobsSlice";
+import { Calendar, Grid3X3, List, Kanban, Users, AlertCircle, Briefcase, Building2, Filter, Download, Search, ChevronDown, Eye, BarChart3 } from 'lucide-react';
 
-const defaultFilters = { 
+const defaultFilters = {
   level: "",
   country: [],
   category: [],
@@ -26,116 +29,142 @@ const defaultFilters = {
   color: []
 };
 
+const upworkJobTypeOptions = [
+  { value: "", label: "All" },
+  { value: "FIXED", label: "Fixed" },
+  { value: "HOURLY", label: "Hourly" },
+];
 
-  // const jobTypes = ["Full Time", "Part Time", "Contract", "Freelance"];
-  const upworkJobTypeOptions = [
-    { value: "", label: "All" },
-    { value: "FIXED", label: "Fixed" },
-    { value: "HOURLY", label: "Hourly" },
-  ];
-  const colors = ["Yellow", "Green", "Red"];
+const colors = ["Yellow", "Green", "Red"];
+const statusOptions = [
+  "not_engaged",
+  "applied",
+  "engaged",
+  "interview",
+  "offer",
+  "rejected",
+  "archived"
+];
 
-  const statusOptions = [
-    "not_engaged",
-    "applied",
-    "engaged",
-    "interview",
-    "offer",
-    "rejected",
-    "archived"
-  ];
+const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 
+const statusLabels = {
+  not_engaged: "Not Engaged",
+  applied: "Applied",
+  engaged: "Engaged",
+  interview: "Interview",
+  offer: "Offer",
+  rejected: "Rejected",
+  archived: "Archived",
+};
 
-  const dateRanges = [
-    { label: "Last 24 Hours", value: "1d" },
-    { label: "Last 3 Days", value: "3d" },
-    { label: "Last 7 Days", value: "7d" },
-  ];
-  
-  function getStartDate(range) {
-    const today = new Date();
-    let start = new Date(today);
-    if (range === "1d") start.setDate(today.getDate() - 1);
-    if (range === "3d") start.setDate(today.getDate() - 3);
-    if (range === "7d") start.setDate(today.getDate() - 7);
-    return start.toISOString().slice(0, 10);
-  }
-  
-  function getEndDate() {
-    const today = new Date();
-    return today.toISOString().slice(0, 10);
-  }
+const statusOrder = [
+  "not_engaged",
+  "applied",
+  "engaged",
+  "interview",
+  "offer",
+  "rejected",
+  "archived",
+];
+
+// Enhanced status configuration with colors
+const statusConfig = {
+  not_engaged: {
+    label: "Not Engaged",
+    color: "bg-gray-50",
+    headerColor: "bg-gray-100",
+    textColor: "text-gray-700",
+    borderColor: "border-gray-200",
+    dotColor: "bg-gray-400"
+  },
+  applied: {
+    label: "Applied",
+    color: "bg-blue-50",
+    headerColor: "bg-blue-100",
+    textColor: "text-blue-700",
+    borderColor: "border-blue-200",
+    dotColor: "bg-blue-400"
+  },
+  engaged: {
+    label: "Engaged",
+    color: "bg-yellow-50",
+    headerColor: "bg-yellow-100",
+    textColor: "text-yellow-700",
+    borderColor: "border-yellow-200",
+    dotColor: "bg-yellow-400"
+  },
+  interview: {
+    label: "Interview",
+    color: "bg-purple-50",
+    headerColor: "bg-purple-100",
+    textColor: "text-purple-700",
+    borderColor: "border-purple-200",
+    dotColor: "bg-purple-400"
+  },
+  offer: {
+    label: "Offer",
+    color: "bg-green-50",
+    headerColor: "bg-green-100",
+    textColor: "text-green-700",
+    borderColor: "border-green-200",
+    dotColor: "bg-green-400"
+  },
+  rejected: {
+    label: "Rejected",
+    color: "bg-red-50",
+    headerColor: "bg-red-100",
+    textColor: "text-red-700",
+    borderColor: "border-red-200",
+    dotColor: "bg-red-400"
+  },
+  archived: {
+    label: "Archived",
+    color: "bg-slate-50",
+    headerColor: "bg-slate-100",
+    textColor: "text-slate-700",
+    borderColor: "border-slate-200",
+    dotColor: "bg-slate-400"
+  },
+};
+
+const dateRanges = [
+  { label: "Last 24 Hours", value: "1d" },
+  { label: "Last 3 Days", value: "3d" },
+  { label: "Last 7 Days", value: "7d" },
+];
+
+function getStartDate(range) {
+  const today = new Date();
+  let start = new Date(today);
+  if (range === "1d") start.setDate(today.getDate() - 1);
+  if (range === "3d") start.setDate(today.getDate() - 3);
+  if (range === "7d") start.setDate(today.getDate() - 7);
+  return start.toISOString().slice(0, 10);
+}
+
+function getEndDate() {
+  const today = new Date();
+  return today.toISOString().slice(0, 10);
+}
 
 const UpworkDashboard = () => {
   const dispatch = useDispatch();
-  const { upworkJobsByDate, loading, error } = useSelector(state => state.jobs);
-  const [dateRange, setDateRange] = useState("1d");
-  const [filteredJobsByDate, setFilteredJobsByDate] = useState([]);
-  const [loadingRange, setLoadingRange] = useState(false);
-
-  const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
+  const { upworkJobsByDate, loading, error, range } = useSelector(state => state.jobs);
+  const [dateRange, setDateRange] = useState(range);
   const [kanbanView, setKanbanView] = useState(false);
   const [kanbanUser, setKanbanUser] = useState("");
   const [kanbanUserError, setKanbanUserError] = useState("");
   const [kanbanJobs, setKanbanJobs] = useState({});
   const [kanbanLoading, setKanbanLoading] = useState(false);
   const [kanbanError, setKanbanError] = useState(null);
-  
-  const statusLabels = {
-    not_engaged: "Not Engaged",
-    applied: "Applied",
-    engaged: "Engaged",
-    interview: "Interview",
-    offer: "Offer",
-    rejected: "Rejected",
-    archived: "Archived",
-  };
-  const statusOrder = [
-    "not_engaged",
-    "applied",
-    "engaged",
-    "interview",
-    "offer",
-    "rejected",
-    "archived",
-  ];
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [optimisticUpdates, setOptimisticUpdates] = useState(new Set());
+  const [failedUpdates, setFailedUpdates] = useState(new Map());
+  const user = useSelector((state) => state.user.user);
 
-  // const [filters, setFilters] = React.useState({
-  //   level: "",
-  //   country: [],
-  //   category: [],
-  //   jobType: "",
-  //   color : [],
-  //   paymentVerified: "",
-  //   clientHistory: "",
-  //   projectLength: "",
-  //   hoursPerWeek: "",
-  //   jobDuration: "",
-  //   status: "",
-
-  // });
-
-  
-const location = useLocation();
-const navigate = useNavigate();
-
-  // 2. Parse filters from URL
-  const getFiltersFromUrl = () => {
-    const params = queryString.parse(location.search, { arrayFormat: 'bracket' });
-    return {
-      ...defaultFilters,
-      ...params,
-      // Ensure multi-selects are always arrays
-      country: params.country ? (Array.isArray(params.country) ? params.country : [params.country]) : [],
-      category: params.category ? (Array.isArray(params.category) ? params.category : [params.category]) : [],
-      // // color: params.color ? (Array.isArray(params.color) ? params.color : [params.color]) : [],
-      // color: typeof params.color === "string" ? params.color : "",
-      color: Array.isArray(params.color) ? params.color[0] : (params.color || ""),
-      type: params.type ? (Array.isArray(params.type) ? params.type : [params.type]) : [],
-    };
-  };
-
-  const [filters, setFilters] = React.useState(getFiltersFromUrl());
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!kanbanView) return;
@@ -146,60 +175,159 @@ const navigate = useNavigate();
     });
     setKanbanJobs(grouped);
   }, [upworkJobsByDate, kanbanView]);
-  
-  // 3. Keep filters in sync with URL (for browser navigation)
+
+  // Enhanced onDragEnd with real-time updates
+  const onDragEnd = async (result) => {
+    const { source, destination } = result;
+    if (!destination) return;
+    
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    if (!kanbanUser) {
+      setKanbanUserError("Please select a user before changing status.");
+      return;
+    }
+
+    const sourceStatus = source.droppableId;
+    const destStatus = destination.droppableId;
+    const job = kanbanJobs[sourceStatus][source.index];
+    if (!job) return;
+
+    const updateId = `${job.jobId || job.id}-${Date.now()}`;
+    
+    // Clear any previous errors for this job
+    setKanbanError(null);
+    setKanbanUserError("");
+    
+    // Store original state for potential reversion
+    const originalKanbanJobs = { ...kanbanJobs };
+    const originalJobStatus = job.currentStatus;
+
+    // IMMEDIATE UI UPDATE (Optimistic)
+    const newKanbanJobs = { ...kanbanJobs };
+    newKanbanJobs[sourceStatus] = Array.from(newKanbanJobs[sourceStatus]);
+    newKanbanJobs[sourceStatus].splice(source.index, 1);
+    newKanbanJobs[destStatus] = Array.from(newKanbanJobs[destStatus]);
+    
+    const updatedJob = { 
+      ...job, 
+      currentStatus: destStatus,
+      isUpdating: true,
+      updateId: updateId
+    };
+    newKanbanJobs[destStatus].splice(destination.index, 0, updatedJob);
+
+    // Update UI immediately
+    setKanbanJobs(newKanbanJobs);
+    setOptimisticUpdates(prev => new Set(prev).add(updateId));
+
+    try {
+      await dispatch(updateUpworkJobStatusThunk({
+        jobId: job.jobId || job.id,
+        status: destStatus,
+        username: kanbanUser,
+      })).unwrap();
+
+      // Success - remove updating indicator
+      setKanbanJobs(prevJobs => {
+        const updatedJobs = { ...prevJobs };
+        Object.keys(updatedJobs).forEach(status => {
+          updatedJobs[status] = updatedJobs[status].map(j => 
+            j.updateId === updateId 
+              ? { ...j, isUpdating: false, updateId: undefined }
+              : j
+          );
+        });
+        return updatedJobs;
+      });
+
+      setOptimisticUpdates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(updateId);
+        return newSet;
+      });
+
+      // Refetch jobs to update Redux and Kanban columns
+      await dispatch(fetchUpworkJobsByDateThunk());
+      
+    } catch (err) {
+      console.error('Failed to update job status:', err);
+      
+      // REVERT UI on failure
+      setKanbanJobs(originalKanbanJobs);
+      
+      // Show error with job details
+      setKanbanError(`Failed to move "${job.title}" to ${statusLabels[destStatus]}. Please try again.`);
+      
+      // Track failed update
+      setFailedUpdates(prev => new Map(prev).set(job.jobId || job.id, {
+        jobTitle: job.title,
+        fromStatus: originalJobStatus,
+        toStatus: destStatus,
+        timestamp: Date.now()
+      }));
+
+      // Remove from optimistic updates
+      setOptimisticUpdates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(updateId);
+        return newSet;
+      });
+
+      // Auto-clear error after 5 seconds
+      setTimeout(() => {
+        setKanbanError(null);
+        setFailedUpdates(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(job.jobId || job.id);
+          return newMap;
+        });
+      }, 5000);
+    }
+  };
+
+  // Parse filters from URL
+  const getFiltersFromUrl = () => {
+    const params = queryString.parse(location.search, { arrayFormat: 'bracket' });
+    return {
+      ...defaultFilters,
+      ...params,
+      country: params.country ? (Array.isArray(params.country) ? params.country : [params.country]) : [],
+      category: params.category ? (Array.isArray(params.category) ? params.category : [params.category]) : [],
+      color: Array.isArray(params.color) ? params.color[0] : (params.color || ""),
+      type: params.type ? (Array.isArray(params.type) ? params.type : [params.type]) : [],
+    };
+  };
+
+  const [filters, setFilters] = React.useState(getFiltersFromUrl());
+
+  // Keep filters in sync with URL
   useEffect(() => {
     setFilters(getFiltersFromUrl());
-    // eslint-disable-next-line
   }, [location.search]);
 
-  // 4. Fetch jobs on mount
+  // Fetch jobs on mount
   useEffect(() => {
     if (!upworkJobsByDate || upworkJobsByDate.length === 0 || upworkJobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
       dispatch(fetchUpworkJobsByDateThunk());
     }
   }, [dispatch, upworkJobsByDate]);
 
- // Fetch jobs when dateRange changes
- useEffect(() => {
-  const fetchJobs = async () => {
-    setLoadingRange(true);
-    try {
-      const startdate = getStartDate(dateRange);
-      const enddate = getEndDate();
-      const data = await fetchUpworkJobsByDateRange(startdate, enddate);
-      setFilteredJobsByDate(data);
-    } catch (err) {
-      setFilteredJobsByDate([]);
-    } finally {
-      setLoadingRange(false);
-    }
-  };
-  fetchJobs();
-}, [dateRange]);
-
-
-
-  // React.useEffect(() => {
-  //   if (!upworkJobsByDate || upworkJobsByDate.length === 0) {
-  //     dispatch(fetchUpworkJobsByDateThunk());
-  //   }
-  // }, [dispatch, upworkJobsByDate]);
-
   // Flatten jobs for filtering
   const allJobs = upworkJobsByDate.flatMap(day => day.jobs || []);
- 
-
   const levels = Array.from(new Set(allJobs.map(j => j.level).filter(Boolean)));
   const countries = Array.from(new Set(allJobs.map(j => j.country).filter(Boolean)));
   const categories = Array.from(new Set(allJobs.map(j => j.category).filter(Boolean)));
-  const paymentVerified = [true, false]; // static for sidebar
-  const clientHistory = [1, 10, 100]; // static for sidebar
-  const projectLength = [1, 3, 6, 13, 25]; // static for sidebar
-  const hoursPerWeek = [30, 40, 50]; // static for sidebar
-  const jobDuration = ["contract_to_hire", "not_given"]; // static for sidebar
-  const statusOptions = ["not_engaged", "applied", "engaged", "interview", "offer", "rejected", "archived"]; // static for sidebar
-  const colors = ["Yellow", "Green", "Red"]; // static for sidebar
+  const paymentVerified = [true, false];
+  const clientHistory = [1, 10, 100];
+  const projectLength = [1, 3, 6, 13, 25];
+  const hoursPerWeek = [30, 40, 50];
+  const jobDuration = ["contract_to_hire", "not_given"];
   const jobTypes = ["Full Time", "Part Time", "Contract", "Freelance"];
 
   // Filtering logic
@@ -207,80 +335,87 @@ const navigate = useNavigate();
     if (filters.level && job.level !== filters.level) return false;
     if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
     if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
-    // if (filters.jobType && job.jobType !== filters.jobType) return false;
-    // if (filters.jobType && job.jobType !== filters.jobType) return false;
     if (filters.jobType && job.jobType !== filters.jobType) return false;
     if (filters.status && job.currentStatus !== filters.status) return false;
     if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
-  if (filters.clientHistory) {
-    const hires = job.buyerTotalJobsWithHires;
-    if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
-    if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
-    if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
-  }
-  if (filters.projectLength) {
-    const weeks = job.hourlyWeeks;
-    let group = "";
-    if (weeks === null || weeks === undefined) {
-      group = "less_than_1";
-    } else if (weeks < 4) {
-      group = "less_than_1";
-    } else if (weeks >= 4 && weeks < 13) {
-      group = "1_3";
-    } else if (weeks >= 13 && weeks < 25) {
-      group = "3_6";
-    } else if (weeks >= 25) {
-      group = "more_6";
+    
+    if (filters.clientHistory) {
+      const hires = job.buyerTotalJobsWithHires;
+      if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
+      if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
+      if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
     }
-    if (filters.projectLength !== group) return false;
-  }
-  if (filters.hoursPerWeek) {
-    const minHours = job.minHoursWeek;
-    let group = "";
-    if (minHours === null || minHours === undefined) {
-      group = "not_given";
-    } else if (minHours <= 30) {
-      group = "less_30";
-    } else if (minHours > 30) {
-      group = "more_30";
-    }
-    if (filters.hoursPerWeek !== group) return false;
-  }
-
-  // Job Duration filter
-  if (filters.jobDuration) {
-    const isContractToHire = job.isContractToHire;
-    let group = "";
-    if (isContractToHire === true) {
-      group = "contract_to_hire";
-    } else {
-      group = "not_given";
-    }
-    if (filters.jobDuration !== group) return false;
-  }
-    // Color filter
-      const colorValue = job.tier || job.tierColor;
-      if (filters.color && filters.color !== "" && colorValue !== filters.color) {
-        return false;
+    
+    if (filters.projectLength) {
+      const weeks = job.hourlyWeeks;
+      let group = "";
+      if (weeks === null || weeks === undefined) {
+        group = "less_than_1";
+      } else if (weeks < 4) {
+        group = "less_than_1";
+      } else if (weeks >= 4 && weeks < 13) {
+        group = "1_3";
+      } else if (weeks >= 13 && weeks < 25) {
+        group = "3_6";
+      } else if (weeks >= 25) {
+        group = "more_6";
       }
+      if (filters.projectLength !== group) return false;
+    }
+    
+    if (filters.hoursPerWeek) {
+      const minHours = job.minHoursWeek;
+      let group = "";
+      if (minHours === null || minHours === undefined) {
+        group = "not_given";
+      } else if (minHours <= 30) {
+        group = "less_30";
+      } else if (minHours > 30) {
+        group = "more_30";
+      }
+      if (filters.hoursPerWeek !== group) return false;
+    }
+    
+    if (filters.jobDuration) {
+      const isContractToHire = job.isContractToHire;
+      let group = "";
+      if (isContractToHire === true) {
+        group = "contract_to_hire";
+      } else {
+        group = "not_given";
+      }
+      if (filters.jobDuration !== group) return false;
+    }
+    
+    const colorValue = job.tier || job.tierColor;
+    if (filters.color && filters.color !== "" && colorValue !== filters.color) {
+      return false;
+    }
+    
     return true;
   });
 
-  
-    // Dropdown handler
-    const handleDateRangeChange = (e) => {
-      setDateRange(e.target.value);
-    };
+  // Calculate total jobs for stats
+  const totalJobs = allJobs.length;
+  const jobStats = statusOrder.reduce((acc, status) => {
+    acc[status] = allJobs.filter(job => job.currentStatus === status).length;
+    return acc;
+  }, {});
+
+  const handleDateRangeChange = (e) => {
+    setDateRange(e.target.value);
+    dispatch(setRange(e.target.value));
+    dispatch(fetchUpworkJobsByDateThunk());
+  };
 
   const handleExport = () => {
     alert("Exporting jobs...");
   };
-  // Handle filter changes
+
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-
-    // Remove empty filters for cleanliness
+    
     const filtersForUrl = { ...newFilters };
     Object.keys(filtersForUrl).forEach(k => {
       if (
@@ -293,214 +428,419 @@ const navigate = useNavigate();
     if (filtersForUrl.color && Array.isArray(filtersForUrl.color)) {
       filtersForUrl.color = filtersForUrl.color[0];
     }
-
     const query = queryString.stringify(filtersForUrl, { arrayFormat: 'bracket' });
     navigate(`?${query}`, { replace: true });
   };
 
+  const handleLogout = () => {
+    logoutUser(dispatch);
+    navigate("/login");
+  };
 
-const onDragEnd = async (result) => {
-  const { source, destination } = result;
-  if (!destination) return;
-  if (
-    source.droppableId === destination.droppableId &&
-    source.index === destination.index
-  ) {
-    return;
-  }
+  const retryFailedUpdate = async (jobId) => {
+    const failedUpdate = failedUpdates.get(jobId);
+    if (!failedUpdate) return;
 
-  if (!kanbanUser) {
-    setKanbanUserError("Please select a user before changing status.");
-    return;
-  }
+    const job = Object.values(kanbanJobs).flat().find(j => (j.jobId || j.id) === jobId);
+    if (!job) return;
 
-  const sourceStatus = source.droppableId;
-  const destStatus = destination.droppableId;
-  const job = kanbanJobs[sourceStatus][source.index];
-  if (!job) return;
+    // Remove from failed updates
+    setFailedUpdates(prev => {
+      const newMap = new Map(prev);
+      newMap.delete(jobId);
+      return newMap;
+    });
 
-  // Optimistic UI update
-  const newKanbanJobs = { ...kanbanJobs };
-  newKanbanJobs[sourceStatus] = Array.from(newKanbanJobs[sourceStatus]);
-  newKanbanJobs[sourceStatus].splice(source.index, 1);
-  newKanbanJobs[destStatus] = Array.from(newKanbanJobs[destStatus]);
-  const updatedJob = { ...job, currentStatus: destStatus };
-  newKanbanJobs[destStatus].splice(destination.index, 0, updatedJob);
-  setKanbanJobs(newKanbanJobs);
+    // Simulate drag and drop to retry
+    const fakeResult = {
+      source: { droppableId: failedUpdate.fromStatus, index: 0 },
+      destination: { droppableId: failedUpdate.toStatus, index: 0 }
+    };
 
-  setKanbanLoading(true);
-  setKanbanError(null);
-  try {
-    await dispatch(updateUpworkJobStatusThunk({
-      jobId: job.jobId || job.id,
-      status: destStatus,
-      username: kanbanUser,
-    })).unwrap();
+    // Find the job in current kanban state and retry
+    const currentStatus = job.currentStatus;
+    const currentIndex = kanbanJobs[currentStatus].findIndex(j => (j.jobId || j.id) === jobId);
+    
+    if (currentIndex !== -1) {
+      fakeResult.source = { droppableId: currentStatus, index: currentIndex };
+      await onDragEnd(fakeResult);
+    }
+  };
 
-    // Optionally: refetch jobs or update Redux state if needed
-  } catch (err) {
-    setKanbanJobs(kanbanJobs); // revert
-    setKanbanError("Failed to update job status. Please try again.");
-  } finally {
-    setKanbanLoading(false);
-  }
-};
+  useEffect(() => {
+    localStorage.setItem("upworkJobsByDate", JSON.stringify(upworkJobsByDate));
+  }, [upworkJobsByDate]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <Header source="upwork" onExport={handleExport} hideDownloadExcel />
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
-        {/* Sidebar */}
-        <aside className="hidden md:block md:w-1/4">
-          <SidebarFilters
-            paymentVerified={paymentVerified}
-            clientHistory={clientHistory} // pass static options, not value
-            jobTypes={jobTypes}
-            levels={levels}
-            countries={countries}
-            categories={categories}
-            filters={filters}
-            projectLength={projectLength}
-            hoursPerWeek={hoursPerWeek}
-            jobDuration={jobDuration}
-            statusOptions={statusOptions}
-            colors={colors}
-            jobTypeOptions={upworkJobTypeOptions}
-            jobTypeLabel="Job Type"
-            // filters={filters}
-            onFilterChange={handleFilterChange}
-          />
-        </aside>
-        {/* Main job list area */}
-        <main className="w-full md:w-3/4">
-        <div className="flex items-center mb-4">
-            <label htmlFor="date-range" className="mr-2 font-semibold">Show jobs from:</label>
-            <select
-              id="date-range"
-              value={dateRange}
-              onChange={handleDateRangeChange}
-              className="border rounded px-2 py-1"
-            >
-              {dateRanges.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center mb-4 gap-2">
-  <button
-    className={`px-3 py-1 rounded ${!kanbanView ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-    onClick={() => setKanbanView(false)}
-  >
-    List/Grid View
-  </button>
-  <button
-    className={`px-3 py-1 rounded ${kanbanView ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-    onClick={() => setKanbanView(true)}
-  >
-    Kanban View
-  </button>
-  {kanbanView && (
-    <>
-      <label className="font-semibold ml-4">Select User:</label>
-      <select
-        className="border rounded px-2 py-1"
-        value={kanbanUser}
-        onChange={e => {
-          setKanbanUser(e.target.value);
-          setKanbanUserError("");
-        }}
-      >
-        <option value="">-- Select User --</option>
-        {USER_LIST.map(user => (
-          <option key={user} value={user}>{user}</option>
-        ))}
-      </select>
-      {kanbanUserError && (
-        <span className="text-red-500 text-sm ml-2">{kanbanUserError}</span>
-      )}
-    </>
-  )}
-</div>
-{kanbanView ? (
-  // --- KANBAN VIEW ---
-  <div className="overflow-x-auto pb-4">
-    {kanbanError && (
-      <div className="text-red-500 mb-2">{kanbanError}</div>
-    )}
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-4 min-w-[1200px]">
-        {statusOrder.map((status) => (
-          <Droppable droppableId={status} key={status}>
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className={`bg-white rounded-lg shadow flex-1 min-w-[250px] max-w-[300px] flex flex-col
-                  ${snapshot.isDraggingOver ? "bg-blue-50" : ""}
-                `}
-                style={{ maxHeight: "70vh", overflowY: "auto" }}
-              >
-                <div className="p-3 border-b font-bold text-center sticky top-0 bg-white z-10">
-                  {statusLabels[status]}
-                </div>
-                <div className="p-2 flex-1">
-                  {kanbanJobs[status] && kanbanJobs[status].length === 0 && (
-                    <div className="text-gray-400 text-center py-4">No jobs</div>
-                  )}
-                  {kanbanJobs[status] &&
-                    kanbanJobs[status].map((job, idx) => (
-                      <Draggable
-                        key={job.jobId || job.id}
-                        draggableId={(job.jobId || job.id).toString()}
-                        index={idx}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`bg-white rounded shadow mb-3 p-3 cursor-pointer transition
-                              ${snapshot.isDragging ? "ring-2 ring-blue-400" : ""}
-                              hover:shadow-lg
-                            `}
-                          >
-                            <div className="font-semibold">{job.title}</div>
-                            <div className="text-sm text-gray-500">{job.company || job.companyName}</div>
-                            <div className="mt-1 text-xs text-blue-600">{statusLabels[job.currentStatus]}</div>
-                          </div>
-                        )}
-                      </Draggable>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      
+ {/* Enhanced Header */}
+ <div className="bg-white shadow-sm border-b border-gray-200">
+ <Header source="upwork" onExport={handleExport} user={user} onLogout={handleLogout} hideDownloadExcel />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              {/* Stats Cards Row */}
+    <div className="p-6 bg-gray-50">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        {statusOrder.map(status => {
+          const config = statusConfig[status];
+          const count = jobStats[status] || 0;
+          
+          return (
+            <div key={status} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between mb-2">
+                <div className={`w-3 h-3 ${config.dotColor} rounded-full`}></div>
+                <div className="text-2xl font-bold text-gray-900">{count}</div>
+              </div>
+              <div className="text-xs font-medium text-gray-600 leading-tight">
+                {config.label}
+              </div>
+              <div className="text-xs text-gray-400 mt-1">
+                {count === 0 ? 'No jobs' : count === 1 ? '1 job' : `${count} jobs`}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+  </div>
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Enhanced Sidebar */}
+          <aside className={`lg:w-80 ${sidebarOpen ? 'block' : 'hidden lg:block'}`}>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Filter className="h-5 w-5 text-gray-600" />
+                  Filters
+                </h2>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="lg:hidden text-gray-400 hover:text-gray-600"
+                >
+                  ×
+                </button>
+              </div>
+              <SidebarFilters
+                paymentVerified={paymentVerified}
+                clientHistory={clientHistory}
+                jobTypes={jobTypes}
+                levels={levels}
+                countries={countries}
+                categories={categories}
+                filters={filters}
+                projectLength={projectLength}
+                hoursPerWeek={hoursPerWeek}
+                jobDuration={jobDuration}
+                statusOptions={statusOptions}
+                colors={colors}
+                jobTypeOptions={upworkJobTypeOptions}
+                jobTypeLabel="Job Type"
+                onFilterChange={handleFilterChange}
+              />
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <main className="flex-1">
+            {/* Enhanced Controls Bar */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+              {/* Top Row - Date Range and Mobile Filter Toggle */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-gray-600" />
+                  <label htmlFor="date-range" className="font-medium text-gray-700">
+                    Time Range:
+                  </label>
+                  <select
+                    id="date-range"
+                    value={dateRange}
+                    onChange={handleDateRangeChange}
+                    className="border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  >
+                    {dateRanges.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
-                  {provided.placeholder}
+                  </select>
+                </div>
+
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <Filter className="h-4 w-4" />
+                  Filters
+                </button>
+              </div>
+
+              {/* View Controls */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                {/* View Mode Toggle */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-700">View:</span>
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    <button
+                      className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                        !kanbanView 
+                          ? "bg-white text-green-600 shadow-sm" 
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                      onClick={() => setKanbanView(false)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      List/Grid
+                    </button>
+                    <button
+                      className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                        kanbanView 
+                          ? "bg-white text-green-600 shadow-sm" 
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                      onClick={() => setKanbanView(true)}
+                    >
+                      <Kanban className="h-4 w-4" />
+                      Pipeline
+                    </button>
+                  </div>
                 </div>
               </div>
+
+              {/* Kanban User Selection */}
+              {kanbanView && (
+                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-green-600" />
+                      <label className="font-medium text-green-900">
+                        Select User for Status Changes:
+                      </label>
+                    </div>
+                    <select
+                      className="border border-green-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={kanbanUser}
+                      onChange={e => {
+                        setKanbanUser(e.target.value);
+                        setKanbanUserError("");
+                      }}
+                    >
+                      <option value="">-- Select User --</option>
+                      {USER_LIST.map(user => (
+                        <option key={user} value={user}>{user}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {kanbanUserError && (
+                    <div className="mt-2 flex items-center gap-2 text-red-600">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm">{kanbanUserError}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Content Area */}
+            {kanbanView ? (
+              // Enhanced Kanban View
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                {/* Enhanced error display with retry options */}
+                {kanbanError && (
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-red-700 text-sm">{kanbanError}</p>
+                        {failedUpdates.size > 0 && (
+                          <div className="mt-2">
+                            <p className="text-red-600 text-xs mb-2">Failed updates:</p>
+                            {Array.from(failedUpdates.entries()).map(([jobId, update]) => (
+                              <div key={jobId} className="flex items-center justify-between bg-red-100 rounded px-2 py-1 mb-1">
+                                <span className="text-xs text-red-700 truncate">
+                                  {update.jobTitle} → {statusLabels[update.toStatus]}
+                                </span>
+                                <button
+                                  onClick={() => retryFailedUpdate(jobId)}
+                                  className="text-xs text-red-600 hover:text-red-800 ml-2 px-2 py-1 bg-red-200 rounded hover:bg-red-300 transition-colors"
+                                >
+                                  Retry
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Real-time update status bar */}
+                {optimisticUpdates.size > 0 && (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-green-700 text-sm">
+                        Updating {optimisticUpdates.size} job{optimisticUpdates.size !== 1 ? 's' : ''}...
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="overflow-x-auto">
+                  <DragDropContext onDragEnd={onDragEnd}>
+                    <div className="flex gap-6 min-w-max pb-4">
+                      {statusOrder.map((status) => {
+                        const config = statusConfig[status];
+                        const jobs = kanbanJobs[status] || [];
+                        
+                        return (
+                          <Droppable droppableId={status} key={status}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className={`
+                                  w-80 ${config.color} rounded-xl border ${config.borderColor}
+                                  transition-all duration-200 ${snapshot.isDraggingOver ? 'ring-2 ring-green-400 ring-opacity-50' : ''}
+                                `}
+                                style={{ maxHeight: "70vh" }}
+                              >
+                                {/* Enhanced Column Header */}
+                                <div className={`
+                                  ${config.headerColor} ${config.textColor} px-4 py-4 rounded-t-xl
+                                  border-b ${config.borderColor}
+                                `}>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className={`w-3 h-3 ${config.dotColor} rounded-full`}></div>
+                                      <h3 className="font-semibold text-sm">
+                                        {config.label}
+                                      </h3>
+                                    </div>
+                                    <span className={`
+                                      ${config.textColor} bg-white bg-opacity-80 px-2 py-1 rounded-full text-xs font-medium
+                                    `}>
+                                      {jobs.length}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Column Content */}
+                                <div className="p-4 overflow-y-auto" style={{ maxHeight: "calc(70vh - 80px)" }}>
+                                  {jobs.length === 0 ? (
+                                    <div className="text-center py-8 text-gray-400">
+                                      <Briefcase className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                      <p className="text-sm">No jobs in this stage</p>
+                                    </div>
+                                  ) : (
+                                    jobs.map((job, idx) => (
+                                      <Draggable
+                                        key={job.jobId || job.id}
+                                        draggableId={(job.jobId || job.id).toString()}
+                                        index={idx}
+                                      >
+                                        {(provided, snapshot) => (
+                                          <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}
+                                            className={`
+                                              bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-3
+                                              cursor-grab hover:shadow-md transition-all duration-200 relative
+                                              ${snapshot.isDragging ? 'shadow-lg rotate-1 ring-2 ring-green-400' : ''}
+                                              ${job.isUpdating ? 'opacity-75' : ''}
+                                            `}
+                                          >
+                                            {/* Real-time update indicator */}
+                                            {job.isUpdating && (
+                                              <div className="absolute top-2 right-2">
+                                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                              </div>
+                                            )}
+                                            
+                                            {/* Failed update indicator */}
+                                            {failedUpdates.has(job.jobId || job.id) && (
+                                              <div className="absolute top-2 right-2">
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    retryFailedUpdate(job.jobId || job.id);
+                                                  }}
+                                                  className="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                                                  title="Click to retry"
+                                                >
+                                                  ↻
+                                                </button>
+                                              </div>
+                                            )}
+
+                                            <div className="flex items-start gap-2 mb-2">
+                                              <Briefcase className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                              <h4 className="font-medium text-gray-900 text-sm leading-tight line-clamp-2">
+                                                {job.title}
+                                              </h4>
+                                            </div>
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                              <p className="text-gray-600 text-sm truncate">
+                                                {job.company || job.companyName}
+                                              </p>
+                                            </div>
+                                            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.textColor} ${config.color}`}>
+                                              {config.label}
+                                              {job.isUpdating && (
+                                                <div className="ml-1 w-2 h-2 bg-current rounded-full animate-ping"></div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </Draggable>
+                                    ))
+                                  )}
+                                  {provided.placeholder}
+                                </div>
+                              </div>
+                            )}
+                          </Droppable>
+                        );
+                      })}
+                    </div>
+                  </DragDropContext>
+                </div>
+              </div>
+            ) : (
+              // Enhanced List/Grid View
+              <div className="space-y-6">
+                {loading ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading jobs...</p>
+                  </div>
+                ) : error ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6">
+                    <div className="flex items-center gap-2 text-red-600">
+                      <AlertCircle className="h-5 w-5" />
+                      <span>{error}</span>
+                    </div>
+                  </div>
+                ) : upworkJobsByDate.length === 0 ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                    <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+                    <p className="text-gray-600">Try adjusting your filters to see more results.</p>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                      {filteredJobs.map(job => (
+                        <UpworkJobCard key={job.jobId || job.id} job={job} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
-          </Droppable>
-        ))}
-      </div>
-    </DragDropContext>
-    {kanbanLoading && (
-      <div className="fixed left-0 right-0 bottom-0 bg-blue-100 text-blue-700 text-center py-2 z-50">
-        Updating status...
-      </div>
-    )}
-  </div>
-) : (
-  // --- LIST/GRID VIEW ---
-  loadingRange ? (
-    <div>Loading jobs...</div>
-  ) : error ? (
-    <div className="text-red-500">{error}</div>
-  ) : filteredJobs.length === 0 ? (
-    <div>No jobs found.</div>
-  ) : (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-      {filteredJobs.map(job => (
-        <UpworkJobCard key={job.jobId || job.id} job={job} />
-      ))}
-    </div>
-  )
-)}          </main>
+          </main>
+        </div>
       </div>
     </div>
   );
