@@ -11,7 +11,7 @@ import { DateRangePicker } from "react-date-range"
 import "react-date-range/dist/styles.css"
 import "react-date-range/dist/theme/default.css"
 
-const STATUS_TYPES = ["not_engaged", "applied", "engaged", "interview", "offer", "rejected", "archived"]
+const STATUS_TYPES = ["not_engaged", "applied", "engaged", "interview", "offer", "rejected", "onboard"]
 
 const STATUS_LABELS = {
   not_engaged: "Not Engaged",
@@ -20,7 +20,7 @@ const STATUS_LABELS = {
   interview: "Interview",
   offer: "Offer",
   rejected: "Rejected",
-  archived: "Archived",
+  onboard: "onboard",
 }
 
 const USER_LIST = ["khubaib", "taha", "basit", "huzaifa", "abdulrehman"]
@@ -32,7 +32,7 @@ const STATUS_COLORS = {
   interview: "#1A535C", // Dark Blue
   offer: "#FF6F91", // Pink
   rejected: "#5F27CD", // Purple
-  archived: "#00B894", // Green
+  onboard: "#00B894", // Green
 }
 
 const AdminDashboard = () => {

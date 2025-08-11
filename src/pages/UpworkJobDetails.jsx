@@ -16,7 +16,7 @@ const PORT = import.meta.env.VITE_PORT;
 
 const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 const STATUS_OPTIONS = [
-  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'archived'
+  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
 ];
 const UPWORK_SERVICE_CATEGORIES = [
   "AI/ML",

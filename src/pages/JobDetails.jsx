@@ -50,7 +50,7 @@ const getKpiBadge = (score) => {
 //   return res.data;
 // }
 const STATUS_OPTIONS = [
-  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'archived'
+  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
 ];
 
 const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];

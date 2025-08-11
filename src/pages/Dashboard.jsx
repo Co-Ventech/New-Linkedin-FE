@@ -6,7 +6,6 @@ import { useSelector, useDispatch } from "react-redux";
 import JobCard from "../components/JobCard";
 import Header from "../components/Header";
 import SidebarFilters from "../components/SidebarFilters";
-import { fetchlinkedinJobsByDateRange } from "../api/jobService";
 import {
   fetchJobsByDateThunk,
   resetJobsByDate,
@@ -24,7 +23,7 @@ const statusLabels = {
   interview: "Interview",
   offer: "Offer",
   rejected: "Rejected",
-  archived: "Archived",
+  onboard: "Onboard",
 };
 
 const statusOrder = [
@@ -34,7 +33,7 @@ const statusOrder = [
   "interview",
   "offer",
   "rejected",
-  "archived",
+  "onboard",
 ];
 
 // Enhanced status configuration with colors
@@ -87,8 +86,8 @@ const statusConfig = {
     borderColor: "border-red-200",
     dotColor: "bg-red-400"
   },
-  archived: {
-    label: "Archived",
+  onboard: {
+    label: "Onboard",
     color: "bg-slate-50",
     headerColor: "bg-slate-100",
     textColor: "text-slate-700",
@@ -126,7 +125,13 @@ const statusOptions = [
   "interview",
   "offer",
   "rejected",
-  "archived"
+  "onboard"
+];
+
+const timeRanges = [
+  { value: 'last24h', label: 'Last Batch (Last 24 Hours)' },
+  { value: 'last3d', label: 'Last 3 Days' },
+  { value: 'last7d', label: 'Last 7 Days' },
 ];
 
 const dateRanges = [
@@ -135,19 +140,19 @@ const dateRanges = [
   { label: "Last 7 Days", value: "7d" },
 ];
 
-function getStartDate(range) {
-  const today = new Date();
-  let start = new Date(today);
-  if (range === "1d") start.setDate(today.getDate() - 1);
-  if (range === "3d") start.setDate(today.getDate() - 3);
-  if (range === "7d") start.setDate(today.getDate() - 7);
-  return start.toISOString().slice(0, 10);
-}
+// function getStartDate(range) {
+//   const today = new Date();
+//   let start = new Date(today);
+//   if (range === "1d") start.setDate(today.getDate() - 1);
+//   if (range === "3d") start.setDate(today.getDate() - 3);
+//   if (range === "7d") start.setDate(today.getDate() - 7);
+//   return start.toISOString().slice(0, 10);
+// }
 
-function getEndDate() {
-  const today = new Date();
-  return today.toISOString().slice(0, 10);
-}
+// function getEndDate() {
+//   const today = new Date();
+//   return today.toISOString().slice(0, 10);
+// }
 
 const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 
@@ -164,8 +169,9 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [optimisticUpdates, setOptimisticUpdates] = useState(new Set());
   const [failedUpdates, setFailedUpdates] = useState(new Map());
+// const [page, setPage] = useState(1);
 
-  const { jobsByDate, loading, error, range } = useSelector(
+  const {hasMore, jobsByDate, loading, error, range } = useSelector(
     (state) => state.jobs
   );
   const user = useSelector((state) => state.user.user);
@@ -318,7 +324,7 @@ const Dashboard = () => {
       });
 
       // Optionally refresh data in background without affecting UI
-      dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
+      dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 10 }));
       
     } catch (err) {
       console.error('Failed to update job status:', err);
@@ -356,24 +362,72 @@ const Dashboard = () => {
     }
   };
 
-  const handleDateRangeChange = (e) => {
-    setDateRange(e.target.value);
-    dispatch(setRange(e.target.value));
-    dispatch(fetchJobsByDateThunk({ range: e.target.value, page: 1, limit: 1000 }));
-  };
+  // const handleRangeChange = (e) => {
+  //   const newRange = e.target.value;
+  //   setRange(newRange);
+  //   setPage(1);
+  //   dispatch(resetJobs());
+  //   dispatch(fetchJobsPaginatedThunk({ range: newRange, page: 1, limit: 10 }));
+  // };
 
-  // All existing useEffect hooks remain the same
+//   const observer = useRef();
+// const lastJobRef = useCallback(
+//   (node) => {
+//     if (loading) return;
+//     if (observer.current) observer.current.disconnect();
+//     observer.current = new IntersectionObserver(entries => {
+//       if (entries[0].isIntersecting && hasMore) {
+//         setPage(prev => prev + 1);
+//       }
+//     });
+//     if (node) observer.current.observe(node);
+//   },
+//   [loading, hasMore]
+// );
+
+const [page, setPage] = useState(1);
+const observer = React.useRef(null);
+
+useEffect(() => {
+  // initial load and when range changes
+  setPage(1);
+  dispatch(resetJobsByDate());
+  dispatch(fetchJobsByDateThunk({ range: dateRange, page: 1, limit: 10 }));
+}, [dateRange, dispatch]);
+
+
+const lastJobRef = React.useCallback(node => {
+  if (loading) return;
+  if (observer.current) observer.current.disconnect();
+  observer.current = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && hasMore) {
+      setPage(prev => prev + 1);
+    }
+  });
+  if (node) observer.current.observe(node);
+}, [loading, hasMore]);
+
+
+const handleDateRangeChange = (e) => {
+  const val = e.target.value; // '1d' | '3d' | '7d'
+  setDateRange(val);
+  dispatch(setRange(val));
+  setPage(1);
+  dispatch(resetJobsByDate());
+  dispatch(fetchJobsByDateThunk({ range: val, page: 1, limit: 10 }));
+};
+
   useEffect(() => {
     localStorage.setItem("jobsByDate", JSON.stringify(jobsByDate));
   }, [jobsByDate]);
 
-  useEffect(() => {
-    setFilters(getFiltersFromUrl());
-  }, [location.search]);
+  // useEffect(() => {
+  //   setFilters(getFiltersFromUrl());
+  // }, [location.search]);
 
   useEffect(() => {
     if (!jobsByDate || jobsByDate.length === 0 || jobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
-      dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 1000 }));
+      dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 10 }));
     }
   }, [dispatch, range, jobsByDate]);
 
@@ -916,53 +970,59 @@ const Dashboard = () => {
               </div>
             ) : (
               // Enhanced List/Grid View
-              <div className="space-y-6">
-                {loading ? (
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading jobs...</p>
-                  </div>
-                ) : error ? (
-                  <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6">
-                    <div className="flex items-center gap-2 text-red-600">
-                      <AlertCircle className="h-5 w-5" />
-                      <span>{error}</span>
-                    </div>
-                  </div>
-                ) : filteredJobsByDate.length === 0 ? (
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                    <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
-                    <p className="text-gray-600">Try adjusting your filters to see more results.</p>
-                  </div>
-                ) : (
-                  filteredJobsByDate.map((day) => (
-                    <section key={day.date} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                      <div className={
-                        view === "grid"
-                          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
-                          : "flex flex-col gap-4"
-                      }>
-                        {Array.isArray(day.jobs) && day.jobs.length > 0 ? (
-                          day.jobs.map((job) => (
-                            <JobCard
-                              key={job.id}
-                              job={job}
-                              onClick={() => handleJobClick(job)}
-                              view={view}
-                            />
-                          ))
-                        ) : (
-                          <div className="col-span-full text-center py-8 text-gray-500">
-                            <Briefcase className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                            <p>No jobs for this date.</p>
-                          </div>
-                        )}
-                      </div>
-                    </section>
-                  ))
-                )}
-              </div>
+                           // Enhanced List/Grid View
+                           <div className="space-y-6">
+                           {loading ? (
+                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                               <p className="text-gray-600">Loading jobs...</p>
+                             </div>
+                           ) : error ? (
+                             <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6">
+                               <div className="flex items-center gap-2 text-red-600">
+                                 <AlertCircle className="h-5 w-5" />
+                                 <span>{error}</span>
+                               </div>
+                             </div>
+                           ) : filteredJobsByDate.length === 0 ? (
+                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                               <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                               <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+                               <p className="text-gray-600">Try adjusting your filters to see more results.</p>
+                             </div>
+                           ) : (
+                             filteredJobsByDate.map((day) => (
+                               <section key={day.date} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                 <div className={
+                                   view === "grid"
+                                     ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+                                     : "flex flex-col gap-4"
+                                 }>
+                                   {Array.isArray(day.jobs) && day.jobs.length > 0 ? (
+                                     day.jobs.map((job) => (
+                                       <JobCard
+                                         key={job.id}
+                                         job={job}
+                                         onClick={() => handleJobClick(job)}
+                                         view={view}
+                                       />
+                                     ))
+                                   ) : (
+                                     <div className="col-span-full text-center py-8 text-gray-500">
+                                       <Briefcase className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                       <p>No jobs for this date.</p>
+                                     </div>
+                                   )}
+                                 </div>
+                               </section>
+                             ))
+                           )}
+           
+                           {/* Sentinel for lazy loading: place AFTER the map, still inside the list container */}
+                           {!kanbanView && filteredJobsByDate.length > 0 && (
+                             <div ref={lastJobRef} className="h-1 w-full" />
+                           )}
+                         </div> 
             )}
           </main>
         </div>

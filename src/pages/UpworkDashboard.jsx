@@ -8,11 +8,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
 import queryString from "query-string";
 import { useLocation, useNavigate } from "react-router-dom";
-import { fetchUpworkJobsByDateRange } from "../api/jobService";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { updateUpworkJobStatusThunk, upworkfetchJobByIdThunk } from "../slices/jobsSlice";
 import { logoutUser } from "../api/authApi";
-import { setRange } from "../slices/jobsSlice";
+import { setRange, resetJobsByDate } from "../slices/jobsSlice";
 import { Calendar, Grid3X3, List, Kanban, Users, AlertCircle, Briefcase, Building2, Filter, Download, Search, ChevronDown, Eye, BarChart3, X } from 'lucide-react';
 
 const defaultFilters = {
@@ -43,7 +42,7 @@ const statusOptions = [
   "interview",
   "offer",
   "rejected",
-  "archived"
+  "onboard"
 ];
 
 const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
@@ -55,7 +54,7 @@ const statusLabels = {
   interview: "Interview",
   offer: "Offer",
   rejected: "Rejected",
-  archived: "Archived",
+  onboard: "Onboard",
 };
 
 const statusOrder = [
@@ -65,7 +64,7 @@ const statusOrder = [
   "interview",
   "offer",
   "rejected",
-  "archived",
+  "onboard",
 ];
 
 // Enhanced status configuration with colors
@@ -118,8 +117,8 @@ const statusConfig = {
     borderColor: "border-red-200",
     dotColor: "bg-red-400"
   },
-  archived: {
-    label: "Archived",
+  onboard: {
+    label: "Onboard",
     color: "bg-slate-50",
     headerColor: "bg-slate-100",
     textColor: "text-slate-700",
@@ -163,11 +162,13 @@ const UpworkDashboard = () => {
   const [failedUpdates, setFailedUpdates] = useState(new Map());
   const user = useSelector((state) => state.user.user);
   const allJobs = upworkJobsByDate.flatMap(day => day.jobs || []);
+
+
   const location = useLocation();
   const navigate = useNavigate();
 
-   // Parse filters from URL
-   const getFiltersFromUrl = () => {
+  // Parse filters from URL
+  const getFiltersFromUrl = () => {
     const params = queryString.parse(location.search, { arrayFormat: 'bracket' });
     return {
       ...defaultFilters,
@@ -181,70 +182,70 @@ const UpworkDashboard = () => {
 
   const [filters, setFilters] = React.useState(getFiltersFromUrl());
 
-    // Filtering logic
-    const filteredJobs = allJobs.filter(job => {
-      if (filters.level && job.level !== filters.level) return false;
-      if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
-      if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
-      if (filters.jobType && job.jobType !== filters.jobType) return false;
-      if (filters.status && job.currentStatus !== filters.status) return false;
-      if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
-      
-      if (filters.clientHistory) {
-        const hires = job.buyerTotalJobsWithHires;
-        if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
-        if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
-        if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
+  // Filtering logic
+  const filteredJobs = allJobs.filter(job => {
+    if (filters.level && job.level !== filters.level) return false;
+    if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
+    if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
+    if (filters.jobType && job.jobType !== filters.jobType) return false;
+    if (filters.status && job.currentStatus !== filters.status) return false;
+    if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
+
+    if (filters.clientHistory) {
+      const hires = job.buyerTotalJobsWithHires;
+      if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
+      if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
+      if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
+    }
+
+    if (filters.projectLength) {
+      const weeks = job.hourlyWeeks;
+      let group = "";
+      if (weeks === null || weeks === undefined) {
+        group = "less_than_1";
+      } else if (weeks < 4) {
+        group = "less_than_1";
+      } else if (weeks >= 4 && weeks < 13) {
+        group = "1_3";
+      } else if (weeks >= 13 && weeks < 25) {
+        group = "3_6";
+      } else if (weeks >= 25) {
+        group = "more_6";
       }
-      
-      if (filters.projectLength) {
-        const weeks = job.hourlyWeeks;
-        let group = "";
-        if (weeks === null || weeks === undefined) {
-          group = "less_than_1";
-        } else if (weeks < 4) {
-          group = "less_than_1";
-        } else if (weeks >= 4 && weeks < 13) {
-          group = "1_3";
-        } else if (weeks >= 13 && weeks < 25) {
-          group = "3_6";
-        } else if (weeks >= 25) {
-          group = "more_6";
-        }
-        if (filters.projectLength !== group) return false;
+      if (filters.projectLength !== group) return false;
+    }
+
+    if (filters.hoursPerWeek) {
+      const minHours = job.minHoursWeek;
+      let group = "";
+      if (minHours === null || minHours === undefined) {
+        group = "not_given";
+      } else if (minHours <= 30) {
+        group = "less_30";
+      } else if (minHours > 30) {
+        group = "more_30";
       }
-      
-      if (filters.hoursPerWeek) {
-        const minHours = job.minHoursWeek;
-        let group = "";
-        if (minHours === null || minHours === undefined) {
-          group = "not_given";
-        } else if (minHours <= 30) {
-          group = "less_30";
-        } else if (minHours > 30) {
-          group = "more_30";
-        }
-        if (filters.hoursPerWeek !== group) return false;
+      if (filters.hoursPerWeek !== group) return false;
+    }
+
+    if (filters.jobDuration) {
+      const isContractToHire = job.isContractToHire;
+      let group = "";
+      if (isContractToHire === true) {
+        group = "contract_to_hire";
+      } else {
+        group = "not_given";
       }
-      
-      if (filters.jobDuration) {
-        const isContractToHire = job.isContractToHire;
-        let group = "";
-        if (isContractToHire === true) {
-          group = "contract_to_hire";
-        } else {
-          group = "not_given";
-        }
-        if (filters.jobDuration !== group) return false;
-      }
-      
-      const colorValue = job.tier || job.tierColor;
-      if (filters.color && filters.color !== "" && colorValue !== filters.color) {
-        return false;
-      }
-      
-      return true;
-    });
+      if (filters.jobDuration !== group) return false;
+    }
+
+    const colorValue = job.tier || job.tierColor;
+    if (filters.color && filters.color !== "" && colorValue !== filters.color) {
+      return false;
+    }
+
+    return true;
+  });
 
 
 
@@ -252,18 +253,18 @@ const UpworkDashboard = () => {
     if (!kanbanView) return;
     const jobs = upworkJobsByDate.flatMap(day => day.jobs || []);
     const grouped = {};
-  statusOrder.forEach(status => {
-    grouped[status] = filteredJobs.filter(job => job.currentStatus === status);
-  });
-  setKanbanJobs(grouped);
-}, [kanbanView, filteredJobs, statusOrder]);
+    statusOrder.forEach(status => {
+      grouped[status] = filteredJobs.filter(job => job.currentStatus === status);
+    });
+    setKanbanJobs(grouped);
+  }, [kanbanView, filteredJobs, statusOrder]);
 
 
   // Enhanced onDragEnd with real-time updates
   const onDragEnd = async (result) => {
     const { source, destination } = result;
     if (!destination) return;
-    
+
     if (
       source.droppableId === destination.droppableId &&
       source.index === destination.index
@@ -282,11 +283,11 @@ const UpworkDashboard = () => {
     if (!job) return;
 
     const updateId = `${job.jobId || job.id}-${Date.now()}`;
-    
+
     // Clear any previous errors for this job
     setKanbanError(null);
     setKanbanUserError("");
-    
+
     // Store original state for potential reversion
     const originalKanbanJobs = { ...kanbanJobs };
     const originalJobStatus = job.currentStatus;
@@ -296,9 +297,9 @@ const UpworkDashboard = () => {
     newKanbanJobs[sourceStatus] = Array.from(newKanbanJobs[sourceStatus]);
     newKanbanJobs[sourceStatus].splice(source.index, 1);
     newKanbanJobs[destStatus] = Array.from(newKanbanJobs[destStatus]);
-    
-    const updatedJob = { 
-      ...job, 
+
+    const updatedJob = {
+      ...job,
       currentStatus: destStatus,
       isUpdating: true,
       updateId: updateId
@@ -320,8 +321,8 @@ const UpworkDashboard = () => {
       setKanbanJobs(prevJobs => {
         const updatedJobs = { ...prevJobs };
         Object.keys(updatedJobs).forEach(status => {
-          updatedJobs[status] = updatedJobs[status].map(j => 
-            j.updateId === updateId 
+          updatedJobs[status] = updatedJobs[status].map(j =>
+            j.updateId === updateId
               ? { ...j, isUpdating: false, updateId: undefined }
               : j
           );
@@ -337,16 +338,16 @@ const UpworkDashboard = () => {
 
       // Refetch jobs to update Redux and Kanban columns
       await dispatch(fetchUpworkJobsByDateThunk());
-      
+
     } catch (err) {
       console.error('Failed to update job status:', err);
-      
+
       // REVERT UI on failure
       setKanbanJobs(originalKanbanJobs);
-      
+
       // Show error with job details
       setKanbanError(`Failed to move "${job.title}" to ${statusLabels[destStatus]}. Please try again.`);
-      
+
       // Track failed update
       setFailedUpdates(prev => new Map(prev).set(job.jobId || job.id, {
         jobTitle: job.title,
@@ -374,19 +375,19 @@ const UpworkDashboard = () => {
     }
   };
 
- 
+
 
   // Keep filters in sync with URL
   useEffect(() => {
     setFilters(getFiltersFromUrl());
   }, [location.search]);
 
-  // Fetch jobs on mount
+  // Fetch jobs on mount (or when empty) with current range
   useEffect(() => {
     if (!upworkJobsByDate || upworkJobsByDate.length === 0 || upworkJobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
-      dispatch(fetchUpworkJobsByDateThunk());
+      dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1 }));
     }
-  }, [dispatch, upworkJobsByDate]);
+  }, [dispatch, upworkJobsByDate, dateRange]);
 
   // Flatten jobs for filtering
 
@@ -409,10 +410,41 @@ const UpworkDashboard = () => {
     return acc;
   }, {});
 
+  // after filteredJobs and jobStats
+  const [page, setPage] = useState(1);
+  const observer = React.useRef(null);
+  const { hasMore } = useSelector(state => state.jobs);
+
+  useEffect(() => {
+    // first page when range changes
+    setPage(1);
+    dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1, limit: 20 }));
+  }, [dateRange, dispatch]);
+
+  useEffect(() => {
+    if (page > 1) {
+      dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page, limit: 20 }));
+    }
+  }, [page, dateRange, dispatch]);
+
+  const lastJobRef = React.useCallback(node => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prev => prev + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore]);
+
+  // update range change to reset page and fetch page 1
   const handleDateRangeChange = (e) => {
-    setDateRange(e.target.value);
-    dispatch(setRange(e.target.value));
-    dispatch(fetchUpworkJobsByDateThunk());
+    const value = e.target.value;
+    setDateRange(value);
+    dispatch(setRange(value));
+    setPage(1);
+    dispatch(fetchUpworkJobsByDateThunk({ range: value, page: 1, limit: 20 }));
   };
 
   const handleExport = () => {
@@ -422,7 +454,7 @@ const UpworkDashboard = () => {
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    
+
     const filtersForUrl = { ...newFilters };
     Object.keys(filtersForUrl).forEach(k => {
       if (
@@ -442,6 +474,7 @@ const UpworkDashboard = () => {
   const handleLogout = () => {
     logoutUser(dispatch);
     navigate("/login");
+
   };
 
   const retryFailedUpdate = async (jobId) => {
@@ -467,12 +500,14 @@ const UpworkDashboard = () => {
     // Find the job in current kanban state and retry
     const currentStatus = job.currentStatus;
     const currentIndex = kanbanJobs[currentStatus].findIndex(j => (j.jobId || j.id) === jobId);
-    
+
     if (currentIndex !== -1) {
       fakeResult.source = { droppableId: currentStatus, index: currentIndex };
       await onDragEnd(fakeResult);
     }
   };
+
+
 
   useEffect(() => {
     localStorage.setItem("upworkJobsByDate", JSON.stringify(upworkJobsByDate));
@@ -480,37 +515,37 @@ const UpworkDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      
- {/* Enhanced Header */}
- <div className="bg-white shadow-sm border-b border-gray-200">
- <Header source="upwork" onExport={handleExport} user={user} onLogout={handleLogout} hideDownloadExcel />
+
+      {/* Enhanced Header */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <Header source="upwork" onExport={handleExport} user={user} onLogout={handleLogout} hideDownloadExcel />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              {/* Stats Cards Row */}
-    <div className="p-6 bg-gray-50">
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-        {statusOrder.map(status => {
-          const config = statusConfig[status];
-          const count = jobStats[status] || 0;
-          
-          return (
-            <div key={status} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-2">
-                <div className={`w-3 h-3 ${config.dotColor} rounded-full`}></div>
-                <div className="text-2xl font-bold text-gray-900">{count}</div>
-              </div>
-              <div className="text-xs font-medium text-gray-600 leading-tight">
-                {config.label}
-              </div>
-              <div className="text-xs text-gray-400 mt-1">
-                {count === 0 ? 'No jobs' : count === 1 ? '1 job' : `${count} jobs`}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-  </div>
+        {/* Stats Cards Row */}
+        <div className="p-6 bg-gray-50">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            {statusOrder.map(status => {
+              const config = statusConfig[status];
+              const count = jobStats[status] || 0;
+
+              return (
+                <div key={status} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={`w-3 h-3 ${config.dotColor} rounded-full`}></div>
+                    <div className="text-2xl font-bold text-gray-900">{count}</div>
+                  </div>
+                  <div className="text-xs font-medium text-gray-600 leading-tight">
+                    {config.label}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {count === 0 ? 'No jobs' : count === 1 ? '1 job' : `${count} jobs`}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Enhanced Sidebar */}
@@ -588,22 +623,20 @@ const UpworkDashboard = () => {
                   <span className="text-sm font-medium text-gray-700">View:</span>
                   <div className="flex bg-gray-100 rounded-lg p-1">
                     <button
-                      className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                        !kanbanView 
-                          ? "bg-white text-green-600 shadow-sm" 
+                      className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${!kanbanView
+                          ? "bg-white text-green-600 shadow-sm"
                           : "text-gray-600 hover:text-gray-900"
-                      }`}
+                        }`}
                       onClick={() => setKanbanView(false)}
                     >
                       <Eye className="h-4 w-4" />
                       List/Grid
                     </button>
                     <button
-                      className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                        kanbanView 
-                          ? "bg-white text-green-600 shadow-sm" 
+                      className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${kanbanView
+                          ? "bg-white text-green-600 shadow-sm"
                           : "text-gray-600 hover:text-gray-900"
-                      }`}
+                        }`}
                       onClick={() => setKanbanView(true)}
                     >
                       <Kanban className="h-4 w-4" />
@@ -692,14 +725,14 @@ const UpworkDashboard = () => {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="overflow-x-auto">
                   <DragDropContext onDragEnd={onDragEnd}>
                     <div className="flex gap-6 min-w-max pb-4">
                       {statusOrder.map((status) => {
                         const config = statusConfig[status];
                         const jobs = kanbanJobs[status] || [];
-                        
+
                         return (
                           <Droppable droppableId={status} key={status}>
                             {(provided, snapshot) => (
@@ -764,7 +797,7 @@ const UpworkDashboard = () => {
                                                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                                               </div>
                                             )}
-                                            
+
                                             {/* Failed update indicator */}
                                             {failedUpdates.has(job.jobId || job.id) && (
                                               <div className="absolute top-2 right-2">
@@ -843,6 +876,11 @@ const UpworkDashboard = () => {
                         <UpworkJobCard key={job.jobId || job.id} job={job} />
                       ))}
                     </div>
+
+                    {/* Sentinel for lazy loading */}
+                    {!kanbanView && filteredJobs.length > 0 && (
+                      <div ref={lastJobRef} className="h-1 w-full" />
+                    )}
                   </div>
                 )}
               </div>
