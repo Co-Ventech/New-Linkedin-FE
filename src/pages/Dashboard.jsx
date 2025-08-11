@@ -99,14 +99,14 @@ const statusConfig = {
 
 // Default filters remain the same
 const defaultFilters = {
-  type: "",
-  category: "",
-  color: [],
+  category: [],
+  color: "",
   country: [],
   seniority: "",
   field: [],
   domain: [],
   status: "",
+  jobType:"",
 };
 
 // Static filter options remain the same
@@ -191,12 +191,54 @@ const Dashboard = () => {
   useEffect(() => {
     if (!kanbanView) return;
     const jobs = jobsByDate.flatMap(day => day.jobs);
+
+        // Apply the same filtering logic as in the list/grid view
+        const filteredJobs = jobs.filter(job => {
+          if (filters.jobType && job.employmentType !== filters.jobType) {
+            return false;
+          }
+          if (filters.field && filters.field.length > 0 && !filters.field.includes(job.title)) {
+            return false;
+          }
+          if (filters.status && job.currentStatus !== filters.status) return false;
+          if (filters.domain && filters.domain.length > 0 && !filters.domain.includes(job.predicted_domain)) {
+            return false;
+          }
+          if (filters.country && filters.country.length > 0) {
+            let jobCountries = [];
+            if (Array.isArray(job.locations)) {
+              jobCountries = job.locations.map((loc) => {
+                if (typeof loc === "string") {
+                  const parts = loc.split(",");
+                  return parts[parts.length - 1]?.trim();
+                }
+                if (typeof loc === "object" && loc !== null && "country" in loc) {
+                  return loc.country;
+                }
+                return null;
+              }).filter(Boolean);
+            } else if (typeof job.locations === "string") {
+              const parts = job.locations.split(",");
+              jobCountries = [parts[parts.length - 1]?.trim()];
+            }
+            if (!jobCountries.some((c) => filters.country.includes(c))) {
+              return false;
+            }
+          }
+          const colorValue = job.tier || job.tierColor;
+          if (filters.color && filters.color !== "" && colorValue !== filters.color) {
+            return false;
+          }
+          return true;
+        });
+
+
     const grouped = {};
     statusOrder.forEach(status => {
-      grouped[status] = jobs.filter(job => job.currentStatus === status);
+      grouped[status] = filteredJobs.filter(job => job.currentStatus === status);
     });
     setKanbanJobs(grouped);
-  }, [jobsByDate, kanbanView]);
+  }, [jobsByDate, kanbanView,filters ]);
 
   // All existing handlers remain the same
   const onDragEnd = async (result) => {
@@ -460,9 +502,13 @@ const Dashboard = () => {
   };
 
   // Calculate total jobs for stats
-  const totalJobs = allJobs.length;
+  const totalJobs = kanbanView ? Object.values(kanbanJobs).flat().length : allJobs.length;
   const jobStats = statusOrder.reduce((acc, status) => {
-    acc[status] = allJobs.filter(job => job.currentStatus === status).length;
+    if (kanbanView) {
+      acc[status] = kanbanJobs[status] ? kanbanJobs[status].length : 0;
+    } else {
+      acc[status] = allJobs.filter(job => job.currentStatus === status).length;
+    }
     return acc;
   }, {});
 
@@ -556,6 +602,7 @@ const Dashboard = () => {
                 domains={domains}
                 statusOptions={statusOptions}
                 onFilterChange={handleFilterChange}
+                isPipelineView={kanbanView}
               />
             </div>
           </aside>
@@ -830,7 +877,9 @@ const Dashboard = () => {
                                             <div className="flex items-center gap-2 mb-2">
                                               <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                               <p className="text-gray-600 text-sm truncate">
-                                                {job.company || job.companyName}
+                                              {typeof job.company === "object"
+                                                  ? job.company?.name
+                                                  : job.company || job.companyName}
                                               </p>
                                             </div>
                                             <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.textColor} ${config.color}`}>

@@ -13,7 +13,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { updateUpworkJobStatusThunk, upworkfetchJobByIdThunk } from "../slices/jobsSlice";
 import { logoutUser } from "../api/authApi";
 import { setRange } from "../slices/jobsSlice";
-import { Calendar, Grid3X3, List, Kanban, Users, AlertCircle, Briefcase, Building2, Filter, Download, Search, ChevronDown, Eye, BarChart3 } from 'lucide-react';
+import { Calendar, Grid3X3, List, Kanban, Users, AlertCircle, Briefcase, Building2, Filter, Download, Search, ChevronDown, Eye, BarChart3, X } from 'lucide-react';
 
 const defaultFilters = {
   level: "",
@@ -162,19 +162,102 @@ const UpworkDashboard = () => {
   const [optimisticUpdates, setOptimisticUpdates] = useState(new Set());
   const [failedUpdates, setFailedUpdates] = useState(new Map());
   const user = useSelector((state) => state.user.user);
-
+  const allJobs = upworkJobsByDate.flatMap(day => day.jobs || []);
   const location = useLocation();
   const navigate = useNavigate();
+
+   // Parse filters from URL
+   const getFiltersFromUrl = () => {
+    const params = queryString.parse(location.search, { arrayFormat: 'bracket' });
+    return {
+      ...defaultFilters,
+      ...params,
+      country: params.country ? (Array.isArray(params.country) ? params.country : [params.country]) : [],
+      category: params.category ? (Array.isArray(params.category) ? params.category : [params.category]) : [],
+      color: Array.isArray(params.color) ? params.color[0] : (params.color || ""),
+      type: params.type ? (Array.isArray(params.type) ? params.type : [params.type]) : [],
+    };
+  };
+
+  const [filters, setFilters] = React.useState(getFiltersFromUrl());
+
+    // Filtering logic
+    const filteredJobs = allJobs.filter(job => {
+      if (filters.level && job.level !== filters.level) return false;
+      if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
+      if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
+      if (filters.jobType && job.jobType !== filters.jobType) return false;
+      if (filters.status && job.currentStatus !== filters.status) return false;
+      if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
+      
+      if (filters.clientHistory) {
+        const hires = job.buyerTotalJobsWithHires;
+        if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
+        if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
+        if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
+      }
+      
+      if (filters.projectLength) {
+        const weeks = job.hourlyWeeks;
+        let group = "";
+        if (weeks === null || weeks === undefined) {
+          group = "less_than_1";
+        } else if (weeks < 4) {
+          group = "less_than_1";
+        } else if (weeks >= 4 && weeks < 13) {
+          group = "1_3";
+        } else if (weeks >= 13 && weeks < 25) {
+          group = "3_6";
+        } else if (weeks >= 25) {
+          group = "more_6";
+        }
+        if (filters.projectLength !== group) return false;
+      }
+      
+      if (filters.hoursPerWeek) {
+        const minHours = job.minHoursWeek;
+        let group = "";
+        if (minHours === null || minHours === undefined) {
+          group = "not_given";
+        } else if (minHours <= 30) {
+          group = "less_30";
+        } else if (minHours > 30) {
+          group = "more_30";
+        }
+        if (filters.hoursPerWeek !== group) return false;
+      }
+      
+      if (filters.jobDuration) {
+        const isContractToHire = job.isContractToHire;
+        let group = "";
+        if (isContractToHire === true) {
+          group = "contract_to_hire";
+        } else {
+          group = "not_given";
+        }
+        if (filters.jobDuration !== group) return false;
+      }
+      
+      const colorValue = job.tier || job.tierColor;
+      if (filters.color && filters.color !== "" && colorValue !== filters.color) {
+        return false;
+      }
+      
+      return true;
+    });
+
+
 
   useEffect(() => {
     if (!kanbanView) return;
     const jobs = upworkJobsByDate.flatMap(day => day.jobs || []);
     const grouped = {};
-    statusOrder.forEach(status => {
-      grouped[status] = jobs.filter(job => job.currentStatus === status);
-    });
-    setKanbanJobs(grouped);
-  }, [upworkJobsByDate, kanbanView]);
+  statusOrder.forEach(status => {
+    grouped[status] = filteredJobs.filter(job => job.currentStatus === status);
+  });
+  setKanbanJobs(grouped);
+}, [kanbanView, filteredJobs, statusOrder]);
+
 
   // Enhanced onDragEnd with real-time updates
   const onDragEnd = async (result) => {
@@ -291,20 +374,7 @@ const UpworkDashboard = () => {
     }
   };
 
-  // Parse filters from URL
-  const getFiltersFromUrl = () => {
-    const params = queryString.parse(location.search, { arrayFormat: 'bracket' });
-    return {
-      ...defaultFilters,
-      ...params,
-      country: params.country ? (Array.isArray(params.country) ? params.country : [params.country]) : [],
-      category: params.category ? (Array.isArray(params.category) ? params.category : [params.category]) : [],
-      color: Array.isArray(params.color) ? params.color[0] : (params.color || ""),
-      type: params.type ? (Array.isArray(params.type) ? params.type : [params.type]) : [],
-    };
-  };
-
-  const [filters, setFilters] = React.useState(getFiltersFromUrl());
+ 
 
   // Keep filters in sync with URL
   useEffect(() => {
@@ -319,7 +389,7 @@ const UpworkDashboard = () => {
   }, [dispatch, upworkJobsByDate]);
 
   // Flatten jobs for filtering
-  const allJobs = upworkJobsByDate.flatMap(day => day.jobs || []);
+
   const levels = Array.from(new Set(allJobs.map(j => j.level).filter(Boolean)));
   const countries = Array.from(new Set(allJobs.map(j => j.country).filter(Boolean)));
   const categories = Array.from(new Set(allJobs.map(j => j.category).filter(Boolean)));
@@ -330,70 +400,7 @@ const UpworkDashboard = () => {
   const jobDuration = ["contract_to_hire", "not_given"];
   const jobTypes = ["Full Time", "Part Time", "Contract", "Freelance"];
 
-  // Filtering logic
-  const filteredJobs = allJobs.filter(job => {
-    if (filters.level && job.level !== filters.level) return false;
-    if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
-    if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
-    if (filters.jobType && job.jobType !== filters.jobType) return false;
-    if (filters.status && job.currentStatus !== filters.status) return false;
-    if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
-    
-    if (filters.clientHistory) {
-      const hires = job.buyerTotalJobsWithHires;
-      if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
-      if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
-      if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
-    }
-    
-    if (filters.projectLength) {
-      const weeks = job.hourlyWeeks;
-      let group = "";
-      if (weeks === null || weeks === undefined) {
-        group = "less_than_1";
-      } else if (weeks < 4) {
-        group = "less_than_1";
-      } else if (weeks >= 4 && weeks < 13) {
-        group = "1_3";
-      } else if (weeks >= 13 && weeks < 25) {
-        group = "3_6";
-      } else if (weeks >= 25) {
-        group = "more_6";
-      }
-      if (filters.projectLength !== group) return false;
-    }
-    
-    if (filters.hoursPerWeek) {
-      const minHours = job.minHoursWeek;
-      let group = "";
-      if (minHours === null || minHours === undefined) {
-        group = "not_given";
-      } else if (minHours <= 30) {
-        group = "less_30";
-      } else if (minHours > 30) {
-        group = "more_30";
-      }
-      if (filters.hoursPerWeek !== group) return false;
-    }
-    
-    if (filters.jobDuration) {
-      const isContractToHire = job.isContractToHire;
-      let group = "";
-      if (isContractToHire === true) {
-        group = "contract_to_hire";
-      } else {
-        group = "not_given";
-      }
-      if (filters.jobDuration !== group) return false;
-    }
-    
-    const colorValue = job.tier || job.tierColor;
-    if (filters.color && filters.color !== "" && colorValue !== filters.color) {
-      return false;
-    }
-    
-    return true;
-  });
+
 
   // Calculate total jobs for stats
   const totalJobs = allJobs.length;
@@ -537,6 +544,7 @@ const UpworkDashboard = () => {
                 jobTypeOptions={upworkJobTypeOptions}
                 jobTypeLabel="Job Type"
                 onFilterChange={handleFilterChange}
+                isPipelineView={kanbanView}
               />
             </div>
           </aside>

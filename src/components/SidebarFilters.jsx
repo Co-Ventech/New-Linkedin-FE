@@ -1,5 +1,5 @@
 import React from "react";
-const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange, statusOptions ,jobTypeOptions, jobTypeLabel}) => (
+const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countries, levels, domains = [], filters, onFilterChange, statusOptions ,jobTypeOptions, jobTypeLabel,isPipelineView = false}) => (
   <div className="bg-white rounded-lg shadow p-4 space-y-6 scrollbar-hide top-2">
    {jobTypeOptions && (
   <div>
@@ -54,7 +54,7 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
     </div> */}
     
     {/* Status (engaged/not_engaged) */}
-    {statusOptions && (
+    {statusOptions && !isPipelineView && (
   <div>
     <h3 className="font-semibold mb-2">Status</h3>
     <div className="space-y-1">
