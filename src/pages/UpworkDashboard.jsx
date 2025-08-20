@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useMemo} from "react";
 import SidebarFilters from "../components/SidebarFilters";
 import UpworkJobCard from "../components/UpworkJobCard";
 import Header from "../components/Header";
@@ -9,7 +9,7 @@ import { fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
 import queryString from "query-string";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { updateUpworkJobStatusThunk, upworkfetchJobByIdThunk } from "../slices/jobsSlice";
+import { updateUpworkJobStatusThunk, upworkfetchJobByIdThunk, updateUpworkJobStatusNewThunk } from "../slices/jobsSlice";
 import { logoutUser } from "../api/authApi";
 import { setRange, resetJobsByDate } from "../slices/jobsSlice";
 import { Calendar, Grid3X3, List, Kanban, Users, AlertCircle, Briefcase, Building2, Filter, Download, Search, ChevronDown, Eye, BarChart3, X } from 'lucide-react';
@@ -161,6 +161,7 @@ const UpworkDashboard = () => {
   const allJobs = upworkJobsByDate.flatMap(day => day.jobs || []);
 
 
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -180,75 +181,56 @@ const UpworkDashboard = () => {
   const [filters, setFilters] = React.useState(getFiltersFromUrl());
 
   // Filtering logic
-  const filteredJobs = allJobs.filter(job => {
-    // Handle the new API response structure
-    if (filters.level && job.level !== filters.level) return false;
-    
-    if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
-    
-    if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
-    
-    if (filters.jobType && job.jobType !== filters.jobType) return false;
-    
-    if (filters.status && job.currentStatus !== filters.status) return false;
-    
-    if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
+  const filteredJobs = useMemo(() => {
+    return allJobs.filter(job => {
+      // keep your existing filter body unchanged
+      if (filters.level && job.level !== filters.level) return false;
+      if (filters.country.length > 0 && !filters.country.includes(job.country)) return false;
+      if (filters.category.length > 0 && !filters.category.includes(job.category)) return false;
+      if (filters.jobType && job.jobType !== filters.jobType) return false;
+      if (filters.status && job.currentStatus !== filters.status) return false;
+      if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
   
-    if (filters.clientHistory) {
-      const hires = job.buyerTotalJobsWithHires;
-      if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
-      if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
-      if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
-    }
-  
-    if (filters.projectLength) {
-      const weeks = job.hourlyWeeks;
-      let group = "";
-      if (weeks === null || weeks === undefined) {
-        group = "less_than_1";
-      } else if (weeks < 4) {
-        group = "less_than_1";
-      } else if (weeks >= 4 && weeks < 13) {
-        group = "1_3";
-      } else if (weeks >= 13 && weeks < 25) {
-        group = "3_6";
-      } else if (weeks >= 25) {
-        group = "more_6";
+      if (filters.clientHistory) {
+        const hires = job.buyerTotalJobsWithHires;
+        if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
+        if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
+        if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
       }
-      if (filters.projectLength !== group) return false;
-    }
   
-    if (filters.hoursPerWeek) {
-      const minHours = job.minHoursWeek;
-      let group = "";
-      if (minHours === null || minHours === undefined) {
-        group = "not_given";
-      } else if (minHours <= 30) {
-        group = "less_30";
-      } else if (minHours > 30) {
-        group = "more_30";
+      if (filters.projectLength) {
+        const weeks = job.hourlyWeeks;
+        let group = "";
+        if (weeks === null || weeks === undefined) group = "less_than_1";
+        else if (weeks < 4) group = "less_than_1";
+        else if (weeks >= 4 && weeks < 13) group = "1_3";
+        else if (weeks >= 13 && weeks < 25) group = "3_6";
+        else if (weeks >= 25) group = "more_6";
+        if (filters.projectLength !== group) return false;
       }
-      if (filters.hoursPerWeek !== group) return false;
-    }
   
-    if (filters.jobDuration) {
-      const isContractToHire = job.isContractToHire;
-      let group = "";
-      if (isContractToHire === true) {
-        group = "contract_to_hire";
-      } else {
-        group = "not_given";
+      if (filters.hoursPerWeek) {
+        const minHours = job.minHoursWeek;
+        let group = "";
+        if (minHours === null || minHours === undefined) group = "not_given";
+        else if (minHours <= 30) group = "less_30";
+        else if (minHours > 30) group = "more_30";
+        if (filters.hoursPerWeek !== group) return false;
       }
-      if (filters.jobDuration !== group) return false;
-    }
   
-    const colorValue = job.tier || job.tierColor;
-    if (filters.color && filters.color !== "" && colorValue !== filters.color) {
-      return false;
-    }
+      if (filters.jobDuration) {
+        const isContractToHire = job.isContractToHire;
+        let group = isContractToHire === true ? "contract_to_hire" : "not_given";
+        if (filters.jobDuration !== group) return false;
+      }
   
-    return true;
-  });
+      const colorValue = job.tier || job.tierColor;
+      if (filters.color && filters.color !== "" && colorValue !== filters.color) return false;
+  
+      return true;
+    });
+  }, [allJobs, filters]);
+
 
 
 
@@ -259,115 +241,124 @@ const UpworkDashboard = () => {
       grouped[status] = filteredJobs.filter(job => job.currentStatus === status);
     });
     setKanbanJobs(grouped);
-  }, [kanbanView, filteredJobs, statusOrder]);
+  }, [kanbanView, filteredJobs]); 
 
 
-const onDragEnd = async (result) => {
-  const { source, destination } = result;
-  if (!destination) return;
+  const onDragEnd = async (result) => {
 
-  if (
-    source.droppableId === destination.droppableId &&
-    source.index === destination.index
-  ) {
-    return;
-  }
+    const { source, destination } = result;
+    if (!destination) return;
 
-  const sourceStatus = source.droppableId;
-  const destStatus = destination.droppableId;
-  const job = kanbanJobs[sourceStatus][source.index];
-  if (!job) return;
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
 
-  const updateId = `${job.jobId || job._id || job.id}-${Date.now()}`;
+    const sourceStatus = source.droppableId;
+    const destStatus = destination.droppableId;
+    const job = kanbanJobs[sourceStatus][source.index];
+    if (!job) return;
 
-  // Clear any previous errors for this job
-  setKanbanError(null);
+    // const updateId = `${job.jobId || job._id || job.id}-${Date.now()}`;
+    const companyJobId = job._id; // company job id required by API
+    if (!companyJobId) {
+      setKanbanError('This job has no valid _id. Cannot update status.');
+      return;
+    }
 
-  // Store original state for potential reversion
-  const originalKanbanJobs = { ...kanbanJobs };
-  const originalJobStatus = job.currentStatus;
+    const updateId = `${companyJobId}-${Date.now()}`;
 
-  // IMMEDIATE UI UPDATE (Optimistic)
-  const newKanbanJobs = { ...kanbanJobs };
-  newKanbanJobs[sourceStatus] = Array.from(newKanbanJobs[sourceStatus]);
-  newKanbanJobs[sourceStatus].splice(source.index, 1);
-  newKanbanJobs[destStatus] = Array.from(newKanbanJobs[destStatus]);
+    // Clear any previous errors for this job
+    setKanbanError(null);
 
-  const updatedJob = {
-    ...job,
-    currentStatus: destStatus,
-    isUpdating: true,
-    updateId: updateId
+    // Store original state for potential reversion
+    const originalKanbanJobs = { ...kanbanJobs };
+    const originalJobStatus = job.currentStatus;
+
+    // IMMEDIATE UI UPDATE (Optimistic)
+    const newKanbanJobs = { ...kanbanJobs };
+    newKanbanJobs[sourceStatus] = Array.from(newKanbanJobs[sourceStatus]);
+    newKanbanJobs[sourceStatus].splice(source.index, 1);
+    newKanbanJobs[destStatus] = Array.from(newKanbanJobs[destStatus]);
+
+    const updatedJob = {
+      ...job,
+      currentStatus: destStatus,
+      isUpdating: true,
+      updateId: updateId
+    };
+    newKanbanJobs[destStatus].splice(destination.index, 0, updatedJob);
+
+    // Update UI immediately
+    setKanbanJobs(newKanbanJobs);
+    setOptimisticUpdates(prev => new Set(prev).add(updateId));
+
+    try {
+      await dispatch(updateUpworkJobStatusNewThunk({
+        jobId: companyJobId,
+        status: destStatus,
+      })).unwrap();
+
+      // Success - remove updating indicator
+      setKanbanJobs(prevJobs => {
+        const updatedJobs = { ...prevJobs };
+        Object.keys(updatedJobs).forEach(status => {
+          updatedJobs[status] = updatedJobs[status].map(j =>
+            j.updateId === updateId
+              ? { ...j, isUpdating: false, updateId: undefined }
+              : j
+          );
+        });
+        return updatedJobs;
+      });
+
+      setOptimisticUpdates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(updateId);
+        return newSet;
+      });
+
+      // Refetch jobs to update Redux and Kanban columns
+      await dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d' }));
+
+    } catch (err) {
+      console.error('Failed to update job status:', err);
+
+      // REVERT UI on failure
+      setKanbanJobs(originalKanbanJobs);
+
+      // Show error with job details
+      setKanbanError(`Failed to move "${job.title}" to ${statusLabels[destStatus]}. Please try again.`);
+
+      // Track failed update
+      setFailedUpdates(prev => new Map(prev).set(job._id, {
+        jobTitle: job.title,
+        fromStatus: originalJobStatus,
+        toStatus: destStatus,
+        timestamp: Date.now()
+      }));
+
+
+      // Remove from optimistic updates
+      setOptimisticUpdates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(updateId);
+        return newSet;
+      });
+
+      // Auto-clear error after 5 seconds
+      setTimeout(() => {
+        setKanbanError(null);
+        setFailedUpdates(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(job.jobId || job._id || job.id);
+          return newMap;
+        });
+      }, 5000);
+    }
   };
-  newKanbanJobs[destStatus].splice(destination.index, 0, updatedJob);
-
-  // Update UI immediately
-  setKanbanJobs(newKanbanJobs);
-  setOptimisticUpdates(prev => new Set(prev).add(updateId));
-
-  try {
-    await dispatch(updateUpworkJobStatusNewThunk({
-      jobId: job.jobId || job._id || job.id,
-      status: destStatus,
-    })).unwrap();
-
-    // Success - remove updating indicator
-    setKanbanJobs(prevJobs => {
-      const updatedJobs = { ...prevJobs };
-      Object.keys(updatedJobs).forEach(status => {
-        updatedJobs[status] = updatedJobs[status].map(j =>
-          j.updateId === updateId
-            ? { ...j, isUpdating: false, updateId: undefined }
-            : j
-        );
-      });
-      return updatedJobs;
-    });
-
-    setOptimisticUpdates(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(updateId);
-      return newSet;
-    });
-
-    // Refetch jobs to update Redux and Kanban columns
-    await dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d' }));
-
-  } catch (err) {
-    console.error('Failed to update job status:', err);
-
-    // REVERT UI on failure
-    setKanbanJobs(originalKanbanJobs);
-
-    // Show error with job details
-    setKanbanError(`Failed to move "${job.title}" to ${statusLabels[destStatus]}. Please try again.`);
-
-    // Track failed update
-    setFailedUpdates(prev => new Map(prev).set(job.jobId || job._id || job.id, {
-      jobTitle: job.title,
-      fromStatus: originalJobStatus,
-      toStatus: destStatus,
-      timestamp: Date.now()
-    }));
-
-    // Remove from optimistic updates
-    setOptimisticUpdates(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(updateId);
-      return newSet;
-    });
-
-    // Auto-clear error after 5 seconds
-    setTimeout(() => {
-      setKanbanError(null);
-      setFailedUpdates(prev => {
-        const newMap = new Map(prev);
-        newMap.delete(job.jobId || job._id || job.id);
-        return newMap;
-      });
-    }, 5000);
-  }
-};
 
 
 
@@ -417,14 +408,14 @@ const onDragEnd = async (result) => {
     dispatch(resetJobsByDate()); // Reset the Redux state
     dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1, limit: 20 }));
   }, [dateRange, dispatch]);
-  
+
   // Update the useEffect for pagination
   useEffect(() => {
     if (page > 1 && hasMoreLocal) {
       dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page, limit: 20 }));
     }
   }, [page, dateRange, dispatch, hasMoreLocal]);
-  
+
   // Update the lastJobRef callback
   const lastJobRef = React.useCallback(node => {
     if (loading) return;
@@ -436,7 +427,7 @@ const onDragEnd = async (result) => {
     });
     if (node) observer.current.observe(node);
   }, [loading, hasMoreLocal]);
-  
+
   // Update the handleDateRangeChange function
   const handleDateRangeChange = (e) => {
     const value = e.target.value;
@@ -478,41 +469,41 @@ const onDragEnd = async (result) => {
 
   };
 
-const retryFailedUpdate = async (jobId) => {
-  const failedUpdate = failedUpdates.get(jobId);
-  if (!failedUpdate) return;
+  const retryFailedUpdate = async (jobId) => {
+    const failedUpdate = failedUpdates.get(jobId);
+    if (!failedUpdate) return;
 
-  const job = Object.values(kanbanJobs).flat().find(j => (j.jobId || j.id) === jobId);
-  if (!job) return;
+    const job = Object.values(kanbanJobs).flat().find(j => j._id === jobId);
+    if (!job) return;
 
-  // Remove from failed updates
-  setFailedUpdates(prev => {
-    const newMap = new Map(prev);
-    newMap.delete(jobId);
-    return newMap;
-  });
+    // Remove from failed updates
+    setFailedUpdates(prev => {
+      const newMap = new Map(prev);
+      newMap.delete(jobId);
+      return newMap;
+    });
 
-  // Simulate drag and drop to retry
-  const fakeResult = {
-    source: { droppableId: failedUpdate.fromStatus, index: 0 },
-    destination: { droppableId: failedUpdate.toStatus, index: 0 }
+    // Simulate drag and drop to retry
+    const fakeResult = {
+      source: { droppableId: failedUpdate.fromStatus, index: 0 },
+      destination: { droppableId: failedUpdate.toStatus, index: 0 }
+    };
+
+    // Find the job in current kanban state and retry
+    const currentStatus = job.currentStatus;
+    const currentIndex = kanbanJobs[currentStatus].findIndex(j => j._id === jobId);
+
+    if (currentIndex !== -1) {
+      fakeResult.source = { droppableId: currentStatus, index: currentIndex };
+      await onDragEnd(fakeResult);
+    }
   };
-
-  // Find the job in current kanban state and retry
-  const currentStatus = job.currentStatus;
-  const currentIndex = kanbanJobs[currentStatus].findIndex(j => (j.jobId || j.id) === jobId);
-
-  if (currentIndex !== -1) {
-    fakeResult.source = { droppableId: currentStatus, index: currentIndex };
-    await onDragEnd(fakeResult);
-  }
-};
 
   useEffect(() => {
     // Check if we have more jobs based on the current data
     const totalJobs = upworkJobsByDate.flatMap(day => day.jobs || []).length;
     const expectedJobs = page * 20; // Assuming limit is 20
-    
+
     // If we got fewer jobs than expected, we've reached the end
     if (totalJobs < expectedJobs && page > 1) {
       setHasMoreLocal(false);
@@ -634,8 +625,8 @@ const retryFailedUpdate = async (jobId) => {
                   <div className="flex bg-gray-100 rounded-lg p-1">
                     <button
                       className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${!kanbanView
-                          ? "bg-white text-green-600 shadow-sm"
-                          : "text-gray-600 hover:text-gray-900"
+                        ? "bg-white text-green-600 shadow-sm"
+                        : "text-gray-600 hover:text-gray-900"
                         }`}
                       onClick={() => setKanbanView(false)}
                     >
@@ -644,8 +635,8 @@ const retryFailedUpdate = async (jobId) => {
                     </button>
                     <button
                       className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${kanbanView
-                          ? "bg-white text-green-600 shadow-sm"
-                          : "text-gray-600 hover:text-gray-900"
+                        ? "bg-white text-green-600 shadow-sm"
+                        : "text-gray-600 hover:text-gray-900"
                         }`}
                       onClick={() => setKanbanView(true)}
                     >
@@ -658,34 +649,8 @@ const retryFailedUpdate = async (jobId) => {
 
               {/* Kanban User Selection */}
               {kanbanView && (
-                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-green-600" />
-                      <label className="font-medium text-green-900">
-                        Select User for Status Changes:
-                      </label>
-                    </div>
-                    <select
-                      className="border border-green-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      value={kanbanUser}
-                      onChange={e => {
-                        setKanbanUser(e.target.value);
-                        setKanbanUserError("");
-                      }}
-                    >
-                      <option value="">-- Select User --</option>
-                      {USER_LIST.map(user => (
-                        <option key={user} value={user}>{user}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {kanbanUserError && (
-                    <div className="mt-2 flex items-center gap-2 text-red-600">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-sm">{kanbanUserError}</span>
-                    </div>
-                  )}
+                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200 text-sm text-green-800">
+                  Drag and drop cards between columns to update status.
                 </div>
               )}
             </div>
@@ -785,8 +750,8 @@ const retryFailedUpdate = async (jobId) => {
                                   ) : (
                                     jobs.map((job, idx) => (
                                       <Draggable
-                                        key={job.jobId || job.id}
-                                        draggableId={(job.jobId || job.id).toString()}
+                                        key={job._id}
+                                        draggableId={String(job._id)}
                                         index={idx}
                                       >
                                         {(provided, snapshot) => (
@@ -861,12 +826,12 @@ const retryFailedUpdate = async (jobId) => {
             ) : (
               // Enhanced List/Grid View
               <div className="space-y-6">
-                {loading && upworkJobsByDate.length === 0 ?  (
+                {loading && upworkJobsByDate.length === 0 ? (
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
                     <p className="text-gray-600">Loading jobs...</p>
                   </div>
-                  
+
 
                 ) : error ? (
                   <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6">
@@ -885,7 +850,7 @@ const retryFailedUpdate = async (jobId) => {
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
                       {filteredJobs.map(job => (
-                        <UpworkJobCard key={job.jobId || job.id} job={job} />
+                        <UpworkJobCard key={job._id || job.jobId || job.id} job={job} />
                       ))}
                     </div>
 
