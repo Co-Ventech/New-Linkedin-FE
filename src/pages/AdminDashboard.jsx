@@ -32,7 +32,7 @@ import {
   Upload
 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_REMOTE_HOST || 'http://localhost:3000';
+const API_BASE = import.meta.env.VITE_REMOTE_HOST ;
 
 const SuperAdminDashboard = () => {
   const user = useSelector(selectUser);
@@ -901,14 +901,14 @@ const SuperAdminDashboard = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
-        <button
+        {/* <button
           onClick={loadInitialData}
           disabled={loading}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           <span>{loading ? 'Refreshing...' : 'Refresh Data'}</span>
-        </button>
+        </button> */}
       </div>
 
       {/* Analytics Cards */}

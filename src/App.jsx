@@ -233,7 +233,7 @@ import { selectUser, isSuperAdmin, isCompanyAdmin, isCompanyUser } from "./slice
 import ScrollToTop from "./components/ScrollToTop";
 import AdminDashboard from './pages/AdminDashboard';
 import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
-import UserDashboard from './pages/UserDashboard';
+// import UserDashboard from './pages/UserDashboard';
 
 // Protected Route component with role-based access
 function ProtectedRoute({ children, allowedRoles = [] }) {
@@ -380,14 +380,14 @@ function App() {
         />
 
         {/* User Dashboard - accessible only by company users */}
-        <Route
+        {/* <Route
           path="/my-dashboard"
           element={
             <ProtectedRoute allowedRoles={['company_user']}>
               <UserDashboard />
             </ProtectedRoute>
           }
-        />
+        /> */}
         
         {/* User Management - accessible by company admins and super admins */}
         {/* <Route

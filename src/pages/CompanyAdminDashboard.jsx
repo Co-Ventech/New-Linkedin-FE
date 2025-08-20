@@ -28,7 +28,7 @@ import {
   CreditCard
 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_REMOTE_HOST || 'http://localhost:3000';
+const API_BASE = import.meta.env.VITE_REMOTE_HOST ;
 
 const CompanyAdminDashboard = () => {
   const dispatch = useDispatch();

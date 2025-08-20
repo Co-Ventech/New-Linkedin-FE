@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST || 'http://localhost:3000';
+const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
 const API_BASE = `${REMOTE_HOST}/api`;
 
 // Helper function to get auth headers
