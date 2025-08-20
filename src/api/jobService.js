@@ -36,30 +36,168 @@ export async function saveJobsToBackend(jobs) {
 
 export async function fetchJobsByDate(range = '1d', page = 1, limit = 10) {
   try {
-    const today = new Date();
-    const endDate = today.toISOString().slice(0, 10);
-
-    let url = `${REMOTE_HOST}/api/linkedin/jobs-by-date?page=${page}&limit=${limit}`;
-
-    if (range === '3d' || range === '7d') {
-      const days = range === '3d' ? 3 : 7;
-      const start = new Date(today);
-      start.setDate(today.getDate() - (days - 1));
-      const startDate = start.toISOString().slice(0, 10);
-      url += `&start=${startDate}&end=${endDate}`;
+    // Use the new API endpoint for company users
+    const url = `${REMOTE_HOST}/api/company-jobs/user-jobs`;
+    
+    const res = await axios.get(url, { 
+      params: { page, limit },
+      headers: getAuthHeaders() 
+    });
+    
+    const data = res.data || {};
+    
+    // Transform the response to match the expected format
+    // The new API returns { jobs: [...] } but we need [{ date, jobs: [...] }]
+    if (data.jobs && Array.isArray(data.jobs)) {
+      // Group jobs by date (using ts_publish or createdAt)
+      const jobsByDate = {};
+      
+      data.jobs.forEach(job => {
+        // Use ts_publish if available, otherwise use createdAt or current date
+        const jobDate = job.ts_publish || job.createdAt || job.distributedAt || new Date().toISOString();
+        const dateKey = jobDate.slice(0, 10); // YYYY-MM-DD format
+        
+        if (!jobsByDate[dateKey]) {
+          jobsByDate[dateKey] = [];
+        }
+        jobsByDate[dateKey].push(job);
+      });
+      
+      // Convert to array format expected by the UI
+      const result = Object.entries(jobsByDate).map(([date, jobs]) => ({
+        date,
+        jobs
+      }));
+      
+      // Sort by date (newest first)
+      result.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      return result;
     }
-    // range === '1d' (Last Batch): no start/end params
-
-    const res = await axios.get(url, { headers: getAuthHeaders() });
-    const data = res.data || [];
-    // If API returns a single object {date, jobs}, wrap it as an array to match UI expectations
-    if (data && !Array.isArray(data) && data.date && data.jobs) {
-      return [data];
-    }
-    return data;
+    
+    return [];
   } catch (err) {
     throw new Error(err.response?.data?.message || err.message || "Failed to fetch jobs by date.");
   }
+}
+
+// ===== Admin / Company / User management & analytics APIs =====
+
+// Super admin: trigger scraping
+export async function scrapeJobs({ keywords, platform, start, end }) {
+  const res = await axios.post(
+    `${API_BASE}/jobs/scrape`,
+    { keywords, platform, start, end },
+    { headers: getAuthHeaders() }
+  );
+  return res.data;
+}
+
+// Super admin: list scrape batches
+export async function fetchJobBatches() {
+  const res = await axios.get(`${API_BASE}/jobs/batches`, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+// Super admin: distribute jobs to companies
+export async function distributeJobs({ batchId, companyIds, strategy }) {
+  const res = await axios.post(
+    `${API_BASE}/jobs/distribute`,
+    { batchId, companyIds, strategy },
+    { headers: getAuthHeaders() }
+  );
+  return res.data;
+}
+
+// Companies CRUD
+export async function fetchCompanies() {
+  const res = await axios.get(`${API_BASE}/companies`, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function createCompany(payload) {
+  const res = await axios.post(`${API_BASE}/companies`, payload, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function updateCompany(companyId, payload) {
+  const res = await axios.put(`${API_BASE}/companies/${companyId}`, payload, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function deleteCompany(companyId) {
+  const res = await axios.delete(`${API_BASE}/companies/${companyId}`, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+// Analytics
+export async function fetchGlobalAnalytics() {
+  const res = await axios.get(`${API_BASE}/analytics/global`, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function fetchCompanyAnalytics(companyId) {
+  const res = await axios.get(`${API_BASE}/analytics/company/${companyId}` , { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function fetchUserAnalytics(userId) {
+  const res = await axios.get(`${API_BASE}/analytics/user/${userId}` , { headers: getAuthHeaders() });
+  return res.data;
+}
+
+// Company admin: jobs and users
+export async function fetchCompanyJobs(companyId, { page = 1, limit = 20 } = {}) {
+  const res = await axios.get(`${API_BASE}/jobs/company/${companyId}`, {
+    params: { page, limit },
+    headers: getAuthHeaders(),
+  });
+  return res.data;
+}
+
+export async function fetchCompanyUsers(companyId) {
+  const res = await axios.get(`${API_BASE}/users/company/${companyId}`, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function assignJobs({ jobIds, userId }) {
+  const res = await axios.post(`${API_BASE}/jobs/assign`, { jobIds, userId }, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function bulkUpdateJobs(payload) {
+  const res = await axios.put(`${API_BASE}/jobs/bulk-update`, payload, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+// User: assigned jobs and profile
+export async function fetchUserJobs(userId, { page = 1, limit = 20 } = {}) {
+  const res = await axios.get(`${API_BASE}/jobs/user/${userId}`, {
+    params: { page, limit },
+    headers: getAuthHeaders(),
+  });
+  return res.data;
+}
+
+export async function updateUserProfileApi(userId, payload) {
+  const res = await axios.put(`${API_BASE}/users/${userId}`, payload, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+// Generic job interactions
+export async function updateJobStatusGeneric(jobId, status) {
+  const res = await axios.put(`${API_BASE}/jobs/${jobId}/status`, { status }, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function addJobCommentGeneric(jobId, { comment }) {
+  const res = await axios.post(`${API_BASE}/jobs/${jobId}/comments`, { comment }, { headers: getAuthHeaders() });
+  return res.data;
+}
+
+export async function addJobProposalGeneric(jobId, { proposal }) {
+  const res = await axios.post(`${API_BASE}/jobs/${jobId}/proposal`, { proposal }, { headers: getAuthHeaders() });
+  return res.data;
 }
  export async function fetchJobById(jobId) {
   try {

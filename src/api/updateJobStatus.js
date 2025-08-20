@@ -492,3 +492,62 @@ export async function fetchUpworkStatusHistory({ date, start, end }) {
 //     );
 //   }
 // }
+
+export async function updateJobStatusNew(jobId, status) {
+  try {
+    const url = `${API_BASE}/company-jobs/${jobId}/status`;
+    const payload = { status };
+    console.log("PUT URL (status):", url);
+    console.log("PUT DATA (status):", payload);
+    const res = await axios.put(
+      url,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return res.data;
+  } catch (err) {
+    console.error("API updateJobStatusNew error:", err, err.response?.data);
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to update job status."
+    );
+  }
+}
+
+// Update the function to match the actual API requirements
+export async function updateUpworkJobStatusNew(jobId, status) {
+  try {
+    const url = `${API_BASE}/company-jobs/${jobId}/status`;
+    // Get the current user from localStorage or Redux state
+    const currentUser = localStorage.getItem("currentUser") || "current_user"; // You might need to adjust this based on how you store user info
+    
+    const payload = { 
+      status,
+      username: currentUser 
+    };
+    
+    console.log("PUT URL (upwork status):", url);
+    console.log("PUT DATA (upwork status):", payload);
+    
+    const res = await axios.put(
+      url,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return res.data;
+  } catch (err) {
+    console.error("API updateUpworkJobStatusNew error:", err, err.response?.data);
+    throw new Error(
+      err.response?.data?.message || err.message || "Failed to update Upwork job status."
+    );
+  }
+}

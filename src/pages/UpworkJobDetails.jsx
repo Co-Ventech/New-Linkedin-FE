@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {useSelector, useDispatch } from "react-redux";
 
 import { fetchUpworkJobsByDateThunk, updateUpworkJobStatusThunk , updateUpworkAeCommentThunk, addUpworkJobCommentThunk, upworkfetchJobByIdThunk, updateUpworkAeScoreThunk, 
-  updateUpworkAePitchedThunk , updateUpworkEstimatedBudgetThunk , generateUpworkProposalThunk , updateUpworkProposalThunk, setUpworkProposalLoading } from "../slices/jobsSlice";
+  updateUpworkAePitchedThunk , updateUpworkEstimatedBudgetThunk , generateUpworkProposalThunk , updateUpworkProposalThunk, setUpworkProposalLoading,updateJobStatusNewThunk, updateUpworkJobStatusNewThunk } from "../slices/jobsSlice";
 import axios from "axios";
 
 
@@ -14,10 +14,12 @@ import axios from "axios";
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
 const PORT = import.meta.env.VITE_PORT;
 
-const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 const STATUS_OPTIONS = [
   'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
 ];
+
+const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
+
 const UPWORK_SERVICE_CATEGORIES = [
   "AI/ML",
   "QA",
@@ -41,6 +43,7 @@ const badgeClass = {
   jobType: 'bg-blue-100 text-blue-800 border-blue-300',
   occupation: 'bg-indigo-100 text-indigo-800 border-indigo-300',
 };
+
 
 const getKpiBadge = (score) => {
   if (typeof score !== 'number') score = parseFloat(score);
@@ -75,16 +78,19 @@ const dispatch = useDispatch();
 const jobFromRedux = useSelector(state =>
   state.jobs.upworkJobsByDate
     .flatMap(day => day.jobs || [])
-    .find(j => String(j.jobId) === String(id) || String(j.id) === String(id))
+    .find(j => String(j._id) === String(id) || String(j.jobId) === String(id) || String(j.id) === String(id))
 );
+
+const currentUser = useSelector((state) => state.user.user);
+
   // const dispatch = useDispatch();
   // const job = location.state?.job;
 
   // Local state for AE Remark, status, comments
   const [aeRemarkInput, setAeRemarkInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [statusSaving, setStatusSaving] = useState(false);
   const [savingAeRemark, setSavingAeRemark] = useState(false);
-  const [selectedUser, setSelectedUser] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("not_engaged");
   const [commentUser, setCommentUser] = useState("");
   const [comment, setComment] = useState("");
@@ -102,6 +108,7 @@ const [aePitchedError, setAePitchedError] = useState("");
 const [estimatedBudgetInput, setEstimatedBudgetInput] = useState(localJob?.estimated_budget || "");
 const [budgetSaving, setBudgetSaving] = useState(false);
 const [budgetError, setBudgetError] = useState("");
+const [user , setUser ]= useState("");
 const jobId = localJob?.jobId || localJob?.id;
 const upworkProposalState = useSelector(state => {
   const proposals = state.jobs.upworkProposals || {};
@@ -239,22 +246,50 @@ const handleSaveAeRemark = async (e) => {
     setSavingAeRemark(false);
   }
 };
-  const handleSaveStatus = async (e) => {
-    e.preventDefault();
-    if (!selectedUser || !selectedStatus) return;
-    setSaving(true);
-    const jobId = localJob.jobId || localJob.id;
-    try {
-      console.log('Dispatching updateUpworkJobStatusThunk', { jobId, status: selectedStatus, username: selectedUser });
-      await dispatch(updateUpworkJobStatusThunk({jobId, status: selectedStatus, username: selectedUser })).unwrap();
-      console.log('Dispatched successfully');
-      await dispatch(upworkfetchJobByIdThunk(jobId));
-    } catch (err) {
-      alert("Failed to update status.");
-    } finally {
-      setSaving(false);
+const handleSaveStatus = async (e) => {
+  e.preventDefault();
+  if (!selectedStatus) return;
+  
+  setSaving(true);
+  // Use the _id field instead of jobId
+  const jobId = localJob._id;
+  
+  if (!jobId) {
+    alert("Error: Job ID not found. Please refresh the page.");
+    setSaving(false);
+    return;
+  }
+  
+  try {
+    console.log('Dispatching updateUpworkJobStatusNewThunk', { jobId, status: selectedStatus });
+    const result = await dispatch(updateUpworkJobStatusNewThunk({ jobId, status: selectedStatus })).unwrap();
+    console.log('Status updated successfully:', result);
+    
+    // Update local job state with the response data
+    if (result.job) {
+      setLocalJob(prev => ({
+        ...prev,
+        currentStatus: result.job.currentStatus,
+        statusHistory: result.job.statusHistory,
+        comments: result.job.comments,
+        proposal: result.job.proposal
+      }));
+    } else {
+      setLocalJob(prev => ({
+        ...prev,
+        currentStatus: selectedStatus
+      }));
     }
-  };
+    
+    // Show success message
+    alert("Status updated successfully!");
+  } catch (err) {
+    console.error('Status update failed:', err);
+    alert("Failed to update status: " + err.message);
+  } finally {
+    setSaving(false);
+  }
+};
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!commentUser || !comment.trim()) return;
@@ -667,63 +702,61 @@ const handleSaveAeRemark = async (e) => {
         </section>
          {/* Status Management Section */}
          <section className="mb-6 border-b pb-4">
-          <h2 className="text-lg font-bold mb-3 text-gray-800">Add Status</h2>
-          <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
-            <select
-              className="border rounded px-2 py-1"
-              value={selectedUser}
-              onChange={e => setSelectedUser(e.target.value)}
-            >
-              <option value="">Select User</option>
-              {USER_LIST.map(user => (
-                <option key={user} value={user}>{user}</option>
-              ))}
-            </select>
-            <select
-              className="border rounded px-2 py-1"
-              value={selectedStatus}
-              onChange={e => setSelectedStatus(e.target.value)}
-            >
-              {STATUS_OPTIONS.map(status => (
-                <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="px-4 py-1 bg-blue-600 text-white rounded"
-              // disabled={saving || !selectedUser || !selectedStatus, }
-            >
-              { "Save"}
-            </button>
-          </form>
-          {/* Show current status */}
-          <div className="mb-2">
-            <span className="font-semibold">Current Status:</span>{" "}
-            <span className="px-2 py-1 rounded bg-gray-100">
-              {(localJob.currentStatus || "-").replace(/_/g, " ")}
+  <h2 className="text-lg font-bold mb-3 text-gray-800">Update Status</h2>
+  <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
+    <select
+      className="border rounded px-2 py-1"
+      value={selectedStatus}
+      onChange={e => setSelectedStatus(e.target.value)}
+    >
+      {STATUS_OPTIONS.map(status => (
+        <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
+      ))}
+    </select>
+    <button
+      type="submit"
+      className="px-4 py-1 bg-blue-600 text-white rounded"
+      disabled={statusSaving}
+    >
+      {statusSaving ? "Updating..." : "Update Status"}
+      
+    </button>
+  </form>
+  
+  {/* Show current status */}
+  <div className="mb-2">
+    <span className="font-semibold">Current Status:</span>{" "}
+    <span className="px-2 py-1 rounded bg-gray-100">
+      {(localJob.currentStatus || "-").replace(/_/g, " ")}
+    </span>
+  </div>
+  
+  {/* Show who updated the status */}
+  <div className="text-sm text-gray-500">
+    Status updated by: {currentUser?.username || 'Current User'}
+  </div>
+  
+  {/* Show status history if available */}
+  {localJob.statusHistory && localJob.statusHistory.length > 0 && (
+    <div className="mt-3">
+      <span className="font-semibold text-sm">Status History:</span>
+      <ul className="mt-1 space-y-1">
+        {localJob.statusHistory.map((entry, idx) => (
+          <li key={idx} className="text-xs text-gray-600">
+            <span className="font-medium">{entry.username}</span> set status to{" "}
+            <span className="px-1 py-0.5 rounded bg-gray-200 text-xs">
+              {entry.status.replace(/_/g, " ")}
+            </span>{" "}
+            <span className="text-gray-500">
+              ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
             </span>
-          </div>
-          <div>
-            <span className="font-semibold">Status History:</span>
-            <ul className="mt-1 space-y-1">
-              {Array.isArray(localJob.statusHistory) && localJob.statusHistory.length === 0 ? (
-                <li className="text-gray-400 text-sm">No status history.</li>
-              ) : (
-                Array.isArray(localJob.statusHistory) && localJob.statusHistory.map((entry, idx) => (
-                  <li key={idx} className="text-sm">
-                    <span className="font-semibold">{entry.username}</span> set status to{" "}
-                    <span className="px-2 py-0.5 rounded bg-gray-200">
-                      {(entry.status || "-").replace(/_/g, " ")}
-                    </span>{" "}
-                    <span className="text-xs text-gray-500">
-                      ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
-                    </span>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        </section>
+            {entry.notes && <span className="text-gray-500 ml-2">- {entry.notes}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</section>
 
         <section className="mb-6 border-b pb-4">
   <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>

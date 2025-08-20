@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { saveJobsToBackend } from "../api/jobService";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectUser, isSuperAdmin, isCompanyAdmin, isCompanyUser } from "../slices/userSlice";
 
 // import dotenv from 'dotenv';
 // dotenv.config();
@@ -20,6 +22,10 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
   const [lastFetchTime, setLastFetchTime] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Get user from Redux store
+  const currentUser = useSelector(selectUser) || user;
+  
   // Auto-hide message after 2 seconds
   // useEffect(() => {
   //   if (message) {
@@ -76,216 +82,6 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
       alert("Download failed: " + err.message);
     }
   };
-  // Add this button somewhere in your Header's JSX for testing:
-
-  // Updated Fetch Jobs logic (unchanged)
-  // const handleFetchJobs = async () => {
-  //   setLoading("fetch");
-  //   setMessage("");
-  //   const now = Date.now();
-  //   localStorage.setItem("lastFetchJobsTime_linkedin", now.toString());
-  //   setLastFetchTime(now);
-  //   updateCooldown(now);
-  //   try {
-  //     const fetchRes = await axios.get(`${REMOTE_HOST}/api/apify`, {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-  //       },
-  //     });
-  //     let jobs = fetchRes.data.jobs;
-  //     if (!jobs) {
-  //       setMessage("No jobs found to save.");
-  //       setLoading("");
-  //       return;
-  //     }
-  //     await saveJobsToBackend(jobs);
-  //     setMessage("About to save jobs to DB...");
-  //     if (onRefreshJobs) onRefreshJobs();
-  //   } catch (err) {
-  //     setMessage("Fetch & Save jobs: Failed!");
-  //   } finally {
-  //     setLoading("");
-  //   }
-  // };
-
-  // Unified Process, Save, and Fetch handler
-  // const handleProcessSaveAndFetch = async () => {
-  //   setLoading("process-all");
-  //   setMessage("");
-  //   try {
-  //     // 1. Filter jobs (if needed)
-  //     await axios.get(`${REMOTE_HOST}/api/apify/filtered`);
-  //     setMessage("Filter jobs: Success!");
-  //     // 2. Score jobs
-  //     await axios.get(`${REMOTE_HOST}/api/apify/score`);
-  //     setMessage("Score jobs: Success!");
-  //     // 3. Save jobs to DB
-  //     await axios.post(
-  //       `${REMOTE_HOST}/api/save-jobs`,
-  //       {},
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-  //         },
-  //       }
-  //     );
-  //     setMessage("Fetch Jobs from Database: Success!");
-  //     await axios.get(
-  //       `${REMOTE_HOST}/api/jobs-by-date`,
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-  //         },
-  //       }
-  //     );
-  //     setMessage("Fetch Jobs from Database!");
-      // 3. Fetch scored jobs from backend file (not jobs-by-date)
-      // const scoredRes = await axios.get("http://localhost:3001/api/scored-jobs-file", {
-      //   headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-      // });
-      // const scoredJobs = scoredRes.data;
-      // if (Array.isArray(scoredJobs) && scoredJobs.length > 0) {
-      //   // 4. Save scored jobs to DB
-      //   await saveJobsToBackend(scoredJobs);
-      //   setMessage("Jobs saved to DB!");
-      // } else {
-      //   setMessage("No scored jobs found to save.");
-      // }
-      // 5. Fetch jobs by date from DB to refresh UI
-    //   if (onRefreshJobs) onRefreshJobs();
-    // } catch (err) {
-    //   setMessage("Process/Save/Fetch jobs: Failed!");
-    // } finally {
-    //   setLoading("");
-    // }
-  
-
-  // // Helper to format cooldown
-  // const formatCooldown = (seconds) => {
-  //   const h = Math.floor(seconds / 3600);
-  //   const m = Math.floor((seconds % 3600) / 60);
-  //   const s = seconds % 60;
-  //   return `${h}h ${m}m ${s}s`;
-  // };
-
-  // // Handler to fetch scored jobs from backend file and save to DB
-  // const handleSaveScoredJobsToDB = async () => {
-  //   setLoading("save-scored");
-  //   setMessage("");
-  //   try {
-  //     alert("About to fetch scored jobs from backend file");
-  //     const res = await fetch(`${REMOTE_HOST}/api/jobs-by-date`, {
-  //       headers: {
-  //         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-  //       },
-  //     });
-  //     const data = await res.json();
-  //     console.log(data.job);
-
-  //     const jobs = data;
-  //     alert(
-  //       "Fetched " + (jobs?.length || 0) + " scored jobs. Now saving to DB..."
-  //     );
-  //     await saveJobsToBackend(jobs);
-  //     alert("Scored jobs saved to DB!");
-  //     setMessage("Scored jobs saved to DB!");
-  //   } catch (err) {
-  //     alert("Failed to save scored jobs: " + err.message);
-  //     setMessage("Failed to save scored jobs: " + err.message);
-  //   } finally {
-  //     setLoading("");
-  //   }
-  // };
-  // Upwork API handlers (implement your real logic here)
-//   const handleUpworkFetchJobs = async () => {
-//     setLoading("fetch");
-//     setMessage("");
-//     const now = Date.now();
-//     localStorage.setItem("lastFetchJobsTime_upwork", now.toString());
-//     setLastFetchTime(now);
-//     updateCooldown(now);
-//   try {
-//     // Call the Upwork API with POST and token
-//     const response = await axios.post(
-//       `${REMOTE_HOST}/api/upwork`,
-//       // "http://44.214.92.17:3000/api/upwork",
-//       {}, // If your API expects a body, add it here; otherwise, keep as empty object
-//       {
-//         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-//           "Content-Type": "application/json",
-//         },
-//       }   
-//     );
-//     const jobs = response.data.jobs;
-//     if (!jobs || jobs.length === 0) {
-//       setMessage("No Upwork jobs found.");
-//       setLoading("");
-//       return;
-//     }
-//     await saveJobsToBackend(jobs); // Save jobs to your backend as you do for LinkedIn
-//     setMessage("Upwork jobs fetched and saved!");
-//     if (onRefreshJobs) onRefreshJobs();
-//   } catch (err) {
-//     setMessage("Failed to fetch Upwork jobs.");
-//   } finally {
-//     setLoading("");
-//   }
-// };
-
-// const handleUpworkProcessSaveAndFetch = async () => {
-//   setLoading("process-all");
-//   setMessage("");
-//   try {
-//     // 1. Filter/deduplicate jobs
-//     await axios.get(`${REMOTE_HOST}/api/upwork/filtered`, {
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-//       },
-//     });
-//     setMessage("Upwork: Filtered jobs!");
-
-//     // 2. Score jobs and get scored jobs JSON
-//     const scoreRes = await axios.get(`${REMOTE_HOST}/api/upwork/score`, {
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-//       },
-//     });
-//     setMessage("Upwork: Scored jobs!");
-
-//     // 3. Save scored jobs to DB
-//     await axios.post(
-//       `${REMOTE_HOST}/api/upwork/save-jobs`,
-//       {}, // If your API expects a body, add it here; otherwise, keep as empty object
-//       {
-//         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     setMessage("Upwork: Jobs saved to DB!");
-
-
-//     // 4. Fetch jobs from DB (new step)
-//     const jobsRes = await axios.get(`${REMOTE_HOST}/api/upwork/jobs-by-date`, {
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-//       },
-//     });
-//     setMessage("Upwork: Jobs fetched from DB!");
-
-//     // Optionally, update your UI with jobsRes.data if needed
-//     if (onRefreshJobs) onRefreshJobs(jobsRes.data);
-
-//   } catch (err) {
-//     setMessage("Upwork: Process/Save/Fetch jobs failed!");
-//   } finally {
-//     setLoading("");
-//   }
-// };
 
   return (
     <header className="bg-gradient-to-r from-blue-50 to-white shadow-sm border-b mb-4">
@@ -299,6 +95,25 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
         </div>
        
         <div className="flex items-center gap-4">
+          {/* Role-based navigation links */}
+          {isCompanyAdmin(currentUser) && (
+            <button
+              onClick={() => navigate("/user-management")}
+              className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              Manage Users
+            </button>
+          )}
+          
+          {isSuperAdmin(currentUser) && (
+            <button
+              onClick={() => navigate("/admin-dashboard")}
+              className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              Admin Panel
+            </button>
+          )}
+          
         <Menu as="div" className="relative inline-block text-left mr-4">
             <Menu.Button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100">
               {location.pathname.includes("upwork") ? "Upwork Jobs" : "LinkedIn Jobs"} ▼
@@ -308,7 +123,9 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      className={`w-full text-left px-4 py-2 ${active ? "bg-gray-100" : ""}`}
+                      className={`w-full text-left px-4 py-2 text-sm ${
+                        active ? "bg-gray-100 text-gray-900" : "text-gray-700"
+                      }`}
                       onClick={() => navigate("/dashboard/linkedin")}
                     >
                       LinkedIn Jobs
@@ -318,7 +135,9 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      className={`w-full text-left px-4 py-2 ${active ? "bg-gray-100" : ""}`}
+                      className={`w-full text-left px-4 py-2 text-sm ${
+                        active ? "bg-gray-100 text-gray-900" : "text-gray-700"
+                      }`}
                       onClick={() => navigate("/dashboard/upwork")}
                     >
                       Upwork Jobs
@@ -451,18 +270,39 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
                     </button>
                   )}
                 </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      className={`w-full text-left px-4 py-2 text-gray-700 ${
-                        active ? "bg-gray-100" : ""
-                      }`}
-                      onClick={() => navigate("/admin-dashboard")}
-                    >
-                      Admin 
-                    </button>
-                  )}
-                </Menu.Item>
+                
+                {/* Show Admin link only for super admins */}
+                {isSuperAdmin(currentUser) && (
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        className={`w-full text-left px-4 py-2 text-gray-700 ${
+                          active ? "bg-gray-100" : ""
+                        }`}
+                        onClick={() => navigate("/admin-dashboard")}
+                      >
+                        Admin Panel
+                      </button>
+                    )}
+                  </Menu.Item>
+                )}
+                
+                {/* Show User Management link for company admins */}
+                {isCompanyAdmin(currentUser) && (
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        className={`w-full text-left px-4 py-2 text-gray-700 ${
+                          active ? "bg-gray-100" : ""
+                        }`}
+                        onClick={() => navigate("/user-management")}
+                      >
+                        Manage Users
+                      </button>
+                    )}
+                  </Menu.Item>
+                )}
+                
                 <Menu.Item>
                   {({ active }) => (
                     <button
@@ -488,15 +328,35 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
                   >
                     ×
                   </button>
-                  <h2 className="text-lg font-bold mb-2">User Profile </h2>
+                  <h2 className="text-lg font-bold mb-2">User Profile</h2>
                   <div className="mb-1">
                     <span className="font-semibold">Name:</span>{" "}
-                    {user?.username || user?.name || "coventech@coventech.com"}
+                    {currentUser?.username || currentUser?.name}
                   </div>
-                  <div>
+                  <div className="mb-1">
                     <span className="font-semibold">Email:</span>{" "}
-                    {user?.email || "coventech@coventech.com"}
+                    {currentUser?.email}
                   </div>
+                  <div className="mb-1">
+                    <span className="font-semibold">Role:</span>{" "}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      currentUser?.role === 'super_admin' 
+                        ? 'bg-purple-100 text-purple-800' 
+                        : currentUser?.role === 'company_admin'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {currentUser?.role === 'super_admin' ? 'Super Admin' : 
+                       currentUser?.role === 'company_admin' ? 'Company Admin' : 
+                       currentUser?.role === 'company_user' ? 'Company User' : 'User'}
+                    </span>
+                  </div>
+                  {currentUser?.companyId && (
+                    <div>
+                      <span className="font-semibold">Company ID:</span>{" "}
+                      {currentUser.companyId}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

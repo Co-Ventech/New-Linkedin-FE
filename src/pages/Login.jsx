@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../api/authApi";
+import { isSuperAdmin, isCompanyAdmin, isCompanyUser } from "../slices/userSlice";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -18,8 +19,20 @@ const Login = () => {
     setLoading(true);
     const result = await loginUser(dispatch, email, password);
     setLoading(false);
+    
     if (result.success) {
-      navigate("/dashboard");
+      // Role-based navigation
+      const user = result.user;
+      if (isSuperAdmin(user)) {
+        navigate("/admin-dashboard");
+      } else if (isCompanyAdmin(user)) {
+        navigate("/dashboard");
+      } else if (isCompanyUser(user)) {
+        navigate("/dashboard");
+      } else {
+        // Fallback to dashboard
+        navigate("/dashboard");
+      }
     } else {
       setError(result.error || "Invalid email or password");
     }
@@ -32,8 +45,8 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Email"
-            type="email"
+            placeholder="Email or Username"
+            type="text"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -63,6 +76,13 @@ const Login = () => {
               )}
             </button>
           </div>
+          
+          <div className="text-right">
+            <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-500">
+              Forgot Password?
+            </Link>
+          </div>
+          
           {error && <div className="text-red-500 text-sm text-center">{error}</div>}
           <button
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
@@ -73,10 +93,10 @@ const Login = () => {
           </button>
         </form>
         
-        {/* <div className="text-center mt-4 text-sm text-gray-600">
+        <div className="text-center mt-4 text-sm text-gray-600">
           Don&apos;t have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:underline">Register</Link>
-        </div> */}
+          <Link to="/company-signup" className="text-blue-600 hover:underline">Register Company</Link>
+        </div>
       </div>
     </div>
   );
