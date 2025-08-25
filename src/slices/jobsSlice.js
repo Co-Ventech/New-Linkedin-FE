@@ -29,10 +29,10 @@ const PORT = import.meta.env.VITE_PORT;
 // Async thunk to add a comment to a job
 export const addJobCommentThunk = createAsyncThunk(
   'jobs/addJobComment',
-  async ({ jobId, username, comment }, { rejectWithValue }) => {
+  async ({ jobId, text }, { rejectWithValue }) => {
     try {
-      const updated = await addJobComment(jobId, { username, comment });
-      return { jobId, comments: updated.comments };
+      const updated = await addJobComment(jobId, { text });
+      return { jobId, job: updated.job };
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -195,10 +195,10 @@ export const updateUpworkAeCommentThunk = createAsyncThunk(
 
 export const addUpworkJobCommentThunk = createAsyncThunk(
   'jobs/addUpworkJobComment',
-  async ({ jobId, username, comment }, { rejectWithValue }) => {
+  async ({ jobId, text }, { rejectWithValue }) => {
     try {
-      const updated = await addUpworkJobComment(jobId, { username, comment });
-      return { jobId, comments: updated.comments };
+      const updated = await addUpworkJobComment(jobId, { text });
+      return { jobId, job: updated.job };
     } catch (err) {
       return rejectWithValue(err.message);
     }

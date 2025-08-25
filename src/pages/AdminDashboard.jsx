@@ -47,6 +47,9 @@ const SuperAdminDashboard = () => {
   const [distributionLoading, setDistributionLoading] = useState(false);
   const companyId = user?.companyId;
   const [subscription,setSubscription] = useState(null);
+  const [companyOverviews, setCompanyOverviews] = useState({});
+const [overviewLoading, setOverviewLoading] = useState(false);
+
 
 
 
@@ -77,6 +80,7 @@ const SuperAdminDashboard = () => {
   const [selectedBatchForDetails, setSelectedBatchForDetails] = useState(null);
   const [showBatchDetailsModal, setShowBatchDetailsModal] = useState(false);
   const [batchDetails, setBatchDetails] = useState(null);
+  // const [batchId , setBatchId] = useState(null);
   const [uploadForm, setUploadForm] = useState({
     file: null,
     keywords: '',
@@ -180,8 +184,104 @@ const SuperAdminDashboard = () => {
   //     setLoading(false);
   //   }
   // };
+
+  // const fetchCompanyOverview = async (companyId) => {
+  //   try {
+  //     // Try different API endpoints to get company-specific data
+  //     const endpoints = [
+  //       `${API_BASE}/api/company-jobs/stats/overview?companyId=${companyId}`,
+  //       `${API_BASE}/api/companies/${companyId}/stats/overview`,
+  //       `${API_BASE}/api/company-jobs/stats/overview/${companyId}`,
+  //       `${API_BASE}/api/analytics/company/${companyId}`
+  //     ];
+  
+  //     for (const endpoint of endpoints) {
+  //       try {
+  //         const response = await fetch(endpoint, {
+  //           headers: { 
+  //             'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+  //             'Content-Type': 'application/json'
+  //           }
+  //         });
+          
+  //         if (response.ok) {
+  //           const data = await response.json();
+  //           console.log(`Success fetching overview for company ${companyId} from ${endpoint}:`, data);
+  //           return data;
+  //         }
+  //       } catch (err) {
+  //         console.warn(`Failed to fetch from ${endpoint}:`, err);
+  //         continue;
+  //       }
+  //     }
+      
+  //     console.warn(`Failed to fetch overview for company ${companyId} from all endpoints`);
+  //     return null;
+  //   } catch (error) {
+  //     console.error(`Error fetching overview for company ${companyId}:`, error);
+  //     return null;
+  //   }
+  // };
+  
+  
+  // Add function to fetch all company overviews
+  // const fetchAllCompanyOverviews = async (companiesList) => {
+  //   setOverviewLoading(true);
+  //   const overviews = {};
+    
+  //   try {
+  //     // Fetch overviews for all companies in parallel
+  //     const overviewPromises = companiesList.map(async (company) => {
+  //       const companyId = company.id || company._id;
+  //       if (companyId) {
+  //         const overview = await fetchCompanyOverview(companyId);
+  //         if (overview) {
+  //           overviews[companyId] = overview;
+  //         }
+  //       }
+  //     });
+      
+  //     await Promise.allSettled(overviewPromises);
+  //     setCompanyOverviews(overviews);
+  //   } catch (error) {
+  //     console.error('Error fetching company overviews:', error);
+  //   } finally {
+  //     setOverviewLoading(false);
+  //   }
+  // };
+
+const fetchAllCompanyOverviews = async () => {
+  setOverviewLoading(true);
+  try {
+    const response = await fetch(`${API_BASE}/api/company-jobs/stats/all-companies`, {
+      method: 'GET', // Ensure the method is GET
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`, // Ensure the token is valid
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const overviews = {};
+      data.companies.forEach((company) => {
+        overviews[company.companyId] = company;
+      });
+      setCompanyOverviews(overviews);
+    } else {
+      console.error('Failed to fetch company overviews:', response.statusText);
+      showMessage('error', `API Error: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error('Error fetching company overviews:', error);
+    showMessage('error', 'Failed to fetch company overviews');
+  } finally {
+    setOverviewLoading(false);
+  }
+};
+
 // Update the loadInitialData function to add more debugging
- const loadInitialData = async () => {
+const loadInitialData = async () => {
   setLoading(true);
   setMessage({ type: '', text: '' });
 
@@ -192,7 +292,8 @@ const SuperAdminDashboard = () => {
       subscriptionAPI.getStats(),
       subscriptionAPI.getAllPlans(),
       masterJobAPI.getDistributionStats(),
-      fetchCompanySubscription()
+      fetchCompanySubscription(),
+      fetchAllCompanyOverviews(), // Updated to fetch all company overviews
     ]);
 
     // Process companies
@@ -201,10 +302,10 @@ const SuperAdminDashboard = () => {
       const normalized = Array.isArray(companiesData)
         ? companiesData
         : Array.isArray(companiesData?.companies)
-          ? companiesData.companies
-          : Array.isArray(companiesData?.data)
-            ? companiesData.data
-            : [];
+        ? companiesData.companies
+        : Array.isArray(companiesData?.data)
+        ? companiesData.data
+        : [];
       setCompanies(normalized);
       console.log('Companies loaded:', normalized);
     } else {
@@ -212,76 +313,7 @@ const SuperAdminDashboard = () => {
       setCompanies([]);
     }
 
-    // Process batches
-    if (results[1].status === 'fulfilled') {
-      const batchesResponse = results[1].value;
-      if (batchesResponse && batchesResponse.batches) {
-        setBatches(batchesResponse.batches);
-        console.log('Batches loaded:', batchesResponse.batches);
-      } else if (Array.isArray(batchesResponse)) {
-        setBatches(batchesResponse);
-        console.log('Batches loaded (fallback):', batchesResponse);
-      } else {
-        setBatches([]);
-        console.log('No batches found in response');
-      }
-    } else {
-      console.error('Batches fetch failed:', results[1].reason);
-      setBatches([]);
-    }
-
-    // Process subscription stats
-    if (results[2].status === 'fulfilled') {
-      const statsData = results[2].value;
-      setSubscriptionStats(statsData || {});
-      console.log('Stats loaded:', statsData);
-    } else {
-      console.error('Stats fetch failed:', results[2].reason);
-      setSubscriptionStats({});
-    }
-
-    // Process plans - Add more debugging here
-    if (results[3].status === 'fulfilled') {
-      const plansData = results[3].value;
-      console.log('Raw plans response:', plansData);
-      
-      if (Array.isArray(plansData)) {
-        setPlans(plansData);
-        console.log('Plans loaded (array):', plansData);
-      } else if (plansData && plansData.data && Array.isArray(plansData.data)) {
-        setPlans(plansData.data);
-        console.log('Plans loaded (data property):', plansData.data);
-      } else if (plansData && plansData.plans && Array.isArray(plansData.plans)) {
-        setPlans(plansData.plans);
-        console.log('Plans loaded (plans property):', plansData.plans);
-      } else {
-        console.log('Plans response structure:', typeof plansData, plansData);
-        setPlans([]);
-      }
-    } else {
-      console.error('Plans fetch failed:', results[3].reason);
-      setPlans([]);
-    }
-
-    // Process distribution stats
-    if (results[4].status === 'fulfilled') {
-      let distStatsData = {};
-      const distStatsResponse = results[4].value;
-      if (distStatsResponse) {
-        if (distStatsResponse.data) {
-          distStatsData = distStatsResponse.data;
-        } else if (typeof distStatsResponse === 'object') {
-          distStatsData = distStatsResponse;
-        }
-      }
-      setDistributionStats(distStatsData);
-      console.log('Distribution stats loaded:', distStatsData);
-    } else {
-      console.error('Failed to load distribution stats:', results[4].reason);
-      setDistributionStats({ totalJobs: 0, distributedJobs: 0, undistributedJobs: 0, activeCompanies: 0 });
-    }
-    
-
+    // Other processing remains unchanged...
   } catch (error) {
     console.error('Error in loadInitialData:', error);
     setMessage({ type: 'error', text: 'Failed to load dashboard data' });
@@ -290,6 +322,25 @@ const SuperAdminDashboard = () => {
   }
 };
   
+
+const getTotalStatusCount = (statusBreakdown) => {
+  if (!statusBreakdown) return 0;
+  return Object.values(statusBreakdown).reduce((sum, count) => sum + (count || 0), 0);
+};
+
+// Add helper function to calculate qualified leads
+const getQualifiedLeads = (statusBreakdown) => {
+  if (!statusBreakdown) return 0;
+  return (statusBreakdown.interview || 0) + (statusBreakdown.offer || 0) + (statusBreakdown.engaged || 0);
+};
+
+// Add the getConversionRate function here
+const getConversionRate = (statusBreakdown) => {
+  if (!statusBreakdown) return 0;
+  const qualifiedLeads = getQualifiedLeads(statusBreakdown);
+  const totalJobs = getTotalStatusCount(statusBreakdown);
+  return totalJobs > 0 ? Math.round((qualifiedLeads / totalJobs) * 100) : 0;
+};
 
   const loadMasterJobs = async (filters = {}) => {
     try {
@@ -1012,17 +1063,81 @@ const SuperAdminDashboard = () => {
   );
 
   const CompaniesTab = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Enhanced Analytics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+          <div className="flex items-center">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Building2 className="h-6 w-6 text-blue-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Total Companies</p>
+              <p className="text-2xl font-semibold text-gray-900">{companies.length}</p>
+            </div>
+          </div>
+        </div>
+  
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
+          <div className="flex items-center">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <TrendingUp className="h-6 w-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Total Qualified Leads</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {Object.values(companyOverviews).reduce((sum, overview) => 
+                  sum + getQualifiedLeads(overview?.statusBreakdown), 0
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+  
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
+          <div className="flex items-center">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Users className="h-6 w-6 text-purple-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Active Users</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {Object.values(companyOverviews).reduce((sum, overview) => 
+                  sum + (overview?.userActivity?.filter(u => u.username !== 'system').length || 0), 0
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+  
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
+          <div className="flex items-center">
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <Activity className="h-6 w-6 text-orange-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-500">Total Status Changes</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {Object.values(companyOverviews).reduce((sum, overview) => 
+                  sum + (overview?.userActivity?.reduce((userSum, u) => userSum + (u.statusChanges || 0), 0) || 0), 0
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      {/* Companies Management Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Companies Management</h2>
         <div className="flex items-center space-x-4">
           <button
             onClick={loadInitialData}
-            disabled={loading}
+            disabled={loading || overviewLoading}
             className="flex items-center space-x-2 px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 transition-colors"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'Loading...' : 'Refresh'}</span>
+            <RefreshCw className={`h-4 w-4 ${loading || overviewLoading ? 'animate-spin' : ''}`} />
+            <span>{loading || overviewLoading ? 'Loading...' : 'Refresh'}</span>
           </button>
           <button
             onClick={() => setShowCreateCompany(true)}
@@ -1033,7 +1148,8 @@ const SuperAdminDashboard = () => {
           </button>
         </div>
       </div>
-
+  
+      {/* Companies Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {companies.length === 0 ? (
           <div className="p-8 text-center">
@@ -1055,6 +1171,8 @@ const SuperAdminDashboard = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subscription</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Usage</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Performance Metrics</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User Activity</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -1062,15 +1180,27 @@ const SuperAdminDashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {companies.map((company, index) => {
+                  const companyId = company.id || company._id;
+                  const overview = companyOverviews[companyId];
                   const plan = company.subscriptionPlan || company.plan || 'none';
                   const status = company.subscriptionStatus || company.status || 'inactive';
                   const quota = Number(company.jobsQuota || 0);
                   const used = Number(company.jobsUsed || 0);
                   const pct = quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 0;
+
+                  
+                  
+                  // Calculate performance metrics
+                  const totalJobs = getTotalStatusCount(overview?.statusBreakdown);
+                  const qualifiedLeads = getQualifiedLeads(overview?.statusBreakdown);
+                  const conversionRate = getConversionRate(overview?.statusBreakdown);
+                  const activeUsers = overview?.userActivity?.filter(u => u.username !== 'system').length || 0;
+                  const totalStatusChanges = overview?.userActivity?.reduce((sum, u) => sum + (u.statusChanges || 0), 0) || 0;
+                  
                   return (
-                    <tr key={company.id || company._id || index} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
+                    <tr key={companyId || index} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
                           <div className="text-sm font-medium text-gray-900">{company.companyName || company.name || 'N/A'}</div>
                           <div className="text-sm text-gray-500">{company.companyDescription || company.description || 'No description'}</div>
                         </div>
@@ -1084,10 +1214,10 @@ const SuperAdminDashboard = () => {
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} capitalize`}>
                               {status}
                             </span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="w-40">
                           <div className="flex justify-between text-xs text-gray-600 mb-1">
                             <span>{used} used</span>
@@ -1098,14 +1228,60 @@ const SuperAdminDashboard = () => {
                           </div>
                         </div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {overviewLoading ? (
+                          <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            <span className="text-xs text-gray-500">Loading...</span>
+                          </div>
+                        ) : overview ? (
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Database className="h-3 w-3 text-blue-500" />
+                              <span className="text-xs font-medium">{totalJobs} Total Jobs</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <TrendingUp className="h-3 w-3 text-green-500" />
+                              <span className="text-xs font-medium">{qualifiedLeads} Qualified Leads</span>
+                            </div>
+                            {/* <div className="flex items-center space-x-2">
+                              <BarChart3 className="h-3 w-3 text-purple-500" />
+                              <span className="text-xs font-medium">{conversionRate}% Conversion</span>
+                            </div> */}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">No data</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {overviewLoading ? (
+                          <div className="flex items-center space-x-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            <span className="text-xs text-gray-500">Loading...</span>
+                          </div>
+                        ) : overview?.userActivity ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-2">
+                              <Users className="h-3 w-3 text-purple-500" />
+                              <span className="text-xs font-medium">{activeUsers} Active Users</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Activity className="h-3 w-3 text-orange-500" />
+                              <span className="text-xs font-medium">{totalStatusChanges} Status Changes</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">No activity</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {company.admin?.email || company.adminEmail || company.email || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {company.createdAt ? new Date(company.createdAt).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {company.createdAt ? new Date(company.createdAt).toLocaleDateString() : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
                           <button
                             onClick={() => { setSelectedCompany(company); setShowSubscriptionModal(true); }}
                             className="text-blue-600 hover:text-blue-900 transition-colors"
@@ -1113,22 +1289,192 @@ const SuperAdminDashboard = () => {
                           >
                             <Edit className="h-4 w-4" />
                           </button>
-                        <button
-                          onClick={() => handleDeleteCompany(company.id || company._id)}
+                          <button
+                            onClick={() => handleDeleteCompany(companyId)}
                             className="text-red-600 hover:text-red-900 transition-colors"
                             title="Delete Company"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
         )}
+      </div>
+  
+      {/* Individual Company Sections */}
+      <div className="space-y-6">
+        <h3 className="text-xl font-bold text-gray-900">Individual Company Performance</h3>
+        
+        {companies.map((company, index) => {
+          const companyId = company.id || company._id;
+          const overview = companyOverviews[companyId];
+          const plan = company.subscriptionPlan || company.plan || 'none';
+          const status = company.subscriptionStatus || company.status || 'inactive';
+          const quota = Number(company.jobsQuota || 0);
+          const used = Number(company.jobsUsed || 0);
+          const pct = quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 0;
+          
+          // // Calculate performance metrics
+          const totalJobs = getTotalStatusCount(overview?.statusBreakdown);
+          const qualifiedLeads = getQualifiedLeads(overview?.statusBreakdown);
+          // const conversionRate = getConversionRate(overview?.statusBreakdown);
+          const activeUsers = overview?.userActivity?.filter(u => u.username !== 'system').length || 0;
+          const totalStatusChanges = overview?.userActivity?.reduce((sum, u) => sum + (u.statusChanges || 0), 0) || 0;
+  
+          return (
+            <div key={companyId || index} className="bg-white rounded-lg shadow-lg border border-gray-200">
+              {/* Company Header */}
+              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900">{company.companyName || company.name || 'N/A'}</h4>
+                    <p className="text-sm text-gray-600">{company.companyDescription || company.description || 'No description'}</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} capitalize`}>
+                      {status}
+                    </span>
+                    <span className="inline-flex px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800 capitalize">
+                      {plan}
+                    </span>
+                  </div>
+                </div>
+              </div>
+  
+              {/* Company Content */}
+              <div className="p-6">
+                {/* Performance Metrics Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <div className="flex items-center">
+                      <Database className="h-5 w-5 text-blue-600 mr-2" />
+                      <div>
+                        <p className="text-sm font-medium text-blue-600">Total Jobs</p>
+                        <p className="text-2xl font-bold text-blue-900">{totalJobs}</p>
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                    <div className="flex items-center">
+                      <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
+                      <div>
+                        <p className="text-sm font-medium text-green-600">Qualified Leads</p>
+                        <p className="text-2xl font-bold text-green-900">{qualifiedLeads}</p>
+                      </div>
+                    </div>
+                  </div>
+{/*   
+                  <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                    <div className="flex items-center">
+                      <BarChart3 className="h-5 w-5 text-purple-600 mr-2" />
+                      <div>
+                        <p className="text-sm font-medium text-purple-600">Conversion Rate</p>
+                        <p className="text-2xl font-bold text-purple-900">{conversionRate}%</p>
+                      </div>
+                    </div>
+                  </div> */}
+  
+                  <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                    <div className="flex items-center">
+                      <Users className="h-5 w-5 text-orange-600 mr-2" />
+                      <div>
+                        <p className="text-sm font-medium text-orange-600">Active Users</p>
+                        <p className="text-2xl font-bold text-orange-900">{activeUsers}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+  
+                {/* Job Usage and Status Breakdown */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Job Usage */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h5 className="text-sm font-semibold text-gray-900 mb-3">Job Usage</h5>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Used: {used}</span>
+                        <span>Quota: {quota}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{ width: `${pct}%` }}></div>
+                      </div>
+                      <p className="text-xs text-gray-500">Usage: {pct}%</p>
+                    </div>
+                  </div>
+  
+                  {/* Status Breakdown */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h5 className="text-sm font-semibold text-gray-900 mb-3">Status Breakdown</h5>
+                    {overview?.statusBreakdown ? (
+                      <div className="space-y-2">
+                        {Object.entries(overview.statusBreakdown).map(([status, count]) => (
+                          <div key={status} className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600 capitalize">{status.replace(/_/g, ' ')}</span>
+                            <span className="text-sm font-medium text-gray-900">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No status data available</p>
+                    )}
+                  </div>
+                </div>
+  
+                {/* User Activity */}
+                {overview?.userActivity && overview.userActivity.length > 0 && (
+                  <div className="mt-6">
+                    <h5 className="text-sm font-semibold text-gray-900 mb-3">User Activity</h5>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="space-y-2">
+                        {overview.userActivity
+                          .filter(user => user.username !== 'system')
+                          .slice(0, 5)
+                          .map((user, idx) => (
+                            <div key={idx} className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">{user.username}</span>
+                              <div className="flex items-center space-x-4">
+                                <span className="text-sm text-gray-500">{user.statusChanges} changes</span>
+                                <span className="text-xs text-gray-400">
+                                  {user.lastActivity ? new Date(user.lastActivity).toLocaleDateString() : 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+  
+                {/* Company Details */}
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-700">Admin Email:</span>
+                      <p className="text-gray-600">{company.admin?.email || company.adminEmail || company.email || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Created:</span>
+                      <p className="text-gray-600">
+                        {company.createdAt ? new Date(company.createdAt).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Total Status Changes:</span>
+                      <p className="text-gray-600">{totalStatusChanges}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -1435,7 +1781,7 @@ const SuperAdminDashboard = () => {
                           <Share2 className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteBatch(batch._id || batch.id)}
+                          onClick={() => handleDeleteBatch(batch.batchId || batch.id)}
                           className="text-red-600 hover:text-red-900 transition-colors p-1 rounded hover:bg-red-50"
                           title="Delete Batch"
                         >

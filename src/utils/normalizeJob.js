@@ -117,7 +117,10 @@ export function normalizeJob(rawJob) {
     companyLocations = [rawCompanyLocations];
   }
   return {
-    id: rawJob.id || rawJob["Job ID"] || rawJob.jobId || rawJob.job_id || '',
+        _id: rawJob._id || rawJob.companyJobId || rawJob.id || rawJob.jobId || '',
+          id: rawJob.id || rawJob["Job ID"] || rawJob.jobId || rawJob.job_id || '',
+    // id: rawJob.id || rawJob["Job ID"] || rawJob.jobId || rawJob.job_id || '',
+
     title: rawJob.title || rawJob["job title"] || rawJob["Job Title"] || rawJob.jobTitle || '',
     company: getDot('name') || getDot('universalname') || rawJob.company || rawJob.companyName || rawJob["Company"] || rawJob.organization || '',
     companyLogo: getDot('logo') || getDot('logos') || rawJob.companyLogo || rawJob["Company Logo"] || rawJob.logo || rawJob.organization_logo || '',

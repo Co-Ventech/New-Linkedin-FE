@@ -359,6 +359,45 @@ export const subscriptionAPI = {
   }
 };
 
+
+export const companyOverviewAPI = {
+  getCompanyOverview: async (companyId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/company-jobs/stats/overview?companyId=${companyId}`, {
+        headers: getAuthHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching overview for company ${companyId}:`, error);
+      return null;
+    }
+  },
+
+  getAllCompanyOverviews: async (companyIds) => {
+    try {
+      const overviewPromises = companyIds.map(async (companyId) => {
+        const overview = await companyOverviewAPI.getCompanyOverview(companyId);
+        return { companyId, overview };
+      });
+      
+      const results = await Promise.allSettled(overviewPromises);
+      const overviews = {};
+      
+      results.forEach((result) => {
+        if (result.status === 'fulfilled' && result.value.overview) {
+          overviews[result.value.companyId] = result.value.overview;
+        }
+      });
+      
+      return overviews;
+    } catch (error) {
+      console.error('Error fetching all company overviews:', error);
+      return {};
+    }
+  }
+};
+
+
 // Analytics API
 export const analyticsAPI = {
   getGlobal: async () => {

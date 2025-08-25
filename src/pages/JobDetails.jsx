@@ -6,9 +6,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { updateJobStatusThunk, fetchJobsByDateThunk, addJobCommentThunk, updateAeCommentThunk, fetchJobByIdThunk,
- updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk , generateProposalThunk , updateProposalThunk} from "../slices/jobsSlice";
-import { setProposalLoading } from "../slices/jobsSlice"; // You'll add this action
+// import { updateJobStatusThunk,
+//  updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk , generateProposalThunk , updateProposalThunk} from "../slices/jobsSlice";
+// import { setProposalLoading } from "../slices/jobsSlice"; // You'll add this action
+// import { updateJobStatusNewThunk } from "../slices/jobsSlice";
+ // ↓ Replace the import line above with the one below (add updateJobStatusNewThunk; remove updateJobStatusThunk)
+ import { fetchJobsByDateThunk, addJobCommentThunk, updateAeCommentThunk, fetchJobByIdThunk,
+  updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk , generateProposalThunk , updateProposalThunk, updateJobStatusNewThunk , setProposalLoading } from "../slices/jobsSlice";
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -111,7 +115,7 @@ const [isEditingProposal, setIsEditingProposal] = useState(false);
 const [editableProposal, setEditableProposal] = useState(proposalState.text || "");
 const proposalSaving = useSelector(state => state.jobs.proposalSaving);
 const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
-
+const [companyJobId, setCompanyJobId] = useState(localJob?._id || null);
 //   const [proposalType, setProposalType] = useState(""); // "Services" or "Products"
 // const [proposalCategory, setProposalCategory] = useState("");
 // const [editableProposal, setEditableProposal] = useState("");
@@ -147,6 +151,32 @@ const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
       // setAe_comment(job.ae_comment || "");
     }
   }, [localJob]);
+  useEffect(() => {
+    const resolve = async () => {
+      const direct = localJob?._id || localJob?.companyJobId;
+      if (direct) { setCompanyJobId(direct); return; }
+  
+      try {
+        const token = localStorage.getItem("authToken");
+        const res = await axios.get(`${API_BASE}/company-jobs/user-jobs`, {
+          params: { page: 1, limit: 1000 },
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const jobs = res.data?.jobs || [];
+        const externalId = localJob?.jobId || localJob?.id; // fallback to route id if needed
+  
+        const match = jobs.find(j =>
+          String(j.jobId) === String(externalId) ||
+          String(j.masterJobId) === String(externalId)
+        );
+        if (match?._id) setCompanyJobId(match._id);
+      } catch (e) {
+        console.warn('resolve companyJobId failed', e);
+      }
+    };
+    resolve();
+  }, [localJob?._id, localJob?.companyJobId, localJob?.jobId, localJob?.id]);
+
 
   useEffect(() => {
     if (proposalState.text) {
@@ -255,22 +285,30 @@ const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
   //   }
   // };
 
-  const handleSaveStatus = async (e) => {
-    e.preventDefault();
-    console.log("handleSaveStatus called", { selectedUser, selectedStatus, jobId: job?.id });
-    if (!selectedUser || !selectedStatus) return;
-    setSaving(true);
-    try {
-      // This should trigger the API call
-      await dispatch(updateJobStatusThunk({ jobId: localJob.id, status: selectedStatus, username: selectedUser })).unwrap();
-      await dispatch(fetchJobByIdThunk(localJob.id)).unwrap();
-    } catch (err) {
-      alert("Failed to update status.");
-      console.error("handleSaveStatus error:", err);
-    } finally {
-      setSaving(false);
-    }
-  };
+// Replace the whole handleSaveStatus with:
+const handleSaveStatus = async (e) => {
+  e.preventDefault();
+  if (!selectedStatus) return;
+
+  setSaving(true);
+
+  const idForApi = companyJobId || localJob?._id || localJob?.companyJobId;
+  if (!idForApi) {
+    alert("Error: Company Job ID not found. Please open this job from your assigned jobs list.");
+    setSaving(false);
+    return;
+  }
+
+  try {
+    await dispatch(updateJobStatusNewThunk({ jobId: idForApi, status: selectedStatus })).unwrap();
+    setCurrentStatus(selectedStatus);
+  } catch (err) {
+    alert("Failed to update status.");
+    console.error("handleSaveStatus error:", err);
+  } finally {
+    setSaving(false);
+  }
+};
   const handleSaveAeRemark = async (e) => {
     e.preventDefault();
     setAeSaving(true);
@@ -287,14 +325,29 @@ const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
   };
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!commentUser || !comment.trim()) return;
+    if (!comment.trim()) return;
+  
     setCommentLoading(true);
     try {
-      await dispatch(addJobCommentThunk({ jobId: localJob.id, username: commentUser, comment })).unwrap();
-      await dispatch(fetchJobByIdThunk(localJob.id)).unwrap();
+      const idForApi = companyJobId || localJob?._id || localJob?.companyJobId;
+      if (!idForApi) {
+        alert("Error: Company Job ID not found. Please open this job from your assigned jobs list.");
+        setCommentLoading(false);
+        return;
+      }
+  
+      const result = await dispatch(
+        addJobCommentThunk({ jobId: idForApi, text: comment.trim() })
+      ).unwrap();
+  
+      // Update local job comments from API response (if provided)
+      if (result?.job?.comments) {
+        setLocalJob(prev => ({ ...prev, comments: result.job.comments }));
+      }
+      setComment("");
     } catch (err) {
-      alert("Failed to update comment.");
-      console.error("handleSaveStatus error:", err);
+      alert("Failed to add comment.");
+      console.error("handleAddComment error:", err);
     } finally {
       setCommentLoading(false);
     }
@@ -689,116 +742,75 @@ const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
             </form>
           )}
         </section>
-
-        <section className="mb-6 border-b pb-4">
-          <h2 className="text-lg font-bold mb-3 text-gray-800">Add Status</h2>
-          <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
-            <select
-              className="border rounded px-2 py-1"
-              value={selectedUser}
-              onChange={e => setSelectedUser(e.target.value)}
-            >
-              <option value="">Select User</option>
-              {USER_LIST.map(user => (
-                <option key={user} value={user}>{user}</option>
-              ))}
-            </select>
-            <select
-              className="border rounded px-2 py-1"
-              value={selectedStatus}
-              onChange={e => setSelectedStatus(e.target.value)}
-            >
-              {STATUS_OPTIONS.map(status => (
-                <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="px-4 py-1 bg-blue-600 text-white rounded"
-              disabled={saving || !selectedUser || !selectedStatus}
-            >
-              {saving ? "Saving..." : "Save"}
-            </button>
-          </form>
-          {/* Show current status */}
-          <div className="mb-2">
-            <span className="font-semibold">Current Status:</span>{" "}
-            <span className="px-2 py-1 rounded bg-gray-100">
-              {(currentStatus || "-").replace(/_/g, " ")}
-            </span>
-          </div>
-          <div>
-            <span className="font-semibold">Status History:</span>
-            <ul className="mt-1 space-y-1">
-              {Array.isArray(statusHistory) && statusHistory.length === 0 ? (
-                <li className="text-gray-400 text-sm">No status history.</li>
-              ) : (
-                Array.isArray(statusHistory) && statusHistory.map((entry, idx) => (
-                  <li key={idx} className="text-sm">
-                    <span className="font-semibold">{entry.username}</span> set status to{" "}
-                    <span className="px-2 py-0.5 rounded bg-gray-200">
-                      {(entry.status || "-").replace(/_/g, " ")}
-                    </span>{" "}
-                    <span className="text-xs text-gray-500">
-                      ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
-                    </span>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        </section>
+{/* 
+        // Replace the whole “Add Status” section form with (remove user select & dependency): */}
+<section className="mb-6 border-b pb-4">
+  <h2 className="text-lg font-bold mb-3 text-gray-800">Update Status</h2>
+  <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
+    <select
+      className="border rounded px-2 py-1"
+      value={selectedStatus}
+      onChange={e => setSelectedStatus(e.target.value)}
+    >
+      {STATUS_OPTIONS.map(status => (
+        <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
+      ))}
+    </select>
+    <button
+      type="submit"
+      className="px-4 py-1 bg-blue-600 text-white rounded"
+      disabled={saving || !selectedStatus}
+    >
+      {saving ? "Saving..." : "Save"}
+    </button>
+  </form>
+  <div className="mb-2">
+    <span className="font-semibold">Current Status:</span>{" "}
+    <span className="px-2 py-1 rounded bg-gray-100">
+      {(currentStatus || "-").replace(/_/g, " ")}
+    </span>
+  </div>
+</section>
 
         {/* Comment Box */}
         <section className="mb-6 border-b pb-4">
-        <h2 className="text-lg font-bold mb-3 text-gray-800">Add Comments</h2>
-        <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">
-          <select
-            className="border rounded px-2 py-1"
-            value={commentUser}
-            onChange={e => setCommentUser(e.target.value)}
-            required
-          >
-            <option value="">Select User</option>
-            {USER_LIST.map(user => (
-              <option key={user} value={user}>{user}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            value={comment}
-            onChange={e => setComment(e.target.value)}
-            placeholder="Add a comment..."
-            className="border px-2 py-1 rounded w-full"
-            disabled={commentLoading}
-            required
-          />
-          <button
-            type="submit"
-            className="px-4 py-1 bg-blue-600 text-white rounded"
-            disabled={commentLoading || !commentUser || !comment.trim()}
-          >
-
-            {commentLoading ? "Saving..." : "Add"}
-          </button>
-        </form>
-        <ul className="mb-4">
-          {Array.isArray(localJob.comments) && localJob.comments.length > 0 ? (
-            localJob.comments.map((c, idx) => (
-              <li key={idx} className="text-sm text-gray-700 mb-1">
-                <span className="font-semibold">{c.username}:</span> {c.comment}
-                {c.date && (
-                  <span className="text-xs text-gray-500 ml-2">
-                    ({new Date(c.date).toLocaleString()})
-                  </span>
-                )}
-              </li>
-            ))
-          ) : (
-            <li className="text-sm text-gray-400">No comments yet.</li>
+  <h2 className="text-lg font-bold mb-3 text-gray-800">Add Comments</h2>
+  <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">
+    <input
+      type="text"
+      value={comment}
+      onChange={e => setComment(e.target.value)}
+      placeholder="Add a comment..."
+      className="border px-2 py-1 rounded w-full"
+      disabled={commentLoading}
+      required
+    />
+    <button
+      type="submit"
+      className="px-4 py-1 bg-blue-600 text-white rounded"
+      disabled={commentLoading || !comment.trim()}
+    >
+      {commentLoading ? "Saving..." : "Add"}
+    </button>
+  </form>
+  <ul className="mb-4">
+    {Array.isArray(localJob.comments) && localJob.comments.length > 0 ? (
+      localJob.comments.map((c, idx) => (
+        <li key={idx} className="text-sm text-gray-700 mb-1">
+          {c.username && <span className="font-semibold">{c.username}: </span>}
+          {c.text || c.comment || ""}
+          {c.date && (
+            <span className="text-xs text-gray-500 ml-2">
+              ({new Date(c.date).toLocaleString()})
+            </span>
           )}
-        </ul>
-        </section>
+        </li>
+      ))
+    ) : (
+      <li className="text-sm text-gray-400">No comments yet.</li>
+    )}
+  </ul>
+</section>
         <section className="mb-6 border-b pb-4">
   <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>
   {showProposalUI ? (

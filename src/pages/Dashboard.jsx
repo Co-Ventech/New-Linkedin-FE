@@ -10,7 +10,10 @@ import {
   fetchJobsByDateThunk,
   resetJobsByDate,
   setRange,
-  updateJobStatusThunk
+  updateJobStatusThunk,
+  updateUpworkJobStatusNewThunk,
+  updateJobStatusNewThunk
+
 } from "../slices/jobsSlice";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { logoutUser } from "../api/authApi";
@@ -164,8 +167,6 @@ const Dashboard = () => {
   const [kanbanJobs, setKanbanJobs] = useState({});
   const [kanbanLoading, setKanbanLoading] = useState(false);
   const [kanbanError, setKanbanError] = useState(null);
-  const [kanbanUser, setKanbanUser] = useState("");
-  const [kanbanUserError, setKanbanUserError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [optimisticUpdates, setOptimisticUpdates] = useState(new Set());
   const [failedUpdates, setFailedUpdates] = useState(new Map());
@@ -250,68 +251,56 @@ const Dashboard = () => {
   const onDragEnd = async (result) => {
     const { source, destination } = result;
     if (!destination) return;
-    
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
-      return;
-    }
-
-    if (!kanbanUser) {
-      setKanbanUserError("Please select a user before changing status.");
-      return;
-    }
 
     const sourceStatus = source.droppableId;
     const destStatus = destination.droppableId;
-    const job = kanbanJobs[sourceStatus][source.index];
+    if (sourceStatus === destStatus && source.index === destination.index) return;
+
+    const job = (kanbanJobs[sourceStatus] || [])[source.index];
     if (!job) return;
 
-    const updateId = `${job.id}-${Date.now()}`;
-    
-    // Clear any previous errors for this job
+    const companyJobId = job._id || job.companyJobId || job.id || job.jobId;
+    if (!companyJobId) {
+      setKanbanError('Missing company job _id. Open this job from your assigned list.');
+      return;
+    }
+
+    const updateId = `${companyJobId}-${Date.now()}`;
+
+    // Clear previous errors
     setKanbanError(null);
-    setKanbanUserError("");
-    
-    // Store original state for potential reversion
+
+    // Save original state
     const originalKanbanJobs = { ...kanbanJobs };
     const originalJobStatus = job.currentStatus;
 
-    // IMMEDIATE UI UPDATE (Optimistic)
+    // Optimistic UI update
     const newKanbanJobs = { ...kanbanJobs };
     newKanbanJobs[sourceStatus] = Array.from(newKanbanJobs[sourceStatus]);
     newKanbanJobs[sourceStatus].splice(source.index, 1);
     newKanbanJobs[destStatus] = Array.from(newKanbanJobs[destStatus]);
-    
-    const updatedJob = { 
-      ...job, 
+
+    const updatedJob = {
+      ...job,
       currentStatus: destStatus,
-      isUpdating: true, // Add visual indicator
-      updateId: updateId
+      isUpdating: true,
+      updateId
     };
     newKanbanJobs[destStatus].splice(destination.index, 0, updatedJob);
 
-    // Update UI immediately
     setKanbanJobs(newKanbanJobs);
     setOptimisticUpdates(prev => new Set(prev).add(updateId));
 
-    // Background API call
     try {
-      await dispatch(updateJobStatusThunk({
-        jobId: job.id,
-        status: destStatus,
-        username: kanbanUser,
-      })).unwrap();
+-     await dispatch(updateUpworkJobStatusNewThunk({ jobId: companyJobId, status: destStatus })).unwrap();
++     await dispatch(updateJobStatusNewThunk({ jobId: companyJobId, status: destStatus })).unwrap();
 
-      // Success - remove updating indicator
+      // Clear updating indicator
       setKanbanJobs(prevJobs => {
         const updatedJobs = { ...prevJobs };
         Object.keys(updatedJobs).forEach(status => {
-          updatedJobs[status] = updatedJobs[status].map(j => 
-            j.updateId === updateId 
-              ? { ...j, isUpdating: false, updateId: undefined }
-              : j
+          updatedJobs[status] = updatedJobs[status].map(j =>
+            j.updateId === updateId ? { ...j, isUpdating: false, updateId: undefined } : j
           );
         });
         return updatedJobs;
@@ -323,39 +312,28 @@ const Dashboard = () => {
         return newSet;
       });
 
-      // Optionally refresh data in background without affecting UI
+      // Refresh in background
       dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 10 }));
-      
     } catch (err) {
       console.error('Failed to update job status:', err);
-      
-      // REVERT UI on failure
       setKanbanJobs(originalKanbanJobs);
-      
-      // Show error with job details
       setKanbanError(`Failed to move "${job.title}" to ${statusLabels[destStatus]}. Please try again.`);
-      
-      // Track failed update
-      setFailedUpdates(prev => new Map(prev).set(job.id, {
+      setFailedUpdates(prev => new Map(prev).set(job._id, {
         jobTitle: job.title,
         fromStatus: originalJobStatus,
         toStatus: destStatus,
         timestamp: Date.now()
       }));
-
-      // Remove from optimistic updates
       setOptimisticUpdates(prev => {
         const newSet = new Set(prev);
         newSet.delete(updateId);
         return newSet;
       });
-
-      // Auto-clear error after 5 seconds
       setTimeout(() => {
         setKanbanError(null);
         setFailedUpdates(prev => {
           const newMap = new Map(prev);
-          newMap.delete(job.id);
+          newMap.delete(job._id);
           return newMap;
         });
       }, 5000);
@@ -755,34 +733,8 @@ const handleDateRangeChange = (e) => {
 
               {/* Kanban User Selection */}
               {kanbanView && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-blue-600" />
-                      <label className="font-medium text-blue-900">
-                        Select User for Status Changes:
-                      </label>
-                    </div>
-                    <select
-                      className="border border-blue-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={kanbanUser}
-                      onChange={e => {
-                        setKanbanUser(e.target.value);
-                        setKanbanUserError("");
-                      }}
-                    >
-                      <option value="">-- Select User --</option>
-                      {USER_LIST.map(user => (
-                        <option key={user} value={user}>{user}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {kanbanUserError && (
-                    <div className="mt-2 flex items-center gap-2 text-red-600">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-sm">{kanbanUserError}</span>
-                    </div>
-                  )}
+                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200 text-sm text-green-800">
+                  Drag and drop cards between columns to update status.
                 </div>
               )}
             </div>
@@ -882,8 +834,8 @@ const handleDateRangeChange = (e) => {
                                   ) : (
                                     jobs.map((job, idx) => (
                                       <Draggable
-                                        key={job.id}
-                                        draggableId={job.id.toString()}
+                                        key={ job.id}
+                                        draggableId={(job._id || job.id)}
                                         index={idx}
                                       >
                                         {(provided, snapshot) => (
@@ -899,20 +851,18 @@ const handleDateRangeChange = (e) => {
                                             `}
                                             onClick={() => !job.isUpdating && handleJobClick(job)}
                                           >
-                                            {/* Real-time update indicator */}
                                             {job.isUpdating && (
                                               <div className="absolute top-2 right-2">
                                                 <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
                                               </div>
                                             )}
-                                            
-                                            {/* Failed update indicator */}
-                                            {failedUpdates.has(job.id) && (
+
+                                            {failedUpdates.has(job._id) && (
                                               <div className="absolute top-2 right-2">
                                                 <button
                                                   onClick={(e) => {
                                                     e.stopPropagation();
-                                                    retryFailedUpdate(job.id);
+                                                    retryFailedUpdate(job._id);
                                                   }}
                                                   className="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
                                                   title="Click to retry"

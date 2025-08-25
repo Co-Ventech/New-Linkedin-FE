@@ -29,14 +29,17 @@ function getAuthHeaders() {
 //   }
 // }
 
-export async function updateJobStatus(jobId, { status, username }) {
+// Replace the old LinkedIn status API with the new company-jobs endpoint.
+// Keep signature backward-compatible; ignore username in payload.
+export async function updateJobStatus(jobId, { status /*, username*/ }) {
   try {
-    const url = `${API_BASE}/linkedin/job/${jobId}`; 
-    console.log("PATCH URL (status):", url);
-    console.log("PATCH DATA (status):", { status, username });
-    const res = await axios.patch(
+    const url = `${API_BASE}/company-jobs/${jobId}/status`;
+    const payload = { status };
+    console.log("PUT URL (status):", url);
+    console.log("PUT DATA (status):", payload);
+    const res = await axios.put(
       url,
-      { status, username },
+      payload,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -54,17 +57,16 @@ export async function updateJobStatus(jobId, { status, username }) {
 }
 
 // PATCH for comment only
-export async function addJobComment(jobId, { username, comment }) {
+export async function addJobComment(jobId, { text }) {
   try {
-    const payload = { username, comment };
-    // console.log("PATCH URL (comment):", `${API_BASE}/jobs/${jobId}`);
-    // console.log("PATCH DATA (comment):", payload);
-    const res = await axios.patch(
-      `${API_BASE}/linkedin/job/${jobId}`,
+    const url = `${API_BASE}/company-jobs/${jobId}/comments`;
+    const payload = { text };
+    const res = await axios.post(
+      url,
       payload,
       { headers: getAuthHeaders() }
     );
-    return res.data;
+    return res.data; // { message, job }
   } catch (err) {
     throw new Error(
       err.response?.data?.message || err.message || "Failed to add comment."
@@ -156,14 +158,11 @@ export async function updateUpworkJobStatus(jobId, { status, username }) {
 // export async function addUpworkJobComment(jobId, { username, comment }) {
 //   const url = `${API_BASE}/upwork/job/${jobId}`;
 //   // ...same as before, but with Upwork endpoint...
-export async function addUpworkJobComment(jobId, { username, comment }) {
-  // console.log("jobId",localJob?.jobId,localJob);
+export async function addUpworkJobComment(jobId, { text }) {
   try {
-    const url = `${API_BASE}/upwork/job/${jobId}`;
-    const payload = { username, comment };
-    console.log("PATCH URL (comment):", url);
-    console.log("PATCH DATA (comment):", payload);
-    const res = await axios.patch(
+    const url = `${API_BASE}/company-jobs/${jobId}/comments`;
+    const payload = { text };
+    const res = await axios.post(
       url,
       payload,
       {
@@ -173,11 +172,11 @@ export async function addUpworkJobComment(jobId, { username, comment }) {
         },
       }
     );
-    return res.data;
-  }catch (err) {
+    return res.data; // { message, job }
+  } catch (err) {
     console.error("API addUpworkJobComment error:", err, err?.response, err?.response?.data);
     throw new Error(
-      err?.response?.data?.message || err?.message || "Failed to add Aecomment."
+      err?.response?.data?.message || err?.message || "Failed to add comment."
     );
   }
 }
@@ -493,28 +492,21 @@ export async function fetchUpworkStatusHistory({ date, start, end }) {
 //   }
 // }
 
+// LinkedIn/General status (no username required)
 export async function updateJobStatusNew(jobId, status) {
   try {
     const url = `${API_BASE}/company-jobs/${jobId}/status`;
     const payload = { status };
-    console.log("PUT URL (status):", url);
-    console.log("PUT DATA (status):", payload);
-    const res = await axios.put(
-      url,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const res = await axios.put(url, payload, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        "Content-Type": "application/json",
+      },
+    });
     return res.data;
   } catch (err) {
     console.error("API updateJobStatusNew error:", err, err.response?.data);
-    throw new Error(
-      err.response?.data?.message || err.message || "Failed to update job status."
-    );
+    throw new Error(err.response?.data?.message || err.message || "Failed to update job status.");
   }
 }
 

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import {useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
-import { fetchUpworkJobsByDateThunk, updateUpworkJobStatusThunk , updateUpworkAeCommentThunk, addUpworkJobCommentThunk, upworkfetchJobByIdThunk, updateUpworkAeScoreThunk, 
-  updateUpworkAePitchedThunk , updateUpworkEstimatedBudgetThunk , generateUpworkProposalThunk , updateUpworkProposalThunk, setUpworkProposalLoading,updateJobStatusNewThunk, updateUpworkJobStatusNewThunk } from "../slices/jobsSlice";
+import {
+  fetchUpworkJobsByDateThunk, updateUpworkJobStatusThunk, updateUpworkAeCommentThunk, addUpworkJobCommentThunk, upworkfetchJobByIdThunk, updateUpworkAeScoreThunk,
+  updateUpworkAePitchedThunk, updateUpworkEstimatedBudgetThunk, generateUpworkProposalThunk, updateUpworkProposalThunk, setUpworkProposalLoading, updateJobStatusNewThunk, updateUpworkJobStatusNewThunk
+} from "../slices/jobsSlice";
 import axios from "axios";
 
 
@@ -72,16 +74,16 @@ const UpworkJobDetails = () => {
   const loading = useSelector(state => state.jobs.loading);
 
 
-  
-const { id } = useParams();
-const dispatch = useDispatch();
-const jobFromRedux = useSelector(state =>
-  state.jobs.upworkJobsByDate
-    .flatMap(day => day.jobs || [])
-    .find(j => String(j._id) === String(id) || String(j.jobId) === String(id) || String(j.id) === String(id))
-);
 
-const currentUser = useSelector((state) => state.user.user);
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const jobFromRedux = useSelector(state =>
+    state.jobs.upworkJobsByDate
+      .flatMap(day => day.jobs || [])
+      .find(j => String(j._id) === String(id) || String(j.jobId) === String(id) || String(j.id) === String(id))
+  );
+
+  const currentUser = useSelector((state) => state.user.user);
 
   // const dispatch = useDispatch();
   // const job = location.state?.job;
@@ -103,206 +105,219 @@ const currentUser = useSelector((state) => state.user.user);
   const [aeScoreSaving, setAeScoreSaving] = useState(false);
   const [aeScoreError, setAeScoreError] = useState("");
   const [aePitchedInput, setAePitchedInput] = useState(localJob?.ae_pitched || "");
-const [aePitchedSaving, setAePitchedSaving] = useState(false);
-const [aePitchedError, setAePitchedError] = useState("");
-const [estimatedBudgetInput, setEstimatedBudgetInput] = useState(localJob?.estimated_budget || "");
-const [budgetSaving, setBudgetSaving] = useState(false);
-const [budgetError, setBudgetError] = useState("");
-const [user , setUser ]= useState("");
-const jobId = localJob?.jobId || localJob?.id;
-const upworkProposalState = useSelector(state => {
-  const proposals = state.jobs.upworkProposals || {};
-  return proposals[jobId] || { text: '', locked: false };
-});
-const upworkProposalLoading = useSelector(state => state.jobs.upworkProposalLoading);
-console.log("upworkProposalLoading", upworkProposalLoading);
-const upworkProposalError = useSelector(state => state.jobs.upworkProposalError);
-const upworkProposalSaving = useSelector(state => state.jobs.upworkProposalSaving);
-const upworkProposalSaveError = useSelector(state => state.jobs.upworkProposalSaveError);
+  const [aePitchedSaving, setAePitchedSaving] = useState(false);
+  const [aePitchedError, setAePitchedError] = useState("");
+  const [estimatedBudgetInput, setEstimatedBudgetInput] = useState(localJob?.estimated_budget || "");
+  const [budgetSaving, setBudgetSaving] = useState(false);
+  const [budgetError, setBudgetError] = useState("");
+  const [user, setUser] = useState("");
+  const jobId = localJob?.jobId || localJob?.id;
+  const upworkProposalState = useSelector(state => {
+    const proposals = state.jobs.upworkProposals || {};
+    return proposals[jobId] || { text: '', locked: false };
+  });
+  const upworkProposalLoading = useSelector(state => state.jobs.upworkProposalLoading);
+  console.log("upworkProposalLoading", upworkProposalLoading);
+  const upworkProposalError = useSelector(state => state.jobs.upworkProposalError);
+  const upworkProposalSaving = useSelector(state => state.jobs.upworkProposalSaving);
+  const upworkProposalSaveError = useSelector(state => state.jobs.upworkProposalSaveError);
 
-const [proposalCategory, setProposalCategory] = useState("");
-const [showProposalUI, setShowProposalUI] = useState(true);
-const [isEditingProposal, setIsEditingProposal] = useState(false);
-const [editableProposal, setEditableProposal] = useState(upworkProposalState.text || "");
+  const [proposalCategory, setProposalCategory] = useState("");
+  const [showProposalUI, setShowProposalUI] = useState(true);
+  const [isEditingProposal, setIsEditingProposal] = useState(false);
+  const [editableProposal, setEditableProposal] = useState(upworkProposalState.text || "");
 
 
 
-// const [proposalCategory, setProposalCategory] = useState("");
-// const [editableProposal, setEditableProposal] = useState("");
+  // const [proposalCategory, setProposalCategory] = useState("");
+  // const [editableProposal, setEditableProposal] = useState("");
 
-// const upworkProposalLoading = useSelector(state => state.jobs.upworkProposalLoading);
-// const upworkProposalError = useSelector(state => state.jobs.upworkProposalError);
-// const upworkProposalSaving = useSelector(state => state.jobs.upworkProposalSaving);
-// const upworkProposalSaveError = useSelector(state => state.jobs.upworkProposalSaveError);
-// const jobId = localJob?.jobId || localJob?.id;
-// const jobProposal = useSelector(state => (state.jobs.upworkProposals && jobId ? state.jobs.upworkProposals[jobId] : { text: '', locked: false }));
+  // const upworkProposalLoading = useSelector(state => state.jobs.upworkProposalLoading);
+  // const upworkProposalError = useSelector(state => state.jobs.upworkProposalError);
+  // const upworkProposalSaving = useSelector(state => state.jobs.upworkProposalSaving);
+  // const upworkProposalSaveError = useSelector(state => state.jobs.upworkProposalSaveError);
+  // const jobId = localJob?.jobId || localJob?.id;
+  // const jobProposal = useSelector(state => (state.jobs.upworkProposals && jobId ? state.jobs.upworkProposals[jobId] : { text: '', locked: false }));
 
-// useEffect(() => {
-//   setEditableProposal(jobProposal.text || "");
-// }, [jobProposal.text]);
+  // useEffect(() => {
+  //   setEditableProposal(jobProposal.text || "");
+  // }, [jobProposal.text]);
 
-  
-useEffect(() => {
-  if (!jobFromRedux && id) {
-    setLoadingJob(true);
-    setJobError(null);
-    axios.get(`${REMOTE_HOST}/api/upwork/job?id=${id}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-    })
-      .then(res => {
-      //   if (!res.ok) throw new Error("Job not found");
-      //   return res.json();
-      // })
-      const data = res.data.job ? res.data.job : res.data;
-        setLocalJob(data);
-        setLoadingJob(false);
+
+  useEffect(() => {
+    if (!jobFromRedux && id) {
+      setLoadingJob(true);
+      setJobError(null);
+      axios.get(`${REMOTE_HOST}/api/upwork/job?id=${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
       })
-      .catch(err => {
-        setJobError("Job not found.");
-        setLoadingJob(false);
-      });
-    
-  } else if (jobFromRedux) {
-    setLocalJob(jobFromRedux);
-    setSaving(true);
+        .then(res => {
+          //   if (!res.ok) throw new Error("Job not found");
+          //   return res.json();
+          // })
+          const data = res.data.job ? res.data.job : res.data;
+          setLocalJob(data);
+          setLoadingJob(false);
+        })
+        .catch(err => {
+          setJobError("Job not found.");
+          setLoadingJob(false);
+        });
+
+    } else if (jobFromRedux) {
+      setLocalJob(jobFromRedux);
+      setSaving(true);
+    }
+    console.log("local jobs", localJob);
+  }, [jobFromRedux, id]);
+  if (loadingJob) {
+    return <div className="p-8">Loading job details...</div>;
   }
-  console.log("local jobs",localJob);
-}, [jobFromRedux, id]);
-if (loadingJob) {
-  return <div className="p-8">Loading job details...</div>;
-}
-if (jobError) {
-  return <div className="p-8">{jobError}</div>;
-}
-if (!localJob) {
-  return null;
-}
-
-useEffect(() => {
-  setEditableProposal(upworkProposalState.text || "");
-  if (upworkProposalState.text) setShowProposalUI(false);
-}, [upworkProposalState.text]);
-
-useEffect(() => {
-  // Reset proposalLoading when job changes or component unmounts
-  return () => {
-    dispatch(setUpworkProposalLoading(false));
-  };
-}, [id, dispatch]);
-
-useEffect(() => {
-  if (upworkProposalState.text) {
-    setShowProposalUI(false);
+  if (jobError) {
+    return <div className="p-8">{jobError}</div>;
   }
-}, [upworkProposalState.text]);
+  if (!localJob) {
+    return null;
+  }
 
-// if (loading) {
+  useEffect(() => {
+    setEditableProposal(upworkProposalState.text || "");
+    if (upworkProposalState.text) setShowProposalUI(false);
+  }, [upworkProposalState.text]);
+
+  useEffect(() => {
+    // Reset proposalLoading when job changes or component unmounts
+    return () => {
+      dispatch(setUpworkProposalLoading(false));
+    };
+  }, [id, dispatch]);
+
+  useEffect(() => {
+    if (upworkProposalState.text) {
+      setShowProposalUI(false);
+    }
+  }, [upworkProposalState.text]);
+
+  // if (loading) {
   //   return <div className="p-8">Loading job details...</div>;
   // }
   // if (!job) {
   //   return <div className="p-8">No job details found.</div>;
   // }
-  
-//   // Sync local state with job object
-//  useEffect(() => {
-//   if (!job && id) {
-//     dispatch(fetchJobByIdThunk(id));
-//   }
-// }, [job, id, dispatch]);
 
-// if (loading) {
-//   return <div className="p-8">Loading job details...</div>;
-// }
-// if (!job) {
-//   return <div className="p-8">No job details found.</div>;
-// }
+  //   // Sync local state with job object
+  //  useEffect(() => {
+  //   if (!job && id) {
+  //     dispatch(fetchJobByIdThunk(id));
+  //   }
+  // }, [job, id, dispatch]);
 
-const handleGenerateProposal = async (e) => {
-  e.preventDefault();
-  if (!proposalCategory) return;
-  await dispatch(generateUpworkProposalThunk({ jobId, selectedCategory: proposalCategory }));
-};
+  // if (loading) {
+  //   return <div className="p-8">Loading job details...</div>;
+  // }
+  // if (!job) {
+  //   return <div className="p-8">No job details found.</div>;
+  // }
 
-const handleSaveProposal = async () => {
-  if (!editableProposal.trim()) return;
-  await dispatch(updateUpworkProposalThunk({ jobId, proposal: editableProposal.trim() }));
-  setIsEditingProposal(false);
-};
-
-const handleSaveAeRemark = async (e) => {
-  e.preventDefault();
-  setSavingAeRemark(true);
-  const jobId = localJob.jobId || localJob.id;
-  console.log('jobId', jobId);
-  try {
-    await dispatch(updateUpworkAeCommentThunk({ jobId, ae_comment: aeRemarkInput })).unwrap();
-    await dispatch(upworkfetchJobByIdThunk(jobId)).unwrap();
-    setAeRemarkInput("");
-  } catch (err) {
-    alert("Failed to save AE Remark.");
-  } finally {
-    setSavingAeRemark(false);
-  }
-};
-const handleSaveStatus = async (e) => {
-  e.preventDefault();
-  if (!selectedStatus) return;
-  
-  setSaving(true);
-  // Use the _id field instead of jobId
-  const jobId = localJob._id;
-  
-  if (!jobId) {
-    alert("Error: Job ID not found. Please refresh the page.");
-    setSaving(false);
-    return;
-  }
-  
-  try {
-    console.log('Dispatching updateUpworkJobStatusNewThunk', { jobId, status: selectedStatus });
-    const result = await dispatch(updateUpworkJobStatusNewThunk({ jobId, status: selectedStatus })).unwrap();
-    console.log('Status updated successfully:', result);
-    
-    // Update local job state with the response data
-    if (result.job) {
-      setLocalJob(prev => ({
-        ...prev,
-        currentStatus: result.job.currentStatus,
-        statusHistory: result.job.statusHistory,
-        comments: result.job.comments,
-        proposal: result.job.proposal
-      }));
-    } else {
-      setLocalJob(prev => ({
-        ...prev,
-        currentStatus: selectedStatus
-      }));
-    }
-    
-    // Show success message
-    alert("Status updated successfully!");
-  } catch (err) {
-    console.error('Status update failed:', err);
-    alert("Failed to update status: " + err.message);
-  } finally {
-    setSaving(false);
-  }
-};
-  const handleAddComment = async (e) => {
+  const handleGenerateProposal = async (e) => {
     e.preventDefault();
-    if (!commentUser || !comment.trim()) return;
-    setCommentLoading(true);
+    if (!proposalCategory) return;
+    await dispatch(generateUpworkProposalThunk({ jobId, selectedCategory: proposalCategory }));
+  };
+
+  const handleSaveProposal = async () => {
+    if (!editableProposal.trim()) return;
+    await dispatch(updateUpworkProposalThunk({ jobId, proposal: editableProposal.trim() }));
+    setIsEditingProposal(false);
+  };
+
+  const handleSaveAeRemark = async (e) => {
+    e.preventDefault();
+    setSavingAeRemark(true);
     const jobId = localJob.jobId || localJob.id;
     console.log('jobId', jobId);
     try {
-      console.log('Dispatching addUpworkJobCommentThunk', { jobId, username: commentUser, comment });
-      await dispatch(addUpworkJobCommentThunk({ jobId, username: commentUser, comment })).unwrap();
-      console.log('Dispatched successfully');
-      await dispatch(upworkfetchJobByIdThunk(jobId));
+      await dispatch(updateUpworkAeCommentThunk({ jobId, ae_comment: aeRemarkInput })).unwrap();
+      await dispatch(upworkfetchJobByIdThunk(jobId)).unwrap();
+      setAeRemarkInput("");
+    } catch (err) {
+      alert("Failed to save AE Remark.");
+    } finally {
+      setSavingAeRemark(false);
+    }
+  };
+  const handleSaveStatus = async (e) => {
+    e.preventDefault();
+    if (!selectedStatus) return;
+
+    setSaving(true);
+    // Use the _id field instead of jobId
+    const jobId = localJob._id;
+
+    if (!jobId) {
+      alert("Error: Job ID not found. Please refresh the page.");
+      setSaving(false);
+      return;
+    }
+
+    try {
+      console.log('Dispatching updateUpworkJobStatusNewThunk', { jobId, status: selectedStatus });
+      const result = await dispatch(updateUpworkJobStatusNewThunk({ jobId, status: selectedStatus })).unwrap();
+      console.log('Status updated successfully:', result);
+
+      // Update local job state with the response data
+      if (result.job) {
+        setLocalJob(prev => ({
+          ...prev,
+          currentStatus: result.job.currentStatus,
+          statusHistory: result.job.statusHistory,
+          comments: result.job.comments,
+          proposal: result.job.proposal
+        }));
+      } else {
+        setLocalJob(prev => ({
+          ...prev,
+          currentStatus: selectedStatus
+        }));
+      }
+
+      // Show success message
+      alert("Status updated successfully!");
+    } catch (err) {
+      console.error('Status update failed:', err);
+      alert("Failed to update status: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!comment.trim()) return;
+    setCommentLoading(true);
+
+    const companyJobId = localJob?._id;
+    if (!companyJobId) {
+      alert("Error: Company Job ID not found.");
+      setCommentLoading(false);
+      return;
+    }
+
+    try {
+      const result = await dispatch(
+        addUpworkJobCommentThunk({ jobId: companyJobId, text: comment.trim() })
+      ).unwrap();
+
+      if (result?.job) {
+        setLocalJob(prev => ({
+          ...prev,
+          comments: result.job.comments,
+          currentStatus: result.job.currentStatus,
+          statusHistory: result.job.statusHistory
+        }));
+      }
       setComment("");
-      setCommentUser("");
     } catch (err) {
       alert("Failed to add comment.");
     } finally {
@@ -389,7 +404,7 @@ const handleSaveStatus = async (e) => {
         >
           &larr; Back to Jobs
         </button>
-       
+
         {/* Job Overview Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">Job Overview</h2>
@@ -397,9 +412,9 @@ const handleSaveStatus = async (e) => {
             <h1 className="text-2xl font-bold text-gray-800 flex-1">{localJob.title}</h1>
             {localJob.tier && (
               <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass}`} title="Tier">
-                  {localJob.tier === 'Green' ? 'AI Recommended' :
+                {localJob.tier === 'Green' ? 'AI Recommended' :
                   localJob.tier === 'Yellow' ? 'Recommended' :
-                  localJob.tier === 'Red' ? 'Not Recommended' : localJob.tier}
+                    localJob.tier === 'Red' ? 'Not Recommended' : localJob.tier}
               </span>
             )}
           </div>
@@ -411,7 +426,7 @@ const handleSaveStatus = async (e) => {
           </div>
 
           <div className="flex flex-wrap gap-4 text-xs text-gray-500 mb-2">
-          {/* <span className="font-bold">
+            {/* <span className="font-bold">
   Project Length:{" "}
   {(() => {
     const weeks = localJob.hourlyWeeks;
@@ -463,13 +478,13 @@ const handleSaveStatus = async (e) => {
             ) : (
               <span className="text-xs text-gray-400">No skills listed.</span>
             )}
-          
-          <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
-            <span><span className="font-bold">Client History: buyerTotalJobsWithHires </span> {localJob.buyerTotalJobsWithHires === null || localJob.buyerTotalJobsWithHires === undefined
-              ? "No hires"
-              : localJob.buyerTotalJobsWithHires 
-             }</span>
-          </div>
+
+            <div className="flex flex-wrap gap-2 text-xs text-gray-600 mb-2">
+              <span><span className="font-bold">Client History: buyerTotalJobsWithHires </span> {localJob.buyerTotalJobsWithHires === null || localJob.buyerTotalJobsWithHires === undefined
+                ? "No hires"
+                : localJob.buyerTotalJobsWithHires
+              }</span>
+            </div>
           </div>
         </section>
         {/* KPIs Section */}
@@ -477,7 +492,7 @@ const handleSaveStatus = async (e) => {
           <h2 className="text-lg font-bold mb-3 text-gray-800">KPIs</h2>
           <div className="grid grid-cols-2 gap-2 text-xs">
             {[
-                { label: 'Budget Attractiveness', value: localJob.kpi_budget_attractiveness },
+              { label: 'Budget Attractiveness', value: localJob.kpi_budget_attractiveness },
               { label: 'Avg Hourly Rate', value: localJob.kpi_avg_hourly_rate },
               { label: 'Contract to Hire', value: localJob.kpi_contract_to_hire },
               { label: 'Enterprise Heuristic', value: localJob.kpi_enterprise_heuristic },
@@ -511,109 +526,109 @@ const handleSaveStatus = async (e) => {
             </div>
           </div>
         </section>
-        
-     {/* AE Score Section */}
-     <section className="mb-6 border-b pb-4">
-  <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
-  {Array.isArray(localJob.ae_score) && localJob.ae_score.length > 0 ? (
-  <div className="bg-green-50 border border-green-200 rounded p-3">
-    <span className="font-semibold">AE Score:</span> {localJob.ae_score[0].value}%
-  </div>
- ) : (
-  <form onSubmit={handleSaveUpworkAeScore} className="flex flex-col gap-2 mb-2">
-    <select
-      className="border rounded px-2 py-1"
-      value={aeScoreUser}
-      onChange={e => setAeScoreUser(e.target.value)}
-      required
-    >
-      <option value="">Select User</option>
-      {USER_LIST.map(user => (
-        <option key={user} value={user}>{user}</option>
-      ))}
-    </select>
-    <input
-      type="number"
-      className="border rounded px-2 py-1 w-full"
-      placeholder="Enter AE Score (0-100)"
-      value={aeScoreInput}
-      onChange={e => setAeScoreInput(e.target.value)}
-      disabled={aeScoreSaving}
-      min={0}
-      max={100}
-      required
-    />
-    <button
-      type="submit"
-      className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-      disabled={aeScoreSaving || !aeScoreUser || !aeScoreInput}
-    >
-      {aeScoreSaving ? "Saving..." : "Save"}
-    </button>
-    {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
-  </form>
-)}
-</section>
-      {/* AE Pitched Section */}
-<section className="mb-6 border-b pb-4">
-  <h2 className="text-lg font-bold mb-3 text-gray-800">AE Pitched</h2>
-  {localJob.ae_pitched ? (
-    <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
-      <span className="font-semibold">AE Pitched:</span> {localJob.ae_pitched}
-    </div>
-  ) : (
-    <form onSubmit={handleSaveAePitched} className="flex flex-col gap-2 mb-2">
-      <textarea
-        className="border rounded px-2 py-1 w-full"
-        rows={2}
-        placeholder="Write AE Pitched..."
-        value={aePitchedInput}
-        onChange={e => setAePitchedInput(e.target.value)}
-        disabled={aePitchedSaving}
-        required
-      />
-      <button
-        type="submit"
-        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-        disabled={aePitchedSaving || !aePitchedInput.trim()}
-      >
-        {aePitchedSaving ? "Saving..." : "Save"}
-      </button>
-      {aePitchedError && <div className="text-red-500 text-sm">{aePitchedError}</div>}
-    </form>
-  )}
-</section>
 
-{/* Estimated Budget Section */}
-<section className="mb-6 border-b pb-4">
-  <h2 className="text-lg font-bold mb-3 text-gray-800">Estimated Budget</h2>
-  {localJob.estimated_budget ? (
-    <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
-      <span className="font-semibold">Estimated Budget:</span> ${localJob.estimated_budget}
-    </div>
-  ) : (
-    <form onSubmit={handleSaveEstimatedBudget} className="flex flex-col gap-2 mb-2">
-      <input
-        type="number"
-        className="border rounded px-2 py-1 w-full"
-        placeholder="Enter estimated budget"
-        value={estimatedBudgetInput}
-        onChange={e => setEstimatedBudgetInput(e.target.value)}
-        disabled={budgetSaving}
-        min={1}
-        required
-      />
-      <button
-        type="submit"
-        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-        disabled={budgetSaving || !estimatedBudgetInput}
-      >
-        {budgetSaving ? "Saving..." : "Save"}
-      </button>
-      {budgetError && <div className="text-red-500 text-sm">{budgetError}</div>}
-    </form>
-  )}
-</section>
+        {/* AE Score Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
+          {Array.isArray(localJob.ae_score) && localJob.ae_score.length > 0 ? (
+            <div className="bg-green-50 border border-green-200 rounded p-3">
+              <span className="font-semibold">AE Score:</span> {localJob.ae_score[0].value}%
+            </div>
+          ) : (
+            <form onSubmit={handleSaveUpworkAeScore} className="flex flex-col gap-2 mb-2">
+              <select
+                className="border rounded px-2 py-1"
+                value={aeScoreUser}
+                onChange={e => setAeScoreUser(e.target.value)}
+                required
+              >
+                <option value="">Select User</option>
+                {USER_LIST.map(user => (
+                  <option key={user} value={user}>{user}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Enter AE Score (0-100)"
+                value={aeScoreInput}
+                onChange={e => setAeScoreInput(e.target.value)}
+                disabled={aeScoreSaving}
+                min={0}
+                max={100}
+                required
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={aeScoreSaving || !aeScoreUser || !aeScoreInput}
+              >
+                {aeScoreSaving ? "Saving..." : "Save"}
+              </button>
+              {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
+            </form>
+          )}
+        </section>
+        {/* AE Pitched Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Pitched</h2>
+          {localJob.ae_pitched ? (
+            <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+              <span className="font-semibold">AE Pitched:</span> {localJob.ae_pitched}
+            </div>
+          ) : (
+            <form onSubmit={handleSaveAePitched} className="flex flex-col gap-2 mb-2">
+              <textarea
+                className="border rounded px-2 py-1 w-full"
+                rows={2}
+                placeholder="Write AE Pitched..."
+                value={aePitchedInput}
+                onChange={e => setAePitchedInput(e.target.value)}
+                disabled={aePitchedSaving}
+                required
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={aePitchedSaving || !aePitchedInput.trim()}
+              >
+                {aePitchedSaving ? "Saving..." : "Save"}
+              </button>
+              {aePitchedError && <div className="text-red-500 text-sm">{aePitchedError}</div>}
+            </form>
+          )}
+        </section>
+
+        {/* Estimated Budget Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Estimated Budget</h2>
+          {localJob.estimated_budget ? (
+            <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+              <span className="font-semibold">Estimated Budget:</span> ${localJob.estimated_budget}
+            </div>
+          ) : (
+            <form onSubmit={handleSaveEstimatedBudget} className="flex flex-col gap-2 mb-2">
+              <input
+                type="number"
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Enter estimated budget"
+                value={estimatedBudgetInput}
+                onChange={e => setEstimatedBudgetInput(e.target.value)}
+                disabled={budgetSaving}
+                min={1}
+                required
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={budgetSaving || !estimatedBudgetInput}
+              >
+                {budgetSaving ? "Saving..." : "Save"}
+              </button>
+              {budgetError && <div className="text-red-500 text-sm">{budgetError}</div>}
+            </form>
+          )}
+        </section>
         {/* AI Remark Section */}
         {localJob.ai_remark && (
           <section className="mb-6 border-b pb-4">
@@ -623,8 +638,8 @@ const handleSaveStatus = async (e) => {
             </div>
           </section>
         )}
-         {/* AE Remark Section */}
-         <section className="mb-6 border-b pb-4">
+        {/* AE Remark Section */}
+        <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">AE Remark</h2>
           {!localJob.ae_comment ? (
             <form onSubmit={handleSaveAeRemark} className="flex flex-col gap-2 mb-2">
@@ -654,180 +669,169 @@ const handleSaveStatus = async (e) => {
         {/* Comments Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">Add Comments</h2>
-        <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">
-          <select
-            className="border rounded px-2 py-1"
-            value={commentUser}
-            onChange={e => setCommentUser(e.target.value)}
-            required
-          >
-            <option value="">Select User</option>
-            {USER_LIST.map(user => (
-              <option key={user} value={user}>{user}</option>
-            ))}
-          </select>
-          <input
-            type="text"
-            value={comment}
-            onChange={e => setComment(e.target.value)}
-            placeholder="Add a comment..."
-            className="border px-2 py-1 rounded w-full"
-            // disabled={commentLoading}
-            required
-          />
-          <button
-            type="submit"
-            className="px-4 py-1 bg-blue-600 text-white rounded"
-            disabled={commentLoading || !commentUser || !comment.trim()}
-          >
-            {commentLoading ? "Saving..." : "Add"}
-      </button>
-        </form>
-        <ul className="mb-4">
+          <form onSubmit={handleAddComment} className="mb-4 flex flex-col md:flex-row gap-2 items-center">
+            <input
+              type="text"
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              placeholder="Add a comment..."
+              className="border px-2 py-1 rounded w-full"
+              disabled={commentLoading}
+              required
+            />
+            <button
+              type="submit"
+              className="px-4 py-1 bg-blue-600 text-white rounded"
+              disabled={commentLoading || !comment.trim()}
+            >
+              {commentLoading ? "Saving..." : "Add"}
+            </button>
+          </form>
+          <ul className="mb-4">
             {Array.isArray(localJob.comments) && localJob.comments.length > 0 ? (
-            localJob.comments.map((c, idx) => (
-              <li key={idx} className="text-sm text-gray-700 mb-1">
-                <span className="font-semibold">{c.username}:</span> {c.comment}
-                {c.date && (
-                  <span className="text-xs text-gray-500 ml-2">
-                    ({new Date(c.date).toLocaleString()})
-                  </span>
-                )}
-              </li>
-            ))
-          ) : (
-            <li className="text-sm text-gray-400">No comments yet.</li>
-          )}
-        </ul>
+              localJob.comments.map((c, idx) => (
+                <li key={idx} className="text-sm text-gray-700 mb-1">
+                  {c.username && <span className="font-semibold">{c.username}:</span>} {c.text || c.comment || ""}
+                  {c.date && (
+                    <span className="text-xs text-gray-500 ml-2">
+                      ({new Date(c.date).toLocaleString()})
+                    </span>
+                  )}
+                </li>
+              ))
+            ) : (
+              <li className="text-sm text-gray-400">No comments yet.</li>
+            )}
+          </ul>
         </section>
-         {/* Status Management Section */}
-         <section className="mb-6 border-b pb-4">
-  <h2 className="text-lg font-bold mb-3 text-gray-800">Update Status</h2>
-  <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
-    <select
-      className="border rounded px-2 py-1"
-      value={selectedStatus}
-      onChange={e => setSelectedStatus(e.target.value)}
-    >
-      {STATUS_OPTIONS.map(status => (
-        <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
-      ))}
-    </select>
-    <button
-      type="submit"
-      className="px-4 py-1 bg-blue-600 text-white rounded"
-      disabled={statusSaving}
-    >
-      {statusSaving ? "Updating..." : "Update Status"}
-      
-    </button>
-  </form>
-  
-  {/* Show current status */}
-  <div className="mb-2">
-    <span className="font-semibold">Current Status:</span>{" "}
-    <span className="px-2 py-1 rounded bg-gray-100">
-      {(localJob.currentStatus || "-").replace(/_/g, " ")}
-    </span>
-  </div>
-  
-  {/* Show who updated the status */}
-  <div className="text-sm text-gray-500">
-    Status updated by: {currentUser?.username || 'Current User'}
-  </div>
-  
-  {/* Show status history if available */}
-  {localJob.statusHistory && localJob.statusHistory.length > 0 && (
-    <div className="mt-3">
-      <span className="font-semibold text-sm">Status History:</span>
-      <ul className="mt-1 space-y-1">
-        {localJob.statusHistory.map((entry, idx) => (
-          <li key={idx} className="text-xs text-gray-600">
-            <span className="font-medium">{entry.username}</span> set status to{" "}
-            <span className="px-1 py-0.5 rounded bg-gray-200 text-xs">
-              {entry.status.replace(/_/g, " ")}
-            </span>{" "}
-            <span className="text-gray-500">
-              ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
+        {/* Status Management Section */}
+        <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Update Status</h2>
+          <form onSubmit={handleSaveStatus} className="flex flex-col gap-2 mb-2 md:flex-row md:items-center">
+            <select
+              className="border rounded px-2 py-1"
+              value={selectedStatus}
+              onChange={e => setSelectedStatus(e.target.value)}
+            >
+              {STATUS_OPTIONS.map(status => (
+                <option key={status} value={status}>{status.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="px-4 py-1 bg-blue-600 text-white rounded"
+              disabled={statusSaving}
+            >
+              {statusSaving ? "Updating..." : "Update Status"}
+
+            </button>
+          </form>
+
+          {/* Show current status */}
+          <div className="mb-2">
+            <span className="font-semibold">Current Status:</span>{" "}
+            <span className="px-2 py-1 rounded bg-gray-100">
+              {(localJob.currentStatus || "-").replace(/_/g, " ")}
             </span>
-            {entry.notes && <span className="text-gray-500 ml-2">- {entry.notes}</span>}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
-</section>
+          </div>
+
+          {/* Show who updated the status */}
+          <div className="text-sm text-gray-500">
+            Status updated by: {currentUser?.username || 'Current User'}
+          </div>
+
+          {/* Show status history if available */}
+          {localJob.statusHistory && localJob.statusHistory.length > 0 && (
+            <div className="mt-3">
+              <span className="font-semibold text-sm">Status History:</span>
+              <ul className="mt-1 space-y-1">
+                {localJob.statusHistory.map((entry, idx) => (
+                  <li key={idx} className="text-xs text-gray-600">
+                    <span className="font-medium">{entry.username}</span> set status to{" "}
+                    <span className="px-1 py-0.5 rounded bg-gray-200 text-xs">
+                      {entry.status.replace(/_/g, " ")}
+                    </span>{" "}
+                    <span className="text-gray-500">
+                      ({entry.date ? new Date(entry.date).toLocaleString() : "-"})
+                    </span>
+                    {entry.notes && <span className="text-gray-500 ml-2">- {entry.notes}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
 
         <section className="mb-6 border-b pb-4">
-  <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>
-  {showProposalUI ? (
-    <form onSubmit={handleGenerateProposal} className="flex flex-col gap-2 mb-2">
-      <select
-        className="border rounded px-2 py-1"
-        value={proposalCategory}
-        onChange={e => setProposalCategory(e.target.value)}
-        required
-      >
-        <option value="">Select Service Category</option>
-        {UPWORK_SERVICE_CATEGORIES.map(cat => (
-          <option key={cat} value={cat}>{cat}</option>
-        ))}
-      </select>
-      <button
-        type="submit"
-        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
-        disabled={upworkProposalLoading || !proposalCategory}
-      >
-        {upworkProposalLoading ? "Generating..." : "Generate Proposal"}
-      </button>
-      {upworkProposalError && <div className="text-red-500 text-sm">{upworkProposalError}</div>}
-    </form>
-  ) : (
-    <div>
-      <label className="block font-semibold mb-1">Generated Proposal:</label>
-      <textarea
-        className="border rounded px-2 py-1 w-full"
-        rows={8}
-        value={isEditingProposal ? editableProposal : upworkProposalState.text}
-        onChange={e => setEditableProposal(e.target.value)}
-        readOnly={!isEditingProposal}
-      />
-      <div className="flex gap-2 mt-2">
-  {!isEditingProposal && !upworkProposalState.locked && (
-    <button
-      className="px-4 py-1 bg-yellow-500 text-white rounded"
-      onClick={() => setIsEditingProposal(true)}
-    >
-      Edit
-    </button>
-  )}
-  {isEditingProposal && (
-    <>
-      <button
-        className="px-4 py-1 bg-blue-600 text-white rounded"
-        onClick={handleSaveProposal}
-        disabled={upworkProposalSaving}
-      >
-        {upworkProposalSaving ? "Saving..." : "Save"}
-      </button>
-      <button
-        className="px-4 py-1 bg-gray-400 text-white rounded"
-        onClick={() => {
-          setEditableProposal(upworkProposalState.text || "");
-          setIsEditingProposal(false);
-        }}
-        disabled={upworkProposalSaving}
-      >
-        Cancel
-      </button>
-    </>
-  )}
-</div>
-      {upworkProposalSaveError && <div className="text-red-500 text-sm">{upworkProposalSaveError}</div>}
-    </div>
-  )}
-</section>
-      
+          <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>
+          {showProposalUI ? (
+            <form onSubmit={handleGenerateProposal} className="flex flex-col gap-2 mb-2">
+              <select
+                className="border rounded px-2 py-1"
+                value={proposalCategory}
+                onChange={e => setProposalCategory(e.target.value)}
+                required
+              >
+                <option value="">Select Service Category</option>
+                {UPWORK_SERVICE_CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={upworkProposalLoading || !proposalCategory}
+              >
+                {upworkProposalLoading ? "Generating..." : "Generate Proposal"}
+              </button>
+              {upworkProposalError && <div className="text-red-500 text-sm">{upworkProposalError}</div>}
+            </form>
+          ) : (
+            <div>
+              <label className="block font-semibold mb-1">Generated Proposal:</label>
+              <textarea
+                className="border rounded px-2 py-1 w-full"
+                rows={8}
+                value={isEditingProposal ? editableProposal : upworkProposalState.text}
+                onChange={e => setEditableProposal(e.target.value)}
+                readOnly={!isEditingProposal}
+              />
+              <div className="flex gap-2 mt-2">
+                {!isEditingProposal && !upworkProposalState.locked && (
+                  <button
+                    className="px-4 py-1 bg-yellow-500 text-white rounded"
+                    onClick={() => setIsEditingProposal(true)}
+                  >
+                    Edit
+                  </button>
+                )}
+                {isEditingProposal && (
+                  <>
+                    <button
+                      className="px-4 py-1 bg-blue-600 text-white rounded"
+                      onClick={handleSaveProposal}
+                      disabled={upworkProposalSaving}
+                    >
+                      {upworkProposalSaving ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      className="px-4 py-1 bg-gray-400 text-white rounded"
+                      onClick={() => {
+                        setEditableProposal(upworkProposalState.text || "");
+                        setIsEditingProposal(false);
+                      }}
+                      disabled={upworkProposalSaving}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
+              </div>
+              {upworkProposalSaveError && <div className="text-red-500 text-sm">{upworkProposalSaveError}</div>}
+            </div>
+          )}
+        </section>
+
         {/* Raw JSON for debugging
         <details className="mt-4">
           <summary className="cursor-pointer text-xs text-gray-400">Raw Job Data</summary>

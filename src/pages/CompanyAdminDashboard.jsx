@@ -59,6 +59,7 @@ const CompanyAdminDashboard = () => {
     user?.companyId ||
     companyState?._id || companyState?.id ||
     (jobs && jobs.length > 0 ? jobs[0].companyId : undefined);
+    
 
   // Form states
   const [userForm, setUserForm] = useState({
@@ -309,8 +310,7 @@ const CompanyAdminDashboard = () => {
       // Phase 2: derive companyId and fetch subscription + activity
       const cid = getEffectiveCompanyId();
       const tailResults = await Promise.allSettled([
-        fetchCompanySubscription(cid),
-        fetchCompanyActivity()
+        fetchCompanySubscription(cid)
       ]);
 
       if (tailResults[0].status === 'fulfilled') setSubscription(tailResults[0].value);
@@ -365,18 +365,18 @@ const CompanyAdminDashboard = () => {
 
 
   // Activity feed (optional endpoint; handled gracefully if missing)
-  const fetchCompanyActivity = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/company/activity`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
-      });
-      if (!res.ok) return []; // tolerate 404
-      const data = await res.json();
-      return Array.isArray(data.activities) ? data.activities : (Array.isArray(data) ? data : []);
-    } catch {
-      return [];
-    }
-  };
+  // const fetchCompanyActivity = async () => {
+  //   try {
+  //     const res = await fetch(`${API_BASE}/api/company/activity`, {
+  //       headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+  //     });
+  //     if (!res.ok) return []; // tolerate 404
+  //     const data = await res.json();
+  //     return Array.isArray(data.activities) ? data.activities : (Array.isArray(data) ? data : []);
+  //   } catch {
+  //     return [];
+  //   }
+  // };
 
   useEffect(() => {
     if (!subscription && jobs.length > 0) {
