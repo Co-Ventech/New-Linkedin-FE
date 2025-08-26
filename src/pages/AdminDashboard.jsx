@@ -358,7 +358,7 @@ const getConversionRate = (statusBreakdown) => {
   useEffect(() => {
     if (isSuperAdmin(user)) {
     loadInitialData();
-      loadMasterJobs();
+      loadMasterJobs(); 
     }
     // run once on mount for super admins
     // eslint-disable-next-line react-hooks/exhaustive-deps

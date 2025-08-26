@@ -53,7 +53,23 @@ const CompanyAdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedJobs, setSelectedJobs] = useState([]);
   const [subscription, setSubscription] = useState(null);
-  const [overview, setOverview] = useState({ statusBreakdown: {}, userActivity: [] });
+//  const [overview, setOverview] = useState({ statusBreakdown: {}, userActivity: [] });
+ const [overview, setOverview] = useState({
+   grandTotal: {
+    total_engagement: 0,
+    not_engaged: 0,
+    applied: 0,
+     engaged: 0,
+    interview: 0,
+     offer: 0,
+     rejected: 0,
+     onboard: 0
+   },
+  dailyTotals: [],
+   users: []
+ });
+
+
   const companyId = user?.companyId || companyState?._id || companyState?.id;
   const getEffectiveCompanyId = () =>
     user?.companyId ||
@@ -299,12 +315,16 @@ const CompanyAdminDashboard = () => {
       else setMessage({ type: 'error', text: 'Failed to load stats' });
 
       if (baseResults[3].status === 'fulfilled' && baseResults[3].value) {
-        setOverview({
-          statusBreakdown: baseResults[3].value.statusBreakdown || {},
-          userActivity: Array.isArray(baseResults[3].value.userActivity) ? baseResults[3].value.userActivity : []
-        });
+        setOverview(baseResults[3].value);
       } else {
-        setOverview({ statusBreakdown: {}, userActivity: [] });
+        setOverview({
+          grandTotal: {
+            total_engagement: 0, not_engaged: 0, applied: 0, engaged: 0,
+            interview: 0, offer: 0, rejected: 0, onboard: 0
+          },
+          dailyTotals: [],
+          users: []
+        });
       }
 
       // Phase 2: derive companyId and fetch subscription + activity
@@ -354,10 +374,31 @@ const CompanyAdminDashboard = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
       });
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      return await res.json();
+      const data = await res.json();
+      return {
+        grandTotal: {
+          total_engagement: data?.grandTotal?.total_engagement ?? 0,
+          not_engaged: data?.grandTotal?.not_engaged ?? 0,
+          applied: data?.grandTotal?.applied ?? 0,
+          engaged: data?.grandTotal?.engaged ?? 0,
+          interview: data?.grandTotal?.interview ?? 0,
+          offer: data?.grandTotal?.offer ?? 0,
+          rejected: data?.grandTotal?.rejected ?? 0,
+          onboard: data?.grandTotal?.onboard ?? 0
+        },
+        dailyTotals: Array.isArray(data?.dailyTotals) ? data.dailyTotals : [],
+        users: Array.isArray(data?.users) ? data.users : []
+      };
     } catch (err) {
       console.error('Overview stats fetch error:', err);
-      return null;
+      return {
+        grandTotal: {
+          total_engagement: 0, not_engaged: 0, applied: 0, engaged: 0,
+          interview: 0, offer: 0, rejected: 0, onboard: 0
+        },
+        dailyTotals: [],
+        users: []
+      };
     }
   };
   // 4. Add the missing fetchCompanyStats function
@@ -551,6 +592,1021 @@ const CompanyAdminDashboard = () => {
 
   // Tab content components
   // Overview Tab (cards updated)
+  // const OverviewTab = () => {
+  //   const totalUsers = users.length;
+  //   const activeUsers = users.filter(u => u.isActive).length;
+  //   const totalJobs = jobs.length;
+  //   const assignedJobs = typeof stats.assignedJobs === 'number'
+  //     ? stats.assignedJobs
+  //     : jobs.filter(j => !!j.assignee).length;
+
+  //   return (
+  //     <div className="space-y-6">
+  //       <div className="flex justify-between items-center">
+  //         <h2 className="text-2xl font-bold text-gray-900">Company Overview</h2>
+  //         {/* <button
+  //           onClick={loadInitialData}
+  //           disabled={loading}
+  //           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+  //         >
+  //           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+  //           <span>{loading ? 'Refreshing...' : 'Refresh Data'}</span>
+  //         </button> */}
+  //       </div>
+
+  //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-purple-100 rounded-lg">
+  //               <Users className="h-6 w-6 text-purple-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Total Users</p>
+  //               <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-green-100 rounded-lg">
+  //               <CheckCircle className="h-6 w-6 text-green-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Active Users</p>
+  //               <p className="text-2xl font-bold text-gray-900">{activeUsers}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-blue-100 rounded-lg">
+  //               <Database className="h-6 w-6 text-blue-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Total Jobs</p>
+  //               <p className="text-2xl font-bold text-gray-900">{totalJobs}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-yellow-100 rounded-lg">
+  //               <Clock className="h-6 w-6 text-yellow-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Assigned Jobs</p>
+  //               <p className="text-2xl font-bold text-gray-900">{assignedJobs}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+
+  //       {/* Status Breakdown cards */}
+  //       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+  //         {[
+  //                 { key: 'not_engaged', label: 'Not Engaged', color: 'bg-gray-100 text-gray-700' },
+  //           { key: 'applied', label: 'Applied', color: 'bg-blue-100 text-blue-700' },
+  //           { key: 'interview', label: 'Interview', color: 'bg-purple-100 text-purple-700' },
+  //           { key: 'offer', label: 'Offer', color: 'bg-emerald-100 text-emerald-700' },
+  //           { key: 'rejected', label: 'Rejected', color: 'bg-red-100 text-red-700' },
+      
+  //         ].map(item => (
+  //           <div key={item.key} className="bg-white rounded-lg shadow p-4">
+  //             <div className="text-sm text-gray-500">{item.label}</div>
+  //             <div className="mt-1 flex items-baseline justify-between">
+  //               <div className="text-2xl font-semibold text-gray-900">
+  //                 {overview.statusBreakdown?.[item.key] ?? 0}
+  //               </div>
+  //               <span className={`px-2 py-1 rounded text-xs font-medium ${item.color}`}>
+  //                 {item.label}
+  //               </span>
+  //             </div>
+  //           </div>
+  //         ))}
+  //       </div>
+  //       {/* User Activity list */}
+  //       <div className="bg-white rounded-lg shadow mt-6">
+  //         <div className="px-6 py-4 border-b border-gray-200">
+  //           <h3 className="text-lg font-medium text-gray-900">User Activity</h3>
+  //         </div>
+  //         <div className="p-6">
+  //           {overview.userActivity.length === 0 ? (
+  //             <div className="text-center text-gray-500">No user activity yet.</div>
+  //           ) : (
+  //             <div className="overflow-x-auto">
+  //               <table className="min-w-full divide-y divide-gray-200">
+  //                 <thead className="bg-gray-50">
+  //                   <tr>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status Changes</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Activity</th>
+  //                   </tr>
+  //                 </thead>
+  //                 <tbody className="bg-white divide-y divide-gray-200">
+  //                   {overview.userActivity.map((u, i) => (
+  //                     <tr key={i} className="hover:bg-gray-50">
+  //                       <td className="px-6 py-3 text-sm text-gray-900">{u.username || u._id}</td>
+  //                       <td className="px-6 py-3 text-sm font-medium text-gray-900">{u.statusChanges ?? 0}</td>
+  //                       <td className="px-6 py-3 text-sm text-gray-600">
+  //                         {u.lastActivity ? new Date(u.lastActivity).toLocaleString() : '—'}
+  //                       </td>
+  //                     </tr>
+  //                   ))}
+  //                 </tbody>
+  //               </table>
+  //             </div>
+  //           )}
+  //         </div>
+  //       </div>
+
+  //       {/* Recent Activity */}
+  //       <div className="bg-white rounded-lg shadow">
+  //         <div className="px-6 py-4 border-b border-gray-200">
+  //           <div className="flex items-center space-x-2">
+  //             <Activity className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+  //           </div>
+  //         </div>
+  //         <div className="p-6">
+  //           {activities.length === 0 ? (
+  //             <div className="text-center py-8">
+  //               <Database className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+  //               <p className="text-gray-500">No recent activity.</p>
+  //             </div>
+  //           ) : (
+  //             <div className="space-y-3">
+  //               {activities.slice(0, 8).map((item, idx) => (
+  //                 <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded hover:bg-gray-100">
+  //                   <div className="flex items-center space-x-3">
+  //                     <div className={`w-2 h-2 rounded-full ${item.type === 'subscription_updated' ? 'bg-purple-500' : 'bg-blue-500'}`} />
+  //                     <div>
+  //                       <p className="font-medium text-gray-900">{item.message || item.title || 'Activity'}</p>
+  //                       <p className="text-sm text-gray-600">
+  //                         {item.type === 'subscription_updated' ? 'Subscription updated' : (item.type || 'Update')}
+  //                       </p>
+  //                     </div>
+  //                   </div>
+  //                   <div className="text-sm text-gray-500">
+  //                     {item.date ? new Date(item.date).toLocaleString() : ''}
+  //                   </div>
+  //                 </div>
+  //               ))}
+  //             </div>
+  //           )}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+    // Overview Tab (cards updated to match new API: grandTotal, users, dailyTotals)
+    // const OverviewTab = () => {
+    //   const totalUsers = users.length;
+    //   const activeUsers = users.filter(u => u.isActive).length;
+    //   const totalJobs = jobs.length;
+    //   const assignedJobs = typeof stats.assignedJobs === 'number'
+    //     ? stats.assignedJobs
+    //     : jobs.filter(j => !!j.assignee).length;
+  
+    //   const gt = overview.grandTotal || {};
+    //   const statusCards = [
+    //     { key: 'not_engaged', label: 'Not Engaged', color: 'bg-gray-100 text-gray-700' },
+    //     { key: 'applied', label: 'Applied', color: 'bg-blue-100 text-blue-700' },
+    //     { key: 'engaged', label: 'Engaged', color: 'bg-indigo-100 text-indigo-700' },
+    //     { key: 'interview', label: 'Interview', color: 'bg-purple-100 text-purple-700' },
+    //     { key: 'offer', label: 'Offer', color: 'bg-emerald-100 text-emerald-700' },
+    //     { key: 'rejected', label: 'Rejected', color: 'bg-red-100 text-red-700' },
+    //     { key: 'onboard', label: 'Onboard', color: 'bg-teal-100 text-teal-700' }
+    //   ];
+  
+    //   const maxDaily = Math.max(
+    //     1,
+    //     ...overview.dailyTotals.map(d => Number(d.total_engagement) || 0)
+    //   );
+  
+    //   return (
+    //     <div className="space-y-6">
+    //       <div className="flex justify-between items-center">
+    //         <h2 className="text-2xl font-bold text-gray-900">Company Overview</h2>
+    //       </div>
+  
+    //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    //         <div className="bg-white rounded-lg shadow p-6">
+    //           <div className="flex items-center">
+    //             <div className="p-2 bg-purple-100 rounded-lg">
+    //               <Users className="h-6 w-6 text-purple-600" />
+    //             </div>
+    //             <div className="ml-4">
+    //               <p className="text-sm font-medium text-gray-600">Total Users</p>
+    //               <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
+    //             </div>
+    //           </div>
+    //         </div>
+  
+    //         <div className="bg-white rounded-lg shadow p-6">
+    //           <div className="flex items-center">
+    //             <div className="p-2 bg-green-100 rounded-lg">
+    //               <CheckCircle className="h-6 w-6 text-green-600" />
+    //             </div>
+    //             <div className="ml-4">
+    //               <p className="text-sm font-medium text-gray-600">Active Users</p>
+    //               <p className="text-2xl font-bold text-gray-900">{activeUsers}</p>
+    //             </div>
+    //           </div>
+    //         </div>
+  
+    //         <div className="bg-white rounded-lg shadow p-6">
+    //           <div className="flex items-center">
+    //             <div className="p-2 bg-blue-100 rounded-lg">
+    //               <Database className="h-6 w-6 text-blue-600" />
+    //             </div>
+    //             <div className="ml-4">
+    //               <p className="text-sm font-medium text-gray-600">Total Jobs</p>
+    //               <p className="text-2xl font-bold text-gray-900">{totalJobs}</p>
+    //             </div>
+    //           </div>
+    //         </div>
+  
+    //         <div className="bg-white rounded-lg shadow p-6">
+    //           <div className="flex items-center">
+    //             <div className="p-2 bg-yellow-100 rounded-lg">
+    //               <Clock className="h-6 w-6 text-yellow-600" />
+    //             </div>
+    //             <div className="ml-4">
+    //               <p className="text-sm font-medium text-gray-600">Assigned Jobs</p>
+    //               <p className="text-2xl font-bold text-gray-900">{assignedJobs}</p>
+    //             </div>
+    //           </div>
+    //         </div>
+    //       </div>
+  
+    //       {/* Company Status Breakdown (grandTotal) */}
+    //       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+    //         {statusCards.map(item => (
+    //           <div key={item.key} className="bg-white rounded-lg shadow p-4">
+    //             <div className="text-sm text-gray-500">{item.label}</div>
+    //             <div className="mt-1 flex items-baseline justify-between">
+    //               <div className="text-2xl font-semibold text-gray-900">
+    //                 {gt[item.key] ?? 0}
+    //               </div>
+    //               <span className={`px-2 py-1 rounded text-xs font-medium ${item.color}`}>
+    //                 {item.label}
+    //               </span>
+    //             </div>
+    //           </div>
+    //         ))}
+    //       </div>
+  
+    //       {/* Daily Engagement Trend */}
+    //       <div className="bg-white rounded-lg shadow p-6">
+    //         <div className="flex items-center justify-between mb-4">
+    //           <div className="flex items-center space-x-2">
+    //             <TrendingUp className="h-5 w-5 text-gray-500" />
+    //             <h3 className="text-lg font-medium text-gray-900">Daily Engagement Trend</h3>
+    //           </div>
+    //           <div className="text-sm text-gray-500">Total: {gt.total_engagement ?? 0}</div>
+    //         </div>
+    //         {overview.dailyTotals.length === 0 ? (
+    //           <div className="text-center text-gray-500">No trend data.</div>
+    //         ) : (
+    //           <div className="h-40 flex items-end space-x-2">
+    //             {overview.dailyTotals
+    //               .slice()
+    //               .sort((a, b) => new Date(a.date) - new Date(b.date))
+    //               .map((d, idx) => {
+    //                 const h = Math.round(((Number(d.total_engagement) || 0) / maxDaily) * 100);
+    //                 return (
+    //                   <div key={idx} className="flex-1 flex flex-col items-center">
+    //                     <div className="w-full bg-indigo-500 rounded-t" style={{ height: `${h}%` }} />
+    //                     <div className="mt-1 text-[10px] text-gray-500 rotate-0">
+    //                       {new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: '2-digit' })}
+    //                     </div>
+    //                   </div>
+    //                 );
+    //               })}
+    //           </div>
+    //         )}
+    //         <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm text-gray-700">
+    //           <div>Applied: {overview.grandTotal.applied ?? 0}</div>
+    //           <div>Engaged: {overview.grandTotal.engaged ?? 0}</div>
+    //           <div>Interview: {overview.grandTotal.interview ?? 0}</div>
+    //           <div>Offer: {overview.grandTotal.offer ?? 0}</div>
+    //           <div>Rejected: {overview.grandTotal.rejected ?? 0}</div>
+    //           <div>Onboard: {overview.grandTotal.onboard ?? 0}</div>
+    //         </div>
+    //       </div>
+  
+    //       {/* Team Performance */}
+    //       <div className="bg-white rounded-lg shadow">
+    //         <div className="px-6 py-4 border-b border-gray-200">
+    //           <div className="flex items-center space-x-2">
+    //             <Users className="h-5 w-5 text-gray-500" />
+    //             <h3 className="text-lg font-medium text-gray-900">Team Performance</h3>
+    //           </div>
+    //         </div>
+    //         <div className="p-6">
+    //           {overview.users.length === 0 ? (
+    //             <div className="text-center text-gray-500">No user performance data.</div>
+    //           ) : (
+    //             <div className="overflow-x-auto">
+    //               <table className="min-w-full divide-y divide-gray-200">
+    //                 <thead className="bg-gray-50">
+    //                   <tr>
+    //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+    //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applied</th>
+    //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Engaged</th>
+    //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Interview</th>
+    //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Offer</th>
+    //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rejected</th>
+    //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Not Engaged</th>
+    //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+    //                   </tr>
+    //                 </thead>
+    //                 <tbody className="bg-white divide-y divide-gray-200">
+    //                   {overview.users.map((u, i) => {
+    //                     const s = u.statuses || {};
+    //                     const total =
+    //                       (s.applied || 0) + (s.engaged || 0) + (s.interview || 0) +
+    //                       (s.offer || 0) + (s.rejected || 0) + (s.not_engaged || 0);
+    //                     return (
+    //                       <tr key={i} className="hover:bg-gray-50">
+    //                         <td className="px-6 py-3 text-sm font-medium text-gray-900">
+    //                           {u.username || u._id}
+    //                         </td>
+    //                         <td className="px-6 py-3 text-sm">{s.applied ?? 0}</td>
+    //                         <td className="px-6 py-3 text-sm">{s.engaged ?? 0}</td>
+    //                         <td className="px-6 py-3 text-sm">{s.interview ?? 0}</td>
+    //                         <td className="px-6 py-3 text-sm">{s.offer ?? 0}</td>
+    //                         <td className="px-6 py-3 text-sm">{s.rejected ?? 0}</td>
+    //                         <td className="px-6 py-3 text-sm">{s.not_engaged ?? 0}</td>
+    //                         <td className="px-6 py-3 text-sm font-semibold">{total}</td>
+    //                       </tr>
+    //                     );
+    //                   })}
+    //                 </tbody>
+    //               </table>
+    //             </div>
+    //           )}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   );
+    // };
+
+      // Overview Tab (cards updated to match new API: grandTotal, users, dailyTotals)
+  //  const OverviewTab = () => {
+  //   const totalUsers = users.length;
+  //   const activeUsers = users.filter(u => u.isActive).length;
+  //   const totalJobs = jobs.length;
+  //   const assignedJobs = typeof stats.assignedJobs === 'number'
+  //     ? stats.assignedJobs
+  //     : jobs.filter(j => !!j.assignee).length;
+
+  //   const gt = overview.grandTotal || {};
+  //   const statusCards = [
+  //     { key: 'not_engaged', label: 'Not Engaged', color: 'bg-gray-100 text-gray-700' },
+  //     { key: 'applied', label: 'Applied', color: 'bg-blue-100 text-blue-700' },
+  //     { key: 'engaged', label: 'Engaged', color: 'bg-indigo-100 text-indigo-700' },
+  //     { key: 'interview', label: 'Interview', color: 'bg-purple-100 text-purple-700' },
+  //     { key: 'offer', label: 'Offer', color: 'bg-emerald-100 text-emerald-700' },
+  //     { key: 'rejected', label: 'Rejected', color: 'bg-red-100 text-red-700' },
+  //     { key: 'onboard', label: 'Onboard', color: 'bg-teal-100 text-teal-700' }
+  //   ];
+
+  //   const statusKeys = ['not_engaged','applied','engaged','interview','offer','rejected','onboard'];
+  //   const statusMeta = {
+  //     applied: { color: 'bg-blue-500' },
+  //     engaged: { color: 'bg-indigo-500' },
+  //     interview: { color: 'bg-purple-500' },
+  //     offer: { color: 'bg-emerald-500' },
+  //     rejected: { color: 'bg-red-500' },
+  //     onboard: { color: 'bg-teal-500' },
+  //     not_engaged: { color: 'bg-gray-400' }
+  //   };
+
+  //   const sortedDaily = overview.dailyTotals
+  //     .slice()
+  //     .sort((a, b) => new Date(a.date) - new Date(b.date));
+  //   const maxDaily = Math.max(1, ...sortedDaily.map(d => Number(d.total_engagement) || 0));
+
+  //   // Per-status max across days (for scaling each status chart)
+  //   const perStatusMax = statusKeys.reduce((acc, key) => {
+  //     acc[key] = Math.max(
+  //       1,
+  //       ...sortedDaily.map(d => Number(d[key]) || 0)
+  //     );
+  //     return acc;
+  //   }, {});
+
+  //   // Fixed pixel heights for bars (so charts always render)
+  //   const BASE_TREND_H = 160; // px for the overall daily trend
+  //   const BASE_USER_H = 200;  // px for per-user mini charts
+  //   const BASE_STATUS_H = 160; // px for per-status daily charts
+
+  //   return (
+  //     <div className="space-y-6">
+  //       <div className="flex justify-between items-center">
+  //         <h2 className="text-2xl font-bold text-gray-900">Company Overview</h2>
+  //       </div>
+
+  //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-purple-100 rounded-lg">
+  //               <Users className="h-6 w-6 text-purple-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Total Users</p>
+  //               <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-green-100 rounded-lg">
+  //               <CheckCircle className="h-6 w-6 text-green-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Active Users</p>
+  //               <p className="text-2xl font-bold text-gray-900">{activeUsers}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-blue-100 rounded-lg">
+  //               <Database className="h-6 w-6 text-blue-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Total Jobs</p>
+  //               <p className="text-2xl font-bold text-gray-900">{totalJobs}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-yellow-100 rounded-lg">
+  //               <Clock className="h-6 w-6 text-yellow-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Assigned Jobs</p>
+  //               <p className="text-2xl font-bold text-gray-900">{assignedJobs}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+
+  //       {/* Company Status Breakdown (grandTotal) */}
+  //       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+  //         {statusCards.map(item => (
+  //           <div key={item.key} className="bg-white rounded-lg shadow p-4">
+  //             <div className="text-sm text-gray-500">{item.label}</div>
+  //             <div className="mt-1 flex items-baseline justify-between">
+  //               <div className="text-2xl font-semibold text-gray-900">
+  //                 {gt[item.key] ?? 0}
+  //               </div>
+  //               <span className={`px-2 py-1 rounded text-xs font-medium ${item.color}`}>
+  //                 {item.label}
+  //               </span>
+  //             </div>
+  //           </div>
+  //         ))}
+  //       </div>
+
+  //       {/* Daily Engagement Trend (overall) */}
+  //       <div className="bg-white rounded-lg shadow p-6">
+  //         <div className="flex items-center justify-between mb-4">
+  //           <div className="flex items-center space-x-2">
+  //             <TrendingUp className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Daily Engagement Trend</h3>
+  //           </div>
+  //           <div className="text-sm text-gray-500">Total: {gt.total_engagement ?? 0}</div>
+  //         </div>
+  //         {sortedDaily.length === 0 ? (
+  //           <div className="text-center text-gray-500">No trend data.</div>
+  //         ) : (
+  //           <div className="flex items-end space-x-2" style={{ height: `${BASE_TREND_H}px` }}>
+  //             {sortedDaily.map((d, idx) => {
+  //               const hPx = Math.round(((Number(d.total_engagement) || 0) / maxDaily) * BASE_TREND_H);
+  //               return (
+  //                 <div key={idx} className="flex-1 flex flex-col items-center">
+  //                   <div className="w-full bg-indigo-500 rounded-t" style={{ height: `${Math.max(2, hPx)}px` }} />
+  //                   <div className="mt-1 text-[10px] text-gray-500">
+  //                     {new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: '2-digit' })}
+  //                   </div>
+  //                 </div>
+  //               );
+  //             })}
+  //           </div>
+  //         )}
+  //         <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm text-gray-700">
+  //           <div>Applied: {overview.grandTotal.applied ?? 0}</div>
+  //           <div>Engaged: {overview.grandTotal.engaged ?? 0}</div>
+  //           <div>Interview: {overview.grandTotal.interview ?? 0}</div>
+  //           <div>Offer: {overview.grandTotal.offer ?? 0}</div>
+  //           <div>Rejected: {overview.grandTotal.rejected ?? 0}</div>
+  //           <div>Onboard: {overview.grandTotal.onboard ?? 0}</div>
+  //         </div>
+  //       </div>
+
+  //       {/* Team Member Mini Charts (per-user status bars) */}
+  //       <div className="bg-white rounded-lg shadow">
+  //         <div className="px-6 py-4 border-b border-gray-200">
+  //           <div className="flex items-center space-x-2">
+  //             <Users className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Team Member Status Breakdown</h3>
+  //           </div>
+  //         </div>
+  //         <div className="p-6">
+  //           {overview.users.length === 0 ? (
+  //             <div className="text-center text-gray-500">No user performance data.</div>
+  //           ) : (
+  //             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  //               {overview.users.map((u, idx) => {
+  //                 const s = u.statuses || {};
+  //                 const maxUser = Math.max(1, ...statusKeys.map(k => Number(s[k]) || 0));
+  //                 return (
+  //                   <div key={idx} className="border rounded-lg p-4">
+  //                     <div className="mb-2 flex items-center justify-between">
+  //                       <div className="font-semibold text-gray-900">{u.username || u._id}</div>
+  //                       <div className="text-xs text-gray-500">
+  //                         Total: {(s.applied||0)+(s.engaged||0)+(s.interview||0)+(s.offer||0)+(s.rejected||0)+(s.not_engaged||0)}
+  //                       </div>
+  //                     </div>
+  //                     <div className="flex items-end space-x-2" style={{ height: `${BASE_USER_H}px` }}>
+  //                       {statusKeys.map((k) => {
+  //                         const val = Number(s[k]) || 0;
+  //                         const hPx = Math.round((val / maxUser) * BASE_USER_H);
+  //                         return (
+  //                           <div key={k} className="flex-1 flex flex-col items-center">
+  //                             <div className={`w-full ${statusMeta[k].color} rounded-t`} style={{ height: `${Math.max(2, hPx)}px` }} />
+  //                             <div className="mt-1 text-[10px] text-gray-600 capitalize">{k.replace('_',' ')}</div>
+  //                             <div className="text-[10px] text-gray-900">{val}</div>
+  //                           </div>
+  //                         );
+  //                       })}
+  //                     </div>
+  //                   </div>
+  //                 );
+  //               })}
+  //             </div>
+  //           )}
+  //         </div>
+  //       </div>
+
+  //       {/* Per-Status Daily Bar Charts */}
+  //       <div className="bg-white rounded-lg shadow">
+  //         <div className="px-6 py-4 border-b border-gray-200">
+  //           <div className="flex items-center space-x-2">
+  //             <TrendingUp className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Status Trends by Day</h3>
+  //           </div>
+  //         </div>
+  //         <div className="p-6 space-y-8">
+  //           {statusKeys.map((k) => {
+  //             const maxForStatus = perStatusMax[k] || 1;
+  //             return (
+  //               <div key={k}>
+  //                 <div className="flex items-center justify-between mb-2">
+  //                   <div className="font-medium text-gray-900 capitalize">{k.replace('_',' ')}</div>
+  //                   <div className="text-xs text-gray-500">Peak: {maxForStatus}</div>
+  //                 </div>
+  //                 {sortedDaily.length === 0 ? (
+  //                   <div className="text-sm text-gray-500">No data.</div>
+  //                 ) : (
+  //                   <div className="flex items-end space-x-2" style={{ height: `${BASE_STATUS_H}px` }}>
+  //                     {sortedDaily.map((d, idx) => {
+  //                       const val = Number(d[k]) || 0;
+  //                       const hPx = Math.round((val / maxForStatus) * BASE_STATUS_H);
+  //                       return (
+  //                         <div key={idx} className="flex-1 flex flex-col items-center">
+  //                           <div className={`w-full ${statusMeta[k].color} rounded-t`} style={{ height: `${Math.max(2, hPx)}px` }} />
+  //                           <div className="mt-1 text-[10px] text-gray-500">
+  //                             {new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: '2-digit' })}
+  //                           </div>
+  //                         </div>
+  //                       );
+  //                     })}
+  //                   </div>
+  //                 )}
+  //               </div>
+  //             );
+  //           })}
+  //         </div>
+  //       </div>
+
+  //       {/* Team Performance Table */}
+  //       <div className="bg-white rounded-lg shadow">
+  //         <div className="px-6 py-4 border-b border-gray-200">
+  //           <div className="flex items-center space-x-2">
+  //             <Users className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Team Performance</h3>
+  //           </div>
+  //         </div>
+  //         <div className="p-6">
+  //           {overview.users.length === 0 ? (
+  //             <div className="text-center text-gray-500">No user performance data.</div>
+  //           ) : (
+  //             <div className="overflow-x-auto">
+  //               <table className="min-w-full divide-y divide-gray-200">
+  //                 <thead className="bg-gray-50">
+  //                   <tr>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Not Engaged</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applied</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Engaged</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Interview</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Offer</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rejected</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Onboard</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+  //                   </tr>
+  //                 </thead>
+  //                 <tbody className="bg-white divide-y divide-gray-200">
+  //                   {overview.users.map((u, i) => {
+  //                     const s = u.statuses || {};
+  //                     const total =
+  //                       (s.applied || 0) + (s.engaged || 0) + (s.interview || 0) +
+  //                       (s.offer || 0) + (s.rejected || 0) + (s.not_engaged || 0);
+  //                     return (
+  //                       <tr key={i} className="hover:bg-gray-50">
+  //                         <td className="px-6 py-3 text-sm font-medium text-gray-900">
+  //                           {u.username || u._id}
+  //                         </td>
+  //                         <td className="px-6 py-3 text-sm">{s.not_engaged ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.applied ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.engaged ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.interview ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.offer ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.rejected ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.onboard ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm font-semibold">{total}</td>
+  //                       </tr>
+  //                     );
+  //                   })}
+  //                 </tbody>
+  //               </table>
+  //             </div>
+  //           )}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  // const OverviewTab = () => {
+  //   const totalUsers = users.length;
+  //   const activeUsers = users.filter(u => u.isActive).length;
+  //   const totalJobs = jobs.length;
+  //   const assignedJobs = typeof stats.assignedJobs === 'number'
+  //     ? stats.assignedJobs
+  //     : jobs.filter(j => !!j.assignee).length;
+
+  //   const gt = overview.grandTotal || {};
+  //   const statusCards = [
+  //     { key: 'not_engaged', label: 'Not Engaged', color: 'bg-gray-100 text-gray-700' },
+  //     { key: 'applied', label: 'Applied', color: 'bg-blue-100 text-blue-700' },
+  //     { key: 'engaged', label: 'Engaged', color: 'bg-indigo-100 text-indigo-700' },
+  //     { key: 'interview', label: 'Interview', color: 'bg-purple-100 text-purple-700' },
+  //     { key: 'offer', label: 'Offer', color: 'bg-emerald-100 text-emerald-700' },
+  //     { key: 'rejected', label: 'Rejected', color: 'bg-red-100 text-red-700' },
+  //     { key: 'onboard', label: 'Onboard', color: 'bg-teal-100 text-teal-700' }
+  //   ];
+
+  //   const statusKeys = ['not_engaged','applied','engaged','interview','offer','rejected','onboard'];
+  //   const statusMeta = {
+  //     applied: { color: 'bg-blue-500' },
+  //     engaged: { color: 'bg-indigo-500' },
+  //     interview: { color: 'bg-purple-500' },
+  //     offer: { color: 'bg-emerald-500' },
+  //     rejected: { color: 'bg-red-500' },
+  //     onboard: { color: 'bg-teal-500' },
+  //     not_engaged: { color: 'bg-gray-400' }
+  //   };
+
+  //   // Helpers: normalize dates to continuous range (fill gaps with 0s)
+  //   const toYmd = (d) => {
+  //     const dt = new Date(d);
+  //     const y = dt.getFullYear();
+  //     const m = String(dt.getMonth() + 1).padStart(2, '0');
+  //     const day = String(dt.getDate()).padStart(2, '0');
+  //     return `${y}-${m}-${day}`;
+  //   };
+
+  //   const buildDateRange = (startYmd, endYmd) => {
+  //     const out = [];
+  //     const start = new Date(startYmd + 'T00:00:00');
+  //     const end = new Date(endYmd + 'T00:00:00');
+  //     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+  //       out.push(toYmd(d));
+  //     }
+  //     return out;
+  //   };
+
+  //   // Prepare daily totals with gaps filled
+  //   const rawDaily = Array.isArray(overview.dailyTotals) ? overview.dailyTotals : [];
+  //   const datesInData = rawDaily.map(d => toYmd(d.date || d._id || d.day || new Date()));
+  //   const latestYmd = datesInData.length ? datesInData.sort().slice(-1)[0] : toYmd(new Date());
+  //   // Show recent window of up to 14 days ending on latestYmd
+  //   const windowSize = 14;
+  //   const endDate = latestYmd;
+  //   const endDt = new Date(endDate + 'T00:00:00');
+  //   const startDt = new Date(endDt);
+  //   startDt.setDate(startDt.getDate() - (windowSize - 1));
+  //   const startDate = toYmd(startDt);
+
+  //   const dailyMap = rawDaily.reduce((acc, d) => {
+  //     const key = toYmd(d.date || d._id || d.day || new Date());
+  //     acc[key] = {
+  //       total_engagement: Number(d.total_engagement) || 0,
+  //       ...statusKeys.reduce((o, k) => ({ ...o, [k]: Number(d[k]) || 0 }), {})
+  //     };
+  //     return acc;
+  //   }, {});
+
+  //   const normalizedDaily = buildDateRange(startDate, endDate).map(ymd => {
+  //     const v = dailyMap[ymd] || {};
+  //     return {
+  //       date: ymd,
+  //       total_engagement: Number(v.total_engagement) || 0,
+  //       ...statusKeys.reduce((o, k) => ({ ...o, [k]: Number(v[k]) || 0 }), {})
+  //     };
+  //   });
+
+  //   const maxDaily = Math.max(1, ...normalizedDaily.map(d => d.total_engagement));
+
+  //   // Per-status max across normalized days (for scaling each status chart)
+  //   const perStatusMax = statusKeys.reduce((acc, key) => {
+  //     acc[key] = Math.max(1, ...normalizedDaily.map(d => Number(d[key]) || 0));
+  //     return acc;
+  //   }, {});
+
+  //   // Fixed pixel heights for bars
+  //   const BASE_TREND_H = 180;  // overall daily trend
+  //   const BASE_USER_H = 160;   // per-user mini charts
+  //   const BASE_STATUS_H = 96;  // per-status daily charts (compact)
+
+  //   return (
+  //     <div className="space-y-6">
+  //       <div className="flex justify-between items-center">
+  //         <h2 className="text-2xl font-bold text-gray-900">Company Overview</h2>
+  //       </div>
+
+  //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-purple-100 rounded-lg">
+  //               <Users className="h-6 w-6 text-purple-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Total Users</p>
+  //               <p className="text-2xl font-bold text-gray-900">{totalUsers}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-green-100 rounded-lg">
+  //               <CheckCircle className="h-6 w-6 text-green-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Active Users</p>
+  //               <p className="text-2xl font-bold text-gray-900">{activeUsers}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-blue-100 rounded-lg">
+  //               <Database className="h-6 w-6 text-blue-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Total Jobs</p>
+  //               <p className="text-2xl font-bold text-gray-900">{totalJobs}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+
+  //         <div className="bg-white rounded-lg shadow p-6">
+  //           <div className="flex items-center">
+  //             <div className="p-2 bg-yellow-100 rounded-lg">
+  //               <Clock className="h-6 w-6 text-yellow-600" />
+  //             </div>
+  //             <div className="ml-4">
+  //               <p className="text-sm font-medium text-gray-600">Assigned Jobs</p>
+  //               <p className="text-2xl font-bold text-gray-900">{assignedJobs}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+
+  //       {/* Company Status Breakdown (grandTotal) */}
+  //       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+  //         {statusCards.map(item => (
+  //           <div key={item.key} className="bg-white rounded-lg shadow p-4">
+  //             <div className="text-sm text-gray-500">{item.label}</div>
+  //             <div className="mt-1 flex items-baseline justify-between">
+  //               <div className="text-2xl font-semibold text-gray-900">
+  //                 {gt[item.key] ?? 0}
+  //               </div>
+  //               <span className={`px-2 py-1 rounded text-xs font-medium ${item.color}`}>
+  //                 {item.label}
+  //               </span>
+  //             </div>
+  //           </div>
+  //         ))}
+  //       </div>
+
+  //       {/* Daily Engagement Trend (overall) */}
+  //       <div className="bg-white rounded-lg shadow p-6">
+  //         <div className="flex items-center justify-between mb-4">
+  //           <div className="flex items-center space-x-2">
+  //             <TrendingUp className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Daily Engagement Trend</h3>
+  //           </div>
+  //           <div className="text-sm text-gray-500">Total: {gt.total_engagement ?? 0}</div>
+  //         </div>
+  //         {normalizedDaily.length === 0 ? (
+  //           <div className="text-center text-gray-500">No trend data.</div>
+  //         ) : (
+  //           <div className="flex items-end space-x-2" style={{ height: `${BASE_TREND_H}px` }}>
+  //             {normalizedDaily.map((d, idx) => {
+  //               const val = Number(d.total_engagement) || 0;
+  //               const hPx = Math.round((val / maxDaily) * BASE_TREND_H);
+  //               const label = new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
+  //               return (
+  //                 <div key={idx} className="flex-1 flex flex-col items-center">
+  //                   <div className="text-[10px] text-gray-700 mb-1 h-4">{val}</div>
+  //                   <div className="w-full bg-indigo-500 rounded-t" style={{ height: `${Math.max(2, hPx)}px` }} />
+  //                   <div className="mt-1 text-[10px] text-gray-500">{label}</div>
+  //                 </div>
+  //               );
+  //             })}
+  //           </div>
+  //         )}
+  //         {/* <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm text-gray-700">
+  //           <div>Applied: {overview.grandTotal?.applied ?? 0}</div>
+  //           <div>Engaged: {overview.grandTotal?.engaged ?? 0}</div>
+  //           <div>Interview: {overview.grandTotal?.interview ?? 0}</div>
+  //           <div>Offer: {overview.grandTotal?.offer ?? 0}</div>
+  //           <div>Rejected: {overview.grandTotal?.rejected ?? 0}</div>
+  //           <div>Onboard: {overview.grandTotal?.onboard ?? 0}</div>
+  //         </div> */}
+  //       </div>
+
+  //       {/* Team Member Mini Charts (per-user status bars) */}
+  //       <div className="bg-white rounded-lg shadow">
+  //         <div className="px-6 py-4 border-b border-gray-200">
+  //           <div className="flex items-center space-x-2">
+  //             <Users className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Team Member Status Breakdown</h3>
+  //           </div>
+  //         </div>
+  //         <div className="p-6">
+  //           {overview.users.length === 0 ? (
+  //             <div className="text-center text-gray-500">No user performance data.</div>
+  //           ) : (
+  //             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  //               {overview.users.map((u, idx) => {
+  //                 const s = u.statuses || {};
+  //                 const maxUser = Math.max(1, ...statusKeys.map(k => Number(s[k]) || 0));
+  //                 return (
+  //                   <div key={idx} className="border rounded-lg p-4">
+  //                     <div className="mb-2 flex items-center justify-between">
+  //                       <div className="font-semibold text-gray-900">{u.username || u._id}</div>
+  //                       <div className="text-xs text-gray-500">
+  //                         Total: {(s.applied||0)+(s.engaged||0)+(s.interview||0)+(s.offer||0)+(s.rejected||0)+(s.not_engaged||0)+(s.onboard||0)}
+  //                       </div>
+  //                     </div>
+  //                     <div className="flex items-end space-x-2" style={{ height: `${BASE_USER_H}px` }}>
+  //                       {statusKeys.map((k) => {
+  //                         const val = Number(s[k]) || 0;
+  //                         const hPx = Math.round((val / maxUser) * BASE_USER_H);
+  //                         return (
+  //                           <div key={k} className="flex-1 flex flex-col items-center">
+  //                             <div className="text-[10px] text-gray-700 mb-1 h-4">{val}</div>
+  //                             <div className={`w-full ${statusMeta[k].color} rounded-t`} style={{ height: `${Math.max(2, hPx)}px` }} />
+  //                             <div className="mt-1 text-[10px] text-gray-600 capitalize">{k.replace('_',' ')}</div>
+  //                           </div>
+  //                         );
+  //                       })}
+  //                     </div>
+  //                   </div>
+  //                 );
+  //               })}
+  //             </div>
+  //           )}
+  //         </div>
+  //       </div>
+
+  //       {/* Per-Status Daily Bar Charts */}
+  //       <div className="bg-white rounded-lg shadow">
+  //         <div className="px-6 py-4 border-b border-gray-200">
+  //           <div className="flex items-center space-x-2">
+  //             <TrendingUp className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Status Trends by Day</h3>
+  //           </div>
+  //         </div>
+  //         <div className="p-6 space-y-6">
+  //           {statusKeys.map((k) => {
+  //             const maxForStatus = perStatusMax[k] || 1;
+  //             return (
+  //               <div key={k} className="border rounded-md p-3">
+  //                 <div className="flex items-center justify-between mb-2">
+  //                   <div className="font-medium text-gray-900 capitalize">{k.replace('_',' ')}</div>
+  //                   <div className="text-xs text-gray-500">Peak: {maxForStatus}</div>
+  //                 </div>
+  //                 {normalizedDaily.length === 0 ? (
+  //                   <div className="text-sm text-gray-500">No data.</div>
+  //                 ) : (
+  //                   <div className="flex items-end space-x-2" style={{ height: `${BASE_STATUS_H}px` }}>
+  //                     {normalizedDaily.map((d, idx) => {
+  //                       const val = Number(d[k]) || 0;
+  //                       const hPx = Math.round((val / maxForStatus) * BASE_STATUS_H);
+  //                       const label = new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
+  //                       return (
+  //                         <div key={idx} className="flex-1 flex flex-col items-center">
+  //                           <div className="text-[10px] text-gray-700 mb-0.5 h-3">{val}</div>
+  //                           <div className={`w-full ${statusMeta[k].color} rounded-t`} style={{ height: `${Math.max(2, hPx)}px` }} />
+  //                           <div className="mt-1 text-[10px] text-gray-500">{label}</div>
+  //                         </div>
+  //                       );
+  //                     })}
+  //                   </div>
+  //                 )}
+  //               </div>
+  //             );
+  //           })}
+  //         </div>
+  //       </div>
+
+  //       {/* Team Performance Table */}
+  //       <div className="bg-white rounded-lg shadow">
+  //         <div className="px-6 py-4 border-b border-gray-200">
+  //           <div className="flex items-center space-x-2">
+  //             <Users className="h-5 w-5 text-gray-500" />
+  //             <h3 className="text-lg font-medium text-gray-900">Team Performance</h3>
+  //           </div>
+  //         </div>
+  //         <div className="p-6">
+  //           {overview.users.length === 0 ? (
+  //             <div className="text-center text-gray-500">No user performance data.</div>
+  //           ) : (
+  //             <div className="overflow-x-auto">
+  //               <table className="min-w-full divide-y divide-gray-200">
+  //                 <thead className="bg-gray-50">
+  //                   <tr>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Not Engaged</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applied</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Engaged</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Interview</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Offer</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rejected</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Onboard</th>
+  //                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+  //                   </tr>
+  //                 </thead>
+  //                 <tbody className="bg-white divide-y divide-gray-200">
+  //                   {overview.users.map((u, i) => {
+  //                     const s = u.statuses || {};
+  //                     const total =
+  //                       (s.applied || 0) + (s.engaged || 0) + (s.interview || 0) +
+  //                       (s.offer || 0) + (s.rejected || 0) + (s.not_engaged || 0) + (s.onboard || 0);
+  //                     return (
+  //                       <tr key={i} className="hover:bg-gray-50">
+  //                         <td className="px-6 py-3 text-sm font-medium text-gray-900">
+  //                           {u.username || u._id}
+  //                         </td>
+  //                         <td className="px-6 py-3 text-sm">{s.not_engaged ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.applied ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.engaged ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.interview ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.offer ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.rejected ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm">{s.onboard ?? 0}</td>
+  //                         <td className="px-6 py-3 text-sm font-semibold">{total}</td>
+  //                       </tr>
+  //                     );
+  //                   })}
+  //                 </tbody>
+  //               </table>
+  //             </div>
+  //           )}
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };  
+
   const OverviewTab = () => {
     const totalUsers = users.length;
     const activeUsers = users.filter(u => u.isActive).length;
@@ -559,18 +1615,81 @@ const CompanyAdminDashboard = () => {
       ? stats.assignedJobs
       : jobs.filter(j => !!j.assignee).length;
 
+    const gt = overview.grandTotal || {};
+    const statusCards = [
+      { key: 'not_engaged', label: 'Not Engaged', color: 'bg-gray-100 text-gray-700' },
+      { key: 'applied', label: 'Applied', color: 'bg-blue-100 text-blue-700' },
+      { key: 'engaged', label: 'Engaged', color: 'bg-indigo-100 text-indigo-700' },
+      { key: 'interview', label: 'Interview', color: 'bg-purple-100 text-purple-700' },
+      { key: 'offer', label: 'Offer', color: 'bg-emerald-100 text-emerald-700' },
+      { key: 'rejected', label: 'Rejected', color: 'bg-red-100 text-red-700' },
+      { key: 'onboard', label: 'Onboard', color: 'bg-teal-100 text-teal-700' }
+    ];
+
+    const statusKeys = ['not_engaged','applied','engaged','interview','offer','rejected','onboard'];
+    const statusMeta = {
+      applied: { color: 'bg-blue-500' },
+      engaged: { color: 'bg-indigo-500' },
+      interview: { color: 'bg-purple-500' },
+      offer: { color: 'bg-emerald-500' },
+      rejected: { color: 'bg-red-500' },
+      onboard: { color: 'bg-teal-500' },
+      not_engaged: { color: 'bg-gray-400' }
+    };
+
+    const toYmd = (d) => {
+      const dt = new Date(d);
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth() + 1).padStart(2, '0');
+      const day = String(dt.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+    const buildDateRange = (startYmd, endYmd) => {
+      const out = [];
+      const start = new Date(startYmd + 'T00:00:00');
+      const end = new Date(endYmd + 'T00:00:00');
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        out.push(toYmd(d));
+      }
+      return out;
+    };
+
+    // Use existing overview data directly
+    const dailyMap = (Array.isArray(overview.dailyTotals) ? overview.dailyTotals : []).reduce((acc, d) => {
+      const key = toYmd(d.date || d._id || d.day || new Date());
+      acc[key] = {
+        total_engagement: Number(d.total_engagement) || 0,
+        ...statusKeys.reduce((o, k) => ({ ...o, [k]: Number(d[k]) || 0 }), {})
+      };
+      return acc;
+    }, {});
+
+    // Get date range from existing data
+    const datesInData = Object.keys(dailyMap).sort();
+    const normalizedDaily = datesInData.length > 0 ? datesInData.map(ymd => {
+      const v = dailyMap[ymd] || {};
+      return {
+        date: ymd,
+        total_engagement: Number(v.total_engagement) || 0,
+        ...statusKeys.reduce((o, k) => ({ ...o, [k]: Number(v[k]) || 0 }), {})
+      };
+    }) : [];
+
+    const maxDaily = Math.max(1, ...normalizedDaily.map(d => d.total_engagement));
+    const perStatusMax = statusKeys.reduce((acc, key) => {
+      acc[key] = Math.max(1, ...normalizedDaily.map(d => Number(d[key]) || 0));
+      return acc;
+    }, {});
+
+    // Heights with proper spacing to prevent overlap
+    const BASE_TREND_H = 200;  // Overall daily trend
+    const BASE_USER_H = 180;   // Per-user mini charts
+    const BASE_STATUS_H = 140; // Per-status daily charts
+
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">Company Overview</h2>
-          {/* <button
-            onClick={loadInitialData}
-            disabled={loading}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            <span>{loading ? 'Refreshing...' : 'Refresh Data'}</span>
-          </button> */}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -623,21 +1742,14 @@ const CompanyAdminDashboard = () => {
           </div>
         </div>
 
-        {/* Status Breakdown cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {[
-                  { key: 'not_engaged', label: 'Not Engaged', color: 'bg-gray-100 text-gray-700' },
-            { key: 'applied', label: 'Applied', color: 'bg-blue-100 text-blue-700' },
-            { key: 'interview', label: 'Interview', color: 'bg-purple-100 text-purple-700' },
-            { key: 'offer', label: 'Offer', color: 'bg-emerald-100 text-emerald-700' },
-            { key: 'rejected', label: 'Rejected', color: 'bg-red-100 text-red-700' },
-      
-          ].map(item => (
+        {/* Company Status Breakdown */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+          {statusCards.map(item => (
             <div key={item.key} className="bg-white rounded-lg shadow p-4">
               <div className="text-sm text-gray-500">{item.label}</div>
               <div className="mt-1 flex items-baseline justify-between">
                 <div className="text-2xl font-semibold text-gray-900">
-                  {overview.statusBreakdown?.[item.key] ?? 0}
+                  {gt[item.key] ?? 0}
                 </div>
                 <span className={`px-2 py-1 rounded text-xs font-medium ${item.color}`}>
                   {item.label}
@@ -646,73 +1758,200 @@ const CompanyAdminDashboard = () => {
             </div>
           ))}
         </div>
-        {/* User Activity list */}
-        <div className="bg-white rounded-lg shadow mt-6">
+
+        {/* Daily Engagement Trend */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5 text-gray-500" />
+              <h3 className="text-lg font-medium text-gray-900">Daily Engagement Trend</h3>
+            </div>
+            <div className="text-sm text-gray-500">Total: {gt.total_engagement ?? 0}</div>
+          </div>
+          {normalizedDaily.length === 0 ? (
+            <div className="text-center text-gray-500">No trend data.</div>
+          ) : (
+            <div className="space-y-4">
+              {/* Chart container with proper spacing */}
+              <div className="flex items-end space-x-2" style={{ height: `${BASE_TREND_H}px` }}>
+                {normalizedDaily.map((d, idx) => {
+                  const val = Number(d.total_engagement) || 0;
+                  const hPx = Math.round((val / maxDaily) * BASE_TREND_H);
+                  const label = new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
+                  return (
+                    <div key={idx} className="flex-1 flex flex-col items-center">
+                      {/* Value above bar with proper spacing */}
+                      <div className="text-[10px] text-gray-700 mb-2 h-4 flex items-center justify-center">
+                        {val}
+                      </div>
+                      {/* Bar with max height constraint */}
+                      <div 
+                        className="w-full bg-indigo-500 rounded-t" 
+                        style={{ height: `${Math.max(2, Math.min(hPx, BASE_TREND_H - 60))}px` }} 
+                      />
+                      {/* Date label below bar */}
+                      <div className="mt-2 text-[10px] text-gray-500">{label}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Team Member Status Breakdown */}
+        <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">User Activity</h3>
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5 text-gray-500" />
+              <h3 className="text-lg font-medium text-gray-900">Team Member Status Breakdown</h3>
+            </div>
           </div>
           <div className="p-6">
-            {overview.userActivity.length === 0 ? (
-              <div className="text-center text-gray-500">No user activity yet.</div>
+            {overview.users.length === 0 ? (
+              <div className="text-center text-gray-500">No user performance data.</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {overview.users.map((u, idx) => {
+                  const s = u.statuses || {};
+                  const maxUser = Math.max(1, ...statusKeys.map(k => Number(s[k]) || 0));
+                  return (
+                    <div key={idx} className="border rounded-lg p-4">
+                      <div className="mb-3 flex items-center justify-between">
+                        <div className="font-semibold text-gray-900">{u.username || u._id}</div>
+                        <div className="text-xs text-gray-500">
+                          Total: {(s.applied||0)+(s.engaged||0)+(s.interview||0)+(s.offer||0)+(s.rejected||0)+(s.not_engaged||0)+(s.onboard||0)}
+                        </div>
+                      </div>
+                      <div className="flex items-end space-x-2" style={{ height: `${BASE_USER_H}px` }}>
+                        {statusKeys.map((k) => {
+                          const val = Number(s[k]) || 0;
+                          const hPx = Math.round((val / maxUser) * BASE_USER_H);
+                          return (
+                            <div key={k} className="flex-1 flex flex-col items-center">
+                              {/* Value above bar with proper spacing */}
+                              <div className="text-[10px] text-gray-700 mb-2 h-4 flex items-center justify-center">
+                                {val}
+                              </div>
+                              {/* Bar with max height constraint */}
+                              <div 
+                                className={`w-full ${statusMeta[k].color} rounded-t`} 
+                                style={{ height: `${Math.max(2, Math.min(hPx, BASE_USER_H - 60))}px` }} 
+                              />
+                              {/* Status label below bar */}
+                              <div className="mt-2 text-[10px] text-gray-600 capitalize">{k.replace('_',' ')}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Status Trends by Day */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="h-5 w-5 text-gray-500" />
+              <h3 className="text-lg font-medium text-gray-900">Status Trends by Day</h3>
+            </div>
+          </div>
+          <div className="p-6 space-y-6">
+            {statusKeys.map((k) => {
+              const maxForStatus = perStatusMax[k] || 1;
+              return (
+                <div key={k} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="font-medium text-gray-900 capitalize">{k.replace('_',' ')}</div>
+                    <div className="text-xs text-gray-500">Peak: {maxForStatus}</div>
+                  </div>
+                  {normalizedDaily.length === 0 ? (
+                    <div className="text-sm text-gray-500">No data.</div>
+                  ) : (
+                    <div className="flex items-end space-x-2" style={{ height: `${BASE_STATUS_H}px` }}>
+                      {normalizedDaily.map((d, idx) => {
+                        const val = Number(d[k]) || 0;
+                        const hPx = Math.round((val / maxForStatus) * BASE_STATUS_H);
+                        const label = new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: '2-digit' });
+                        return (
+                          <div key={idx} className="flex-1 flex flex-col items-center">
+                            {/* Value above bar with proper spacing */}
+                            <div className="text-[10px] text-gray-700 mb-2 h-4 flex items-center justify-center">
+                              {val}
+                            </div>
+                            {/* Bar with max height constraint */}
+                            <div 
+                              className={`w-full ${statusMeta[k].color} rounded-t`} 
+                              style={{ height: `${Math.max(2, Math.min(hPx, BASE_STATUS_H - 60))}px` }} 
+                            />
+                            {/* Date label below bar */}
+                            <div className="mt-2 text-[10px] text-gray-500">{label}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Team Performance Table */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5 text-gray-500" />
+              <h3 className="text-lg font-medium text-gray-900">Team Performance</h3>
+            </div>
+          </div>
+          <div className="p-6">
+            {overview.users.length === 0 ? (
+              <div className="text-center text-gray-500">No user performance data.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status Changes</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Activity</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Not Engaged</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applied</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Engaged</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Interview</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Offer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rejected</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Onboard</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {overview.userActivity.map((u, i) => (
-                      <tr key={i} className="hover:bg-gray-50">
-                        <td className="px-6 py-3 text-sm text-gray-900">{u.username || u._id}</td>
-                        <td className="px-6 py-3 text-sm font-medium text-gray-900">{u.statusChanges ?? 0}</td>
-                        <td className="px-6 py-3 text-sm text-gray-600">
-                          {u.lastActivity ? new Date(u.lastActivity).toLocaleString() : '—'}
-                        </td>
-                      </tr>
-                    ))}
+                    {overview.users.map((u, i) => {
+                      const s = u.statuses || {};
+                      const total =
+                        (s.applied || 0) + (s.engaged || 0) + (s.interview || 0) +
+                        (s.offer || 0) + (s.rejected || 0) + (s.not_engaged || 0) + (s.onboard || 0);
+                      return (
+                        <tr key={i} className="hover:bg-gray-50">
+                          <td className="px-6 py-3 text-sm font-medium text-gray-900">
+                            {u.username || u._id}
+                          </td>
+                          <td className="px-6 py-3 text-sm">{s.not_engaged ?? 0}</td>
+                          <td className="px-6 py-3 text-sm">{s.applied ?? 0}</td>
+                          <td className="px-6 py-3 text-sm">{s.engaged ?? 0}</td>
+                          <td className="px-6 py-3 text-sm">{s.interview ?? 0}</td>
+                          <td className="px-6 py-3 text-sm">{s.offer ?? 0}</td>
+                          <td className="px-6 py-3 text-sm">{s.rejected ?? 0}</td>
+                          <td className="px-6 py-3 text-sm">{s.onboard ?? 0}</td>
+                          <td className="px-6 py-3 text-sm font-semibold">{total}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center space-x-2">
-              <Activity className="h-5 w-5 text-gray-500" />
-              <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
-            </div>
-          </div>
-          <div className="p-6">
-            {activities.length === 0 ? (
-              <div className="text-center py-8">
-                <Database className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                <p className="text-gray-500">No recent activity.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {activities.slice(0, 8).map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded hover:bg-gray-100">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${item.type === 'subscription_updated' ? 'bg-purple-500' : 'bg-blue-500'}`} />
-                      <div>
-                        <p className="font-medium text-gray-900">{item.message || item.title || 'Activity'}</p>
-                        <p className="text-sm text-gray-600">
-                          {item.type === 'subscription_updated' ? 'Subscription updated' : (item.type || 'Update')}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {item.date ? new Date(item.date).toLocaleString() : ''}
-                    </div>
-                  </div>
-                ))}
               </div>
             )}
           </div>
@@ -720,8 +1959,7 @@ const CompanyAdminDashboard = () => {
       </div>
     );
   };
-
-  // Update the Users tab content to match the API response structure
+ 
   const UsersTab = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
