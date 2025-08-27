@@ -7,11 +7,11 @@ import SubscriptionModal from '../components/SubscriptionModal';
 import JobDistributionModal from '../components/JobDistributionModal';
 import CreatePlanModal from '../components/CreatePlanModal';
 import { companyAPI, masterJobAPI, subscriptionAPI } from '../services/api';
-import { 
-  Building2, 
-  Users, 
-  Database, 
-  CreditCard, 
+import {
+  Building2,
+  Users,
+  Database,
+  CreditCard,
   TrendingUp,
   AlertCircle,
   CheckCircle,
@@ -32,7 +32,7 @@ import {
   Upload
 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_REMOTE_HOST ;
+const API_BASE = import.meta.env.VITE_REMOTE_HOST;
 
 const SuperAdminDashboard = () => {
   const user = useSelector(selectUser);
@@ -46,9 +46,10 @@ const SuperAdminDashboard = () => {
   const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [distributionLoading, setDistributionLoading] = useState(false);
   const companyId = user?.companyId;
-  const [subscription,setSubscription] = useState(null);
+  const [subscription, setSubscription] = useState(null);
   const [companyOverviews, setCompanyOverviews] = useState({});
-const [overviewLoading, setOverviewLoading] = useState(false);
+  const [overviewLoading, setOverviewLoading] = useState(false);
+ const [upworkFetchLoading, setUpworkFetchLoading] = useState(false);
 
 
 
@@ -92,12 +93,12 @@ const [overviewLoading, setOverviewLoading] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
   const [planForm, setPlanForm] = useState({
     name: '',
-  displayName: '',
-  description: '',
-  price: '',
-  duration: '',
-  jobsQuota: '',
-  features: []
+    displayName: '',
+    description: '',
+    price: '',
+    duration: '',
+    jobsQuota: '',
+    features: []
   });
   // Check role access
   if (!isSuperAdmin(user)) {
@@ -194,7 +195,7 @@ const [overviewLoading, setOverviewLoading] = useState(false);
   //       `${API_BASE}/api/company-jobs/stats/overview/${companyId}`,
   //       `${API_BASE}/api/analytics/company/${companyId}`
   //     ];
-  
+
   //     for (const endpoint of endpoints) {
   //       try {
   //         const response = await fetch(endpoint, {
@@ -203,7 +204,7 @@ const [overviewLoading, setOverviewLoading] = useState(false);
   //             'Content-Type': 'application/json'
   //           }
   //         });
-          
+
   //         if (response.ok) {
   //           const data = await response.json();
   //           console.log(`Success fetching overview for company ${companyId} from ${endpoint}:`, data);
@@ -214,7 +215,7 @@ const [overviewLoading, setOverviewLoading] = useState(false);
   //         continue;
   //       }
   //     }
-      
+
   //     console.warn(`Failed to fetch overview for company ${companyId} from all endpoints`);
   //     return null;
   //   } catch (error) {
@@ -222,13 +223,13 @@ const [overviewLoading, setOverviewLoading] = useState(false);
   //     return null;
   //   }
   // };
-  
-  
+
+
   // Add function to fetch all company overviews
   // const fetchAllCompanyOverviews = async (companiesList) => {
   //   setOverviewLoading(true);
   //   const overviews = {};
-    
+
   //   try {
   //     // Fetch overviews for all companies in parallel
   //     const overviewPromises = companiesList.map(async (company) => {
@@ -240,7 +241,7 @@ const [overviewLoading, setOverviewLoading] = useState(false);
   //         }
   //       }
   //     });
-      
+
   //     await Promise.allSettled(overviewPromises);
   //     setCompanyOverviews(overviews);
   //   } catch (error) {
@@ -250,97 +251,306 @@ const [overviewLoading, setOverviewLoading] = useState(false);
   //   }
   // };
 
-const fetchAllCompanyOverviews = async () => {
-  setOverviewLoading(true);
-  try {
-    const response = await fetch(`${API_BASE}/api/company-jobs/stats/all-companies`, {
-      method: 'GET', // Ensure the method is GET
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`, // Ensure the token is valid
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const overviews = {};
-      data.companies.forEach((company) => {
-        overviews[company.companyId] = company;
+  const fetchAllCompanyOverviews = async () => {
+    setOverviewLoading(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/company-jobs/stats/all-companies`, {
+        method: 'GET', // Ensure the method is GET
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`, // Ensure the token is valid
+          'Content-Type': 'application/json',
+        },
       });
-      setCompanyOverviews(overviews);
-    } else {
-      console.error('Failed to fetch company overviews:', response.statusText);
-      showMessage('error', `API Error: ${response.statusText}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        const overviews = {};
+        data.companies.forEach((company) => {
+          overviews[company.companyId] = company;
+        });
+        setCompanyOverviews(overviews);
+      } else {
+        console.error('Failed to fetch company overviews:', response.statusText);
+        showMessage('error', `API Error: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Error fetching company overviews:', error);
+      showMessage('error', 'Failed to fetch company overviews');
+    } finally {
+      setOverviewLoading(false);
     }
-  } catch (error) {
-    console.error('Error fetching company overviews:', error);
-    showMessage('error', 'Failed to fetch company overviews');
-  } finally {
-    setOverviewLoading(false);
-  }
-};
+  };
 
-// Update the loadInitialData function to add more debugging
-const loadInitialData = async () => {
-  setLoading(true);
-  setMessage({ type: '', text: '' });
+  // Update the loadInitialData function to add more debugging
+  // const loadInitialData = async () => {
+  //   setLoading(true);
+  //   setMessage({ type: '', text: '' });
 
-  try {
-    const results = await Promise.allSettled([
-      companyAPI.getAll(),
-      masterJobAPI.getJobBatches(),
-      subscriptionAPI.getStats(),
-      subscriptionAPI.getAllPlans(),
-      masterJobAPI.getDistributionStats(),
-      fetchCompanySubscription(),
-      fetchAllCompanyOverviews(), // Updated to fetch all company overviews
-    ]);
+  //   try {
+  //     const results = await Promise.allSettled([
+  //       companyAPI.getAll(),
+  //       masterJobAPI.getJobBatches(),
+  //       subscriptionAPI.getStats(),
+  //       subscriptionAPI.getAllPlans(),
+  //       masterJobAPI.getDistributionStats(),
+  //       fetchCompanySubscription(),
+  //       fetchAllCompanyOverviews(), // Updated to fetch all company overviews
+  //     ]);
 
-    // Process companies
-    if (results[0].status === 'fulfilled') {
-      const companiesData = results[0].value;
-      const normalized = Array.isArray(companiesData)
-        ? companiesData
-        : Array.isArray(companiesData?.companies)
-        ? companiesData.companies
-        : Array.isArray(companiesData?.data)
-        ? companiesData.data
-        : [];
-      setCompanies(normalized);
-      console.log('Companies loaded:', normalized);
-    } else {
-      console.error('Companies fetch failed:', results[0].reason);
-      setCompanies([]);
+  //     // Process companies
+  //     if (results[0].status === 'fulfilled') {
+  //       const companiesData = results[0].value;
+  //       const normalized = Array.isArray(companiesData)
+  //         ? companiesData
+  //         : Array.isArray(companiesData?.companies)
+  //           ? companiesData.companies
+  //           : Array.isArray(companiesData?.data)
+  //             ? companiesData.data
+  //             : [];
+  //       setCompanies(normalized);
+  //       console.log('Companies loaded:', normalized);
+  //     } else {
+  //       console.error('Companies fetch failed:', results[0].reason);
+  //       setCompanies([]);
+  //     }
+
+  //     // Other processing remains unchanged...
+  //   } catch (error) {
+  //     console.error('Error in loadInitialData:', error);
+  //     setMessage({ type: 'error', text: 'Failed to load dashboard data' });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  // Update the loadInitialData function to add more debugging
+  // const loadInitialData = async () => {
+  //   setLoading(true);
+  //   setMessage({ type: '', text: '' });
+
+  //   try {
+  //     const results = await Promise.allSettled([
+  //       companyAPI.getAll(),                 // 0
+  //       masterJobAPI.getJobBatches(),        // 1
+  //       subscriptionAPI.getStats(),          // 2
+  //       subscriptionAPI.getAllPlans(),       // 3
+  //       masterJobAPI.getDistributionStats(), // 4
+  //       fetchCompanySubscription(),          // 5
+  //       fetchAllCompanyOverviews(),          // 6 (side-effect only)
+  //     ]);
+
+  //     // Companies
+  //     if (results[0].status === 'fulfilled') {
+  //       const companiesData = results[0].value;
+  //       const normalized = Array.isArray(companiesData)
+  //         ? companiesData
+  //         : Array.isArray(companiesData?.companies)
+  //           ? companiesData.companies
+  //           : Array.isArray(companiesData?.data)
+  //             ? companiesData.data
+  //             : [];
+  //       setCompanies(normalized);
+  //       console.log('Companies loaded:', normalized);
+  //     } else {
+  //       console.error('Companies fetch failed:', results[0].reason);
+  //       setCompanies([]);
+  //     }
+
+  //     // Batches
+  //     if (results[1].status === 'fulfilled') {
+  //       const batchesData = results[1].value;
+  //       const normalizedBatches = Array.isArray(batchesData)
+  //         ? batchesData
+  //         : Array.isArray(batchesData?.batches)
+  //           ? batchesData.batches
+  //           : Array.isArray(batchesData?.data)
+  //             ? batchesData.data
+  //             : [];
+  //       setBatches(normalizedBatches);
+  //       console.log('Batches loaded:', normalizedBatches);
+  //     } else {
+  //       console.error('Batches fetch failed:', results[1].reason);
+  //       setBatches([]);
+  //     }
+
+  //     // Subscription stats
+  //     if (results[2].status === 'fulfilled') {
+  //       const stats = results[2].value;
+  //       const normalizedStats = stats?.data || stats || {};
+  //       setSubscriptionStats(normalizedStats);
+  //       console.log('Subscription stats loaded:', normalizedStats);
+  //     } else {
+  //       console.error('Subscription stats fetch failed:', results[2].reason);
+  //       setSubscriptionStats({});
+  //     }
+
+  //     // Plans
+  //     if (results[3].status === 'fulfilled') {
+  //       const plansData = results[3].value;
+  //       const normalizedPlans = Array.isArray(plansData)
+  //         ? plansData
+  //         : Array.isArray(plansData?.plans)
+  //           ? plansData.plans
+  //           : Array.isArray(plansData?.data)
+  //             ? plansData.data
+  //             : [];
+  //       setPlans(normalizedPlans);
+  //       console.log('Plans loaded:', normalizedPlans);
+  //     } else {
+  //       console.error('Plans fetch failed:', results[3].reason);
+  //       setPlans([]);
+  //     }
+
+  //     // Distribution stats
+  //     if (results[4].status === 'fulfilled') {
+  //       const dist = results[4].value;
+  //       const normalizedDist = dist?.data || dist || {};
+  //       setDistributionStats(normalizedDist);
+  //       console.log('Distribution stats loaded:', normalizedDist);
+  //     } else {
+  //       console.error('Distribution stats fetch failed:', results[4].reason);
+  //       setDistributionStats({});
+  //     }
+
+  //     // Company subscription (optional)
+  //     if (results[5].status === 'fulfilled') {
+  //       setSubscription(results[5].value || null);
+  //     } else {
+  //       setSubscription(null);
+  //     }
+
+  //     // results[6] is fetchAllCompanyOverviews (side effect), no state to set here
+  //   } catch (error) {
+  //     console.error('Error in loadInitialData:', error);
+  //     setMessage({ type: 'error', text: 'Failed to load dashboard data' });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+  // Update the loadInitialData function to add more debugging
+  const loadInitialData = async () => {
+    setLoading(true);
+    setMessage({ type: '', text: '' });
+
+    try {
+      const results = await Promise.allSettled([
+        companyAPI.getAll(),                 // 0
+        masterJobAPI.getJobBatches(),        // 1
+        subscriptionAPI.getStats(),          // 2
+        subscriptionAPI.getAllPlans(),       // 3
+        masterJobAPI.getDistributionStats(), // 4
+        fetchCompanySubscription(),          // 5
+        fetchAllCompanyOverviews(),          // 6 (side-effect only)
+      ]);
+
+      // Companies
+      if (results[0].status === 'fulfilled') {
+        const companiesData = results[0].value;
+        const normalized = Array.isArray(companiesData)
+          ? companiesData
+          : Array.isArray(companiesData?.companies)
+            ? companiesData.companies
+            : Array.isArray(companiesData?.data)
+              ? companiesData.data
+              : [];
+        setCompanies(normalized);
+        console.log('Companies loaded:', normalized);
+      } else {
+        console.error('Companies fetch failed:', results[0].reason);
+        setCompanies([]);
+      }
+
+      // Batches
+      if (results[1].status === 'fulfilled') {
+        const batchesData = results[1].value;
+        const normalizedBatches = Array.isArray(batchesData)
+          ? batchesData
+          : Array.isArray(batchesData?.batches)
+            ? batchesData.batches
+            : Array.isArray(batchesData?.data)
+              ? batchesData.data
+              : [];
+        setBatches(normalizedBatches);
+        console.log('Batches loaded:', normalizedBatches);
+      } else {
+        console.error('Batches fetch failed:', results[1].reason);
+        setBatches([]);
+      }
+
+      // Subscription stats
+      if (results[2].status === 'fulfilled') {
+        const stats = results[2].value;
+        const normalizedStats = stats?.data || stats || {};
+        setSubscriptionStats(normalizedStats);
+        console.log('Subscription stats loaded:', normalizedStats);
+      } else {
+        console.error('Subscription stats fetch failed:', results[2].reason);
+        setSubscriptionStats({});
+      }
+
+      // Plans
+      if (results[3].status === 'fulfilled') {
+        const plansData = results[3].value;
+        const normalizedPlans = Array.isArray(plansData)
+          ? plansData
+          : Array.isArray(plansData?.plans)
+            ? plansData.plans
+            : Array.isArray(plansData?.data)
+              ? plansData.data
+              : [];
+        setPlans(normalizedPlans);
+        console.log('Plans loaded:', normalizedPlans);
+      } else {
+        console.error('Plans fetch failed:', results[3].reason);
+        setPlans([]);
+      }
+
+      // Distribution stats
+      if (results[4].status === 'fulfilled') {
+        const dist = results[4].value;
+        const normalizedDist = dist?.data || dist || {};
+        setDistributionStats(normalizedDist);
+        console.log('Distribution stats loaded:', normalizedDist);
+      } else {
+        console.error('Distribution stats fetch failed:', results[4].reason);
+        setDistributionStats({});
+      }
+
+      // Company subscription (optional)
+      if (results[5].status === 'fulfilled') {
+        setSubscription(results[5].value || null);
+      } else {
+        setSubscription(null);
+      }
+
+      // results[6] is fetchAllCompanyOverviews (side effect), no state to set here
+    } catch (error) {
+      console.error('Error in loadInitialData:', error);
+      setMessage({ type: 'error', text: 'Failed to load dashboard data' });
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // Other processing remains unchanged...
-  } catch (error) {
-    console.error('Error in loadInitialData:', error);
-    setMessage({ type: 'error', text: 'Failed to load dashboard data' });
-  } finally {
-    setLoading(false);
-  }
-};
-  
+  const getTotalStatusCount = (statusBreakdown) => {
+    if (!statusBreakdown) return 0;
+    return Object.values(statusBreakdown).reduce((sum, count) => sum + (count || 0), 0);
+  };
 
-const getTotalStatusCount = (statusBreakdown) => {
-  if (!statusBreakdown) return 0;
-  return Object.values(statusBreakdown).reduce((sum, count) => sum + (count || 0), 0);
-};
+  // Add helper function to calculate qualified leads
+  const getQualifiedLeads = (statusBreakdown) => {
+    if (!statusBreakdown) return 0;
+    return (statusBreakdown.interview || 0) + (statusBreakdown.offer || 0) + (statusBreakdown.engaged || 0);
+  };
 
-// Add helper function to calculate qualified leads
-const getQualifiedLeads = (statusBreakdown) => {
-  if (!statusBreakdown) return 0;
-  return (statusBreakdown.interview || 0) + (statusBreakdown.offer || 0) + (statusBreakdown.engaged || 0);
-};
-
-// Add the getConversionRate function here
-const getConversionRate = (statusBreakdown) => {
-  if (!statusBreakdown) return 0;
-  const qualifiedLeads = getQualifiedLeads(statusBreakdown);
-  const totalJobs = getTotalStatusCount(statusBreakdown);
-  return totalJobs > 0 ? Math.round((qualifiedLeads / totalJobs) * 100) : 0;
-};
+  // Add the getConversionRate function here
+  const getConversionRate = (statusBreakdown) => {
+    if (!statusBreakdown) return 0;
+    const qualifiedLeads = getQualifiedLeads(statusBreakdown);
+    const totalJobs = getTotalStatusCount(statusBreakdown);
+    return totalJobs > 0 ? Math.round((qualifiedLeads / totalJobs) * 100) : 0;
+  };
 
   const loadMasterJobs = async (filters = {}) => {
     try {
@@ -357,8 +567,8 @@ const getConversionRate = (statusBreakdown) => {
   // Update useEffect to also load master jobs
   useEffect(() => {
     if (isSuperAdmin(user)) {
-    loadInitialData();
-      loadMasterJobs(); 
+      loadInitialData();
+      loadMasterJobs();
     }
     // run once on mount for super admins
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -377,8 +587,8 @@ const getConversionRate = (statusBreakdown) => {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-   // Company operations
-   const handleCreateCompany = async (companyData) => {
+  // Company operations
+  const handleCreateCompany = async (companyData) => {
     try {
       setLoading(true);
       const response = await companyAPI.create({
@@ -404,7 +614,7 @@ const getConversionRate = (statusBreakdown) => {
     if (!window.confirm('Are you sure you want to delete this company? This action cannot be undone.')) {
       return;
     }
-    
+
     try {
       setLoading(true);
       await companyAPI.delete(companyId);
@@ -513,6 +723,33 @@ const getConversionRate = (statusBreakdown) => {
       setUploadForm(prev => ({ ...prev, file }));
     }
   };
+
+  const handleRunUpworkPipeline = async () => {
+    try {
+      setUpworkFetchLoading(true);
+      showMessage('success', 'Starting Upwork pipeline... This may take up to 5 minutes.');
+      const res = await fetch(`${API_BASE}/api/upwork-scheduler/run-upwork-pipeline`, {
+        method: 'POST',
+        // headers: {
+        //   'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        // }
+      });
+      if (!res.ok) {
+        let err;
+        try { err = await res.json(); } catch {}
+        throw new Error(err?.error || `Request failed (${res.status})`);
+      }
+      let data;
+      try { data = await res.json(); } catch {}
+      showMessage('success', data?.message || 'Upwork pipeline completed. Jobs saved.');
+      await loadInitialData();
+    } catch (error) {
+      console.error('Error running Upwork pipeline:', error);
+      showMessage('error', error.message || 'Failed to run Upwork pipeline');
+    } finally {
+      setUpworkFetchLoading(false);
+    }
+      };
 
   // View batch details
   const handleViewBatchDetails = async (batchId) => {
@@ -793,12 +1030,12 @@ const getConversionRate = (statusBreakdown) => {
   // };
   const handleCreatePlan = async (planData) => {
     // Validate required fields according to API requirements
-    if (!planData.name || !planData.displayName || !planData.description || 
-        !planData.price || !planData.duration || !planData.jobsQuota) {
+    if (!planData.name || !planData.displayName || !planData.description ||
+      !planData.price || !planData.duration || !planData.jobsQuota) {
       showMessage('error', 'Name, display name, description, price, duration, and jobs quota are required');
       return;
     }
-  
+
     try {
       setLoading(true);
       const response = await subscriptionAPI.createPlan({
@@ -810,18 +1047,18 @@ const getConversionRate = (statusBreakdown) => {
         jobsQuota: parseInt(planData.jobsQuota),
         features: planData.features || []
       });
-      
+
       showMessage('success', response.message || 'Plan created successfully!');
       setShowCreatePlan(false);
       // Reset form to initial state
-      setPlanForm({ 
-        name: '', 
-        displayName: '', 
-        description: '', 
-        price: '', 
-        duration: '', 
-        jobsQuota: '', 
-        features: [] 
+      setPlanForm({
+        name: '',
+        displayName: '',
+        description: '',
+        price: '',
+        duration: '',
+        jobsQuota: '',
+        features: []
       });
       await loadInitialData();
     } catch (error) {
@@ -831,7 +1068,7 @@ const getConversionRate = (statusBreakdown) => {
       setLoading(false);
     }
   };
-  
+
 
   const handleEditPlan = async (planData) => {
     if (!editingPlan) {
@@ -844,8 +1081,8 @@ const getConversionRate = (statusBreakdown) => {
       showMessage('error', 'Invalid plan data - missing ID');
       return;
     }
-    if (!planData.displayName || !planData.description || !planData.price || 
-        !planData.duration || !planData.jobsQuota) {
+    if (!planData.displayName || !planData.description || !planData.price ||
+      !planData.duration || !planData.jobsQuota) {
       showMessage('error', 'Display name, description, price, duration, and jobs quota are required');
       return;
     }
@@ -871,11 +1108,11 @@ const getConversionRate = (statusBreakdown) => {
       setLoading(false);
     }
   };
-  
+
   // Update the openEditPlan function
   const openEditPlan = (plan) => {
     console.log('Opening edit for plan:', plan); // Debug log
-    
+
     // Check if plan has the correct ID field
     const planId = plan.id || plan._id;
     if (!planId) {
@@ -883,7 +1120,7 @@ const getConversionRate = (statusBreakdown) => {
       showMessage('error', 'Invalid plan data - missing ID');
       return;
     }
-    
+
     setEditingPlan(plan);
     setPlanForm({
       name: plan.name || '',
@@ -901,7 +1138,7 @@ const getConversionRate = (statusBreakdown) => {
     if (!window.confirm('Are you sure you want to delete this plan? This action cannot be undone.')) {
       return;
     }
-    
+
     try {
       setLoading(true);
       await subscriptionAPI.deletePlan(planId);
@@ -1024,7 +1261,7 @@ const getConversionRate = (statusBreakdown) => {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <Activity className="h-5 w-5 text-gray-500" />
-          <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+            <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
           </div>
         </div>
         <div className="p-6">
@@ -1034,28 +1271,28 @@ const getConversionRate = (statusBreakdown) => {
               <p className="text-gray-500">No job batches yet. Start by scraping some jobs!</p>
             </div>
           ) : (
-          <div className="space-y-4">
-            {batches.slice(0, 5).map((batch) => (
+            <div className="space-y-4">
+              {batches.slice(0, 5).map((batch) => (
                 <div key={batch.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-center space-x-3">
                     <div className={`w-2 h-2 rounded-full ${batch.status === 'completed' ? 'bg-green-500' :
                       batch.status === 'processing' ? 'bg-yellow-500' :
                         'bg-gray-500'
                       }`} />
-                <div>
+                    <div>
                       <p className="font-medium text-gray-900">New job batch created</p>
-                  <p className="text-sm text-gray-600">
-                    {batch.platform} - {batch.keywords} ({batch.count} jobs)
-                  </p>
-                </div>
+                      <p className="text-sm text-gray-600">
+                        {batch.platform} - {batch.keywords} ({batch.count} jobs)
+                      </p>
+                    </div>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-500">
                     <Calendar className="h-4 w-4" />
                     <span>{new Date(batch.createdAt).toLocaleDateString()}</span>
                   </div>
-              </div>
-            ))}
-          </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
@@ -1077,7 +1314,7 @@ const getConversionRate = (statusBreakdown) => {
             </div>
           </div>
         </div>
-  
+
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
@@ -1086,14 +1323,14 @@ const getConversionRate = (statusBreakdown) => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Qualified Leads</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {Object.values(companyOverviews).reduce((sum, overview) => 
+                {Object.values(companyOverviews).reduce((sum, overview) =>
                   sum + getQualifiedLeads(overview?.statusBreakdown), 0
                 )}
               </p>
             </div>
           </div>
         </div>
-  
+
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
@@ -1102,14 +1339,14 @@ const getConversionRate = (statusBreakdown) => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Active Users</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {Object.values(companyOverviews).reduce((sum, overview) => 
+                {Object.values(companyOverviews).reduce((sum, overview) =>
                   sum + (overview?.userActivity?.filter(u => u.username !== 'system').length || 0), 0
                 )}
               </p>
             </div>
           </div>
         </div>
-  
+
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
           <div className="flex items-center">
             <div className="p-2 bg-orange-100 rounded-lg">
@@ -1118,7 +1355,7 @@ const getConversionRate = (statusBreakdown) => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Status Changes</p>
               <p className="text-2xl font-semibold text-gray-900">
-                {Object.values(companyOverviews).reduce((sum, overview) => 
+                {Object.values(companyOverviews).reduce((sum, overview) =>
                   sum + (overview?.userActivity?.reduce((userSum, u) => userSum + (u.statusChanges || 0), 0) || 0), 0
                 )}
               </p>
@@ -1126,7 +1363,7 @@ const getConversionRate = (statusBreakdown) => {
           </div>
         </div>
       </div>
-  
+
       {/* Companies Management Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Companies Management</h2>
@@ -1148,7 +1385,7 @@ const getConversionRate = (statusBreakdown) => {
           </button>
         </div>
       </div>
-  
+
       {/* Companies Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         {companies.length === 0 ? (
@@ -1188,15 +1425,15 @@ const getConversionRate = (statusBreakdown) => {
                   const used = Number(company.jobsUsed || 0);
                   const pct = quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 0;
 
-                  
-                  
+
+
                   // Calculate performance metrics
                   const totalJobs = getTotalStatusCount(overview?.statusBreakdown);
                   const qualifiedLeads = getQualifiedLeads(overview?.statusBreakdown);
                   const conversionRate = getConversionRate(overview?.statusBreakdown);
                   const activeUsers = overview?.userActivity?.filter(u => u.username !== 'system').length || 0;
                   const totalStatusChanges = overview?.userActivity?.reduce((sum, u) => sum + (u.statusChanges || 0), 0) || 0;
-                  
+
                   return (
                     <tr key={companyId || index} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -1306,11 +1543,11 @@ const getConversionRate = (statusBreakdown) => {
           </div>
         )}
       </div>
-  
+
       {/* Individual Company Sections */}
       <div className="space-y-6">
         <h3 className="text-xl font-bold text-gray-900">Individual Company Performance</h3>
-        
+
         {companies.map((company, index) => {
           const companyId = company.id || company._id;
           const overview = companyOverviews[companyId];
@@ -1319,14 +1556,14 @@ const getConversionRate = (statusBreakdown) => {
           const quota = Number(company.jobsQuota || 0);
           const used = Number(company.jobsUsed || 0);
           const pct = quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 0;
-          
+
           // // Calculate performance metrics
           const totalJobs = getTotalStatusCount(overview?.statusBreakdown);
           const qualifiedLeads = getQualifiedLeads(overview?.statusBreakdown);
           // const conversionRate = getConversionRate(overview?.statusBreakdown);
           const activeUsers = overview?.userActivity?.filter(u => u.username !== 'system').length || 0;
           const totalStatusChanges = overview?.userActivity?.reduce((sum, u) => sum + (u.statusChanges || 0), 0) || 0;
-  
+
           return (
             <div key={companyId || index} className="bg-white rounded-lg shadow-lg border border-gray-200">
               {/* Company Header */}
@@ -1346,7 +1583,7 @@ const getConversionRate = (statusBreakdown) => {
                   </div>
                 </div>
               </div>
-  
+
               {/* Company Content */}
               <div className="p-6">
                 {/* Performance Metrics Cards */}
@@ -1360,7 +1597,7 @@ const getConversionRate = (statusBreakdown) => {
                       </div>
                     </div>
                   </div>
-  
+
                   <div className="bg-green-50 rounded-lg p-4 border border-green-200">
                     <div className="flex items-center">
                       <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
@@ -1370,7 +1607,7 @@ const getConversionRate = (statusBreakdown) => {
                       </div>
                     </div>
                   </div>
-{/*   
+                  {/*   
                   <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
                     <div className="flex items-center">
                       <BarChart3 className="h-5 w-5 text-purple-600 mr-2" />
@@ -1380,7 +1617,7 @@ const getConversionRate = (statusBreakdown) => {
                       </div>
                     </div>
                   </div> */}
-  
+
                   <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
                     <div className="flex items-center">
                       <Users className="h-5 w-5 text-orange-600 mr-2" />
@@ -1391,7 +1628,7 @@ const getConversionRate = (statusBreakdown) => {
                     </div>
                   </div>
                 </div>
-  
+
                 {/* Job Usage and Status Breakdown */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Job Usage */}
@@ -1408,7 +1645,7 @@ const getConversionRate = (statusBreakdown) => {
                       <p className="text-xs text-gray-500">Usage: {pct}%</p>
                     </div>
                   </div>
-  
+
                   {/* Status Breakdown */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h5 className="text-sm font-semibold text-gray-900 mb-3">Status Breakdown</h5>
@@ -1426,7 +1663,7 @@ const getConversionRate = (statusBreakdown) => {
                     )}
                   </div>
                 </div>
-  
+
                 {/* User Activity */}
                 {overview?.userActivity && overview.userActivity.length > 0 && (
                   <div className="mt-6">
@@ -1451,7 +1688,7 @@ const getConversionRate = (statusBreakdown) => {
                     </div>
                   </div>
                 )}
-  
+
                 {/* Company Details */}
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -1484,6 +1721,30 @@ const getConversionRate = (statusBreakdown) => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Job Batches & Distribution</h2>
         <div className="flex items-center space-x-3">
+         
+      
+         <button
+           onClick={handleRunUpworkPipeline}
+           disabled={upworkFetchLoading}
+           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+           title="Run Upwork pipeline and save jobs to DB"
+         >
+           {upworkFetchLoading ? (
+             <>
+               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+               <span>Fetching Upwork Jobs...</span>
+             </>
+           ) : (
+             <>
+               <Play className="h-4 w-4" />
+               <span>Fetch Jobs for Upwork</span>
+             </>
+           )}
+   </button>
+        
+
+
+
           <button
             onClick={handleDistributeAll}
             disabled={distributionLoading}
@@ -1585,7 +1846,7 @@ const getConversionRate = (statusBreakdown) => {
 
       {/* Distribution History Chart */}
       {distributionStats?.distributionHistory && distributionStats.distributionHistory.length > 0 && (
-      <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Distribution History</h3>
           <div className="h-64 flex items-end space-x-2">
             {distributionStats.distributionHistory.slice(-7).map((item, index) => (
@@ -1620,21 +1881,21 @@ const getConversionRate = (statusBreakdown) => {
               <label htmlFor="platform" className="block text-sm font-medium text-gray-700 mb-2">
                 Platform *
               </label>
-          <select
+              <select
                 id="platform"
                 name="platform"
-            value={scrapeForm.platform}
+                value={scrapeForm.platform}
                 onChange={(e) => setScrapeForm({ ...scrapeForm, platform: e.target.value })}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
-          >
-            <option value="linkedin">LinkedIn</option>
-            <option value="upwork">Upwork</option>
-          </select>
+              >
+                <option value="linkedin">LinkedIn</option>
+                <option value="upwork">Upwork</option>
+              </select>
             </div>
             <div className="flex items-end">
-          <button
-            type="submit"
+              <button
+                type="submit"
                 disabled={loading}
                 className="w-full bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center space-x-2 transition-colors"
               >
@@ -1649,7 +1910,7 @@ const getConversionRate = (statusBreakdown) => {
                     <span>Upload Jobs</span>
                   </>
                 )}
-          </button>
+              </button>
             </div>
           </div>
         </form>
@@ -1681,20 +1942,20 @@ const getConversionRate = (statusBreakdown) => {
             <p className="text-gray-500">Upload jobs to get started with job distribution.</p>
           </div>
         ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Batch ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Platform
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Platform
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Jobs Scraped
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1702,17 +1963,17 @@ const getConversionRate = (statusBreakdown) => {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Distributed
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {batches.map((batch) => (
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {batches.map((batch) => (
                   <tr key={batch._id || batch.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
@@ -1721,26 +1982,26 @@ const getConversionRate = (statusBreakdown) => {
                           {batch.batchId}
                         </span>
                       </div>
-                  </td>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${batch.platform === 'linkedin'
                         ? 'bg-blue-100 text-blue-800'
                         : 'bg-green-100 text-green-800'
                         }`}>
-                    {batch.platform}
+                        {batch.platform}
                       </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${batch.status === 'completed'
-                        ? 'bg-green-100 text-green-800' 
+                        ? 'bg-green-100 text-green-800'
                         : batch.status === 'processing'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {batch.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                        }`}>
+                        {batch.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center space-x-2">
                         <Database className="h-4 w-4 text-gray-400" />
                         <span className="font-medium">{batch.stats?.totalJobsScraped || 0}</span>
@@ -1757,16 +2018,16 @@ const getConversionRate = (statusBreakdown) => {
                         <Share2 className="h-4 w-4 text-blue-500" />
                         <span className="font-medium">{batch.distribution?.jobsDistributed || 0}</span>
                       </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
                         <span>{new Date(batch.createdAt).toLocaleDateString()}</span>
                       </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                      <button
+                        <button
                           onClick={() => handleViewBatchDetails(batch._id || batch.id)}
                           className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded hover:bg-blue-50"
                           title="View Details"
@@ -1920,7 +2181,7 @@ const getConversionRate = (statusBreakdown) => {
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               >
                 Cancel
-                      </button>
+              </button>
               <button
                 type="submit"
                 disabled={
@@ -1944,8 +2205,8 @@ const getConversionRate = (statusBreakdown) => {
                     <span>Execute Distribution</span>
                   </>
                 )}
-                      </button>
-                    </div>
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -2037,11 +2298,11 @@ const getConversionRate = (statusBreakdown) => {
                               }`}>
                               {job.status || 'pending'}
                             </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -2066,10 +2327,10 @@ const getConversionRate = (statusBreakdown) => {
             >
               Close
             </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
   };
 
   const PlansTab = () => (
@@ -2077,7 +2338,7 @@ const getConversionRate = (statusBreakdown) => {
       {/* Add Header with Create Plan Button */}
       <div className="flex justify-between items-center">
         <div>
-        <h2 className="text-2xl font-bold text-gray-900">Subscription Plans</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Subscription Plans</h2>
           <p className="text-sm text-gray-600 mt-1">Manage subscription plans and pricing</p>
         </div>
         <div className="flex items-center space-x-4">
@@ -2098,7 +2359,7 @@ const getConversionRate = (statusBreakdown) => {
           </button>
         </div>
       </div>
-  
+
       {/* Plans Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
@@ -2112,7 +2373,7 @@ const getConversionRate = (statusBreakdown) => {
             </div>
           </div>
         </div>
-  
+
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
@@ -2126,7 +2387,7 @@ const getConversionRate = (statusBreakdown) => {
             </div>
           </div>
         </div>
-  
+
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
           <div className="flex items-center">
             <div className="p-2 bg-purple-100 rounded-lg">
@@ -2140,7 +2401,7 @@ const getConversionRate = (statusBreakdown) => {
             </div>
           </div>
         </div>
-  
+
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
           <div className="flex items-center">
             <div className="p-2 bg-orange-100 rounded-lg">
@@ -2155,7 +2416,7 @@ const getConversionRate = (statusBreakdown) => {
           </div>
         </div>
       </div>
-  
+
       {/* Plan Breakdown Chart */}
       {subscriptionStats?.planBreakdown && Object.keys(subscriptionStats.planBreakdown).length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
@@ -2170,7 +2431,7 @@ const getConversionRate = (statusBreakdown) => {
           </div>
         </div>
       )}
-  
+
       {/* Plans Table - Updated to show correct fields */}
       <div className="bg-white rounded-lg shadow border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
@@ -2182,7 +2443,7 @@ const getConversionRate = (statusBreakdown) => {
             </div>
           </div>
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="flex items-center space-x-3">
@@ -2195,68 +2456,68 @@ const getConversionRate = (statusBreakdown) => {
             <CreditCard size={64} className="mx-auto mb-4 text-gray-300" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No subscription plans yet</h3>
             <p className="text-gray-500 mb-4">Create your first subscription plan to get started.</p>
-        <button
-          onClick={() => setShowCreatePlan(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-        >
-          Create Plan
-        </button>
-      </div>
+            <button
+              onClick={() => setShowCreatePlan(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Create Plan
+            </button>
+          </div>
         ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Plan Details
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Duration
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Jobs Quota
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Features
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {plans.map((plan) => (
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {plans.map((plan) => (
                   <tr key={plan.id || plan._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
                         <div className="text-sm font-medium text-gray-900">{plan.displayName}</div>
-                      <div className="text-sm text-gray-500">{plan.description}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{plan.description}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                         {plan.name}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center space-x-1">
                         <DollarSign className="h-4 w-4 text-green-600" />
                         <span className="font-medium">${plan.price}</span>
                       </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-4 w-4 text-blue-600" />
                         <span className="font-medium">{plan.duration} days</span>
                       </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center space-x-1">
                         <Database className="h-4 w-4 text-orange-600" />
                         <span className="font-medium">{plan.jobsQuota}</span>
@@ -2281,10 +2542,10 @@ const getConversionRate = (statusBreakdown) => {
                           <span className="text-gray-400">No features</span>
                         )}
                       </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                    <button
+                        <button
                           onClick={() => openEditPlan(plan)}
                           className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded hover:bg-blue-50"
                           title="Edit Plan"
@@ -2295,16 +2556,16 @@ const getConversionRate = (statusBreakdown) => {
                           onClick={() => handleDeletePlan(plan.id || plan._id)}
                           className="text-red-600 hover:text-red-900 transition-colors p-1 rounded hover:bg-red-50"
                           title="Delete Plan"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
@@ -2320,7 +2581,7 @@ const getConversionRate = (statusBreakdown) => {
       jobsQuota: '',
       features: []
     });
-  
+
     useEffect(() => {
       if (plan) {
         setFormData({
@@ -2333,12 +2594,12 @@ const getConversionRate = (statusBreakdown) => {
         });
       }
     }, [plan]);
-  
+
     const handleSubmit = (e) => {
       e.preventDefault();
       onSubmit(formData);
     };
-  
+
     const addFeature = () => {
       const newFeature = prompt('Enter feature name:');
       if (newFeature && newFeature.trim()) {
@@ -2348,16 +2609,16 @@ const getConversionRate = (statusBreakdown) => {
         }));
       }
     };
-  
+
     const removeFeature = (index) => {
       setFormData(prev => ({
         ...prev,
         features: prev.features.filter((_, i) => i !== index)
       }));
     };
-  
+
     if (!isOpen || !plan) return null;
-  
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -2372,7 +2633,7 @@ const getConversionRate = (statusBreakdown) => {
               </button>
             </div>
           </div>
-  
+
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -2388,7 +2649,7 @@ const getConversionRate = (statusBreakdown) => {
                   required
                 />
               </div>
-  
+
               <div>
                 <label htmlFor="edit-price" className="block text-sm font-medium text-gray-700 mb-2">
                   Price ($) *
@@ -2410,7 +2671,7 @@ const getConversionRate = (statusBreakdown) => {
                 </div>
               </div>
             </div>
-  
+
             <div>
               <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700 mb-2">
                 Description *
@@ -2424,7 +2685,7 @@ const getConversionRate = (statusBreakdown) => {
                 required
               />
             </div>
-  
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="edit-duration" className="block text-sm font-medium text-gray-700 mb-2">
@@ -2440,7 +2701,7 @@ const getConversionRate = (statusBreakdown) => {
                   required
                 />
               </div>
-  
+
               <div>
                 <label htmlFor="edit-jobsQuota" className="block text-sm font-medium text-gray-700 mb-2">
                   Jobs Quota *
@@ -2456,7 +2717,7 @@ const getConversionRate = (statusBreakdown) => {
                 />
               </div>
             </div>
-  
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Features
@@ -2493,7 +2754,7 @@ const getConversionRate = (statusBreakdown) => {
                 </button>
               </div>
             </div>
-  
+
             <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
               <button
                 type="button"
@@ -2535,17 +2796,17 @@ const getConversionRate = (statusBreakdown) => {
   };
 
   return (
-    <Layout 
-      activeTab={activeTab} 
+    <Layout
+      activeTab={activeTab}
       onTabChange={setActiveTab}
       onRefresh={loadInitialData}
     >
       {/* Message Display */}
       {message.text && (
         <div className={`mb-6 p-4 rounded-md ${message.type === 'success'
-            ? 'bg-green-50 border border-green-200 text-green-800' 
-            : 'bg-red-50 border border-red-200 text-red-800'
-        }`}>
+          ? 'bg-green-50 border border-green-200 text-green-800'
+          : 'bg-red-50 border border-red-200 text-red-800'
+          }`}>
           <div className="flex items-center">
             {message.type === 'success' ? (
               <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
