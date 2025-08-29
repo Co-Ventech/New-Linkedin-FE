@@ -90,22 +90,24 @@ export const upworkfetchJobByIdThunk = createAsyncThunk(
 );
 
 // Async thunk to fetch jobs grouped by date from backend
-export const fetchJobsByDateThunk = createAsyncThunk('jobs/fetchJobsByDate', async ({ range, page, limit }, { rejectWithValue }) => {
-  try {
-    const data = await fetchJobsByDate(range, page, limit);
-    
-    // The data is now already in the correct format: [{date, jobs: [...]}]
-    // Each job needs to be normalized
-    const normalizedData = data.map(day => ({
-      date: day.date,
-      jobs: (day.jobs || []).map(normalizeJob)
-    }));
-    
-    return normalizedData;
-  } catch (err) {
-    return rejectWithValue(err.message);
+export const fetchJobsByDateThunk = createAsyncThunk(
+  'jobs/fetchJobsByDate',
+  async ({ range, page, limit }, { rejectWithValue }) => {
+    try {
+      const data = await fetchJobsByDate(range, page, limit);
+
+      // Filter only LinkedIn jobs
+      const linkedinJobs = data.map((day) => ({
+        date: day.date,
+        jobs: (day.jobs || []).filter((job) => job.platform === 'linkedin'), // Filter LinkedIn jobs
+      }));
+
+      return linkedinJobs;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
   }
-});
+);
 
 export const updateAeCommentThunk = createAsyncThunk(
   'jobs/updateAeComment',
@@ -582,36 +584,43 @@ const jobsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchJobsByDateThunk.fulfilled, (state, action) => {
-        const page = action.meta?.arg?.page || 1;
-        const incoming = action.payload || []; // [{date, jobs:[]}, ...]
-      
-        if (page === 1 || state.jobsByDate.length === 0) {
-          state.jobsByDate = incoming;
-        } else {
-          // Merge by date: append new jobs to existing bucket if date matches
-          const byDate = new Map(state.jobsByDate.map(d => [d.date, d]));
-      
-          incoming.forEach(group => {
-            const existing = byDate.get(group.date);
-            if (!existing) {
-              byDate.set(group.date, { date: group.date, jobs: group.jobs || [] });
-            } else {
-              const existingIds = new Set((existing.jobs || []).map(j => String(j.jobId || j.id || j._id)));
-              const toAdd = (group.jobs || []).filter(j => !existingIds.has(String(j.jobId || j.id || j._id)));
-              existing.jobs = [...(existing.jobs || []), ...toAdd];
-            }
-          });
-      
-          state.jobsByDate = Array.from(byDate.values());
-        }
-      
-        state.page = page;
-        // hasMore: if any group has jobs, assume more; server returns empty page when done
-        state.hasMore = incoming.some(g => (g.jobs?.length || 0) > 0);
-        state.loading = false;
-        state.error = null;
-      })
+     .addCase(fetchJobsByDateThunk.fulfilled, (state, action) => {
+  const page = action.meta?.arg?.page || 1;
+  const incoming = action.payload || []; // [{date, jobs:[]}, ...]
+
+  if (page === 1 || state.jobsByDate.length === 0) {
+    // First page or no existing data - replace everything
+    state.jobsByDate = incoming;
+  } else {
+    // Subsequent pages - merge by date and avoid duplicates
+    const byDate = new Map(state.jobsByDate.map((d) => [d.date, d]));
+
+    incoming.forEach((group) => {
+      const existing = byDate.get(group.date);
+      if (!existing) {
+        // New date group - add it
+        byDate.set(group.date, { date: group.date, jobs: group.jobs || [] });
+      } else {
+        // Existing date group - merge jobs and avoid duplicates
+        const existingIds = new Set(
+          (existing.jobs || []).map((j) => String(j.jobId || j.id || j._id))
+        );
+        const toAdd = (group.jobs || []).filter(
+          (j) => !existingIds.has(String(j.jobId || j.id || j._id))
+        );
+        existing.jobs = [...(existing.jobs || []), ...toAdd];
+      }
+    });
+
+    state.jobsByDate = Array.from(byDate.values());
+  }
+
+  state.page = page;
+  // hasMore: if any group has jobs, assume more; server returns empty page when done
+  state.hasMore = incoming.some((g) => (g.jobs?.length || 0) > 0);
+  state.loading = false;
+  state.error = null;
+})
       .addCase(fetchJobsByDateThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch jobs.';
