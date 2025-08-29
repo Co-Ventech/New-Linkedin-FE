@@ -11,6 +11,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { updateUpworkJobStatusThunk, upworkfetchJobByIdThunk, updateUpworkJobStatusNewThunk } from "../slices/jobsSlice";
 import { logoutUser } from "../api/authApi";
+// import { persistor } from './store';
 import { setRange, resetJobsByDate } from "../slices/jobsSlice";
 import { Calendar, Grid3X3, List, Kanban, Users, AlertCircle, Briefcase, Building2, Filter, Download, Search, ChevronDown, Eye, BarChart3, X } from 'lucide-react';
 
@@ -369,11 +370,11 @@ const UpworkDashboard = () => {
   }, [location.search]);
 
   // Fetch jobs on mount (or when empty) with current range
-  useEffect(() => {
-    if (!upworkJobsByDate || upworkJobsByDate.length === 0 || upworkJobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
-      dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1 }));
-    }
-  }, [dispatch, upworkJobsByDate, dateRange]);
+  // useEffect(() => {
+  //   if (!upworkJobsByDate || upworkJobsByDate.length === 0 || upworkJobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
+  //     dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1 }));
+  //   }
+  // }, [dispatch, upworkJobsByDate, dateRange]);
 
   // Flatten jobs for filtering
 

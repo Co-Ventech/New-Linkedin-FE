@@ -526,7 +526,16 @@
 
 
 import { useNavigate } from "react-router-dom";
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { Edit3, Check, X, ChevronDown } from 'lucide-react';
+import { updateJobStatusNewThunk, fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
+import { fetchJobsByDateThunk } from "../slices/jobsSlice";
+
+
+const STATUS_OPTIONS = [
+  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
+];
 
 const badgeClass = {
   tier: {
@@ -541,32 +550,101 @@ const badgeClass = {
   views: 'bg-orange-100 text-orange-800 border-orange-300',
 };
 
-const JobCard = ({ job, onClick , view = "grid"}) => {
+const JobCard = ({ job, onClick, view = "grid" }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showFullDesc, setShowFullDesc] = React.useState(false);
-  const [error, setError] = React.useState(null);
 
-const handleViewJob = (e) => {
-  e.stopPropagation();
-  navigate(`/jobs/${job.id}`, { state: { job } });
-};
+  const [statusOpen, setStatusOpen] = React.useState(false);
+  const [selectedStatus, setSelectedStatus] = React.useState(job?.currentStatus || 'not_engaged');
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState("");
 
-const handleReadMoreClick = (e) => {
-  e.stopPropagation();
-  navigate(`/jobs/${job.id}`, { state: { job } });
-};
+
+  const [displayStatus, setDisplayStatus] = React.useState(job?.currentStatus || 'not_engaged');
+
+  const statusLabels = {
+    not_engaged: 'Not Engaged',
+    applied: 'Applied',
+    engaged: 'Engaged',
+    interview: 'Interview',
+    offer: 'Offer',
+    rejected: 'Rejected',
+    onboard: 'Onboard',
+  };
+
+  const statusPill = {
+    not_engaged: 'bg-gray-100 text-gray-800 border border-gray-200',
+    applied: 'bg-blue-100 text-blue-800 border border-blue-200',
+    engaged: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+    interview: 'bg-purple-100 text-purple-800 border border-purple-200',
+    offer: 'bg-green-100 text-green-800 border border-green-200',
+    rejected: 'bg-red-100 text-red-800 border border-red-200',
+    onboard: 'bg-slate-100 text-slate-800 border border-slate-200',
+  };
+
+  useEffect(() => {
+    setDisplayStatus(job?.currentStatus || 'not_engaged');
+    setSelectedStatus(job?.currentStatus || 'not_engaged');
+  }, [job?.currentStatus]);
+
+  const openStatusMenu = (e) => {
+    e.stopPropagation();
+    setStatusOpen(v => !v);
+    setError("");
+  };
+
+  const handleStatusChange = (e) => {
+    e.stopPropagation();
+    setSelectedStatus(e.target.value);
+  };
+
+  const handleSaveStatus = async (e) => {
+    e.stopPropagation();
+    if (!job?._id) {
+      setError("Missing job _id");
+      return;
+    }
+    if (!selectedStatus) return;
+    try {
+      setSaving(true);
+      // Optimistic local indicator (optional)
+      const payload = { jobId: job._id, status: selectedStatus };
+      await dispatch(updateJobStatusNewThunk(payload)).unwrap();
+      setStatusOpen(false);
+      setError("");
+      setDisplayStatus(selectedStatus);
+      // Background refresh to keep lists/kanban in sync
+      dispatch(fetchJobsByDateThunk({}));
+    } catch (err) {
+      console.error('Inline status update failed:', err);
+      setError(err?.message || 'Failed to update');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleViewJob = (e) => {
+    e.stopPropagation();
+    navigate(`/jobs/${job.id}`, { state: { job } });
+  };
+
+  const handleReadMoreClick = (e) => {
+    e.stopPropagation();
+    navigate(`/jobs/${job.id}`, { state: { job } });
+  };
   // Safe data extraction with try-catch
   const extractJobData = () => {
     try {
       // Defensive: support both flat and nested company fields
       const companyObj = typeof job?.company === 'object' && job.company !== null ? job.company : {};
-      
+
       // Safe company name extraction
       const companyName = (() => {
         try {
-          return companyObj.name || 
-                 (typeof job?.company === 'string' ? job.company : '') || 
-                 '-';
+          return companyObj.name ||
+            (typeof job?.company === 'string' ? job.company : '') ||
+            '-';
         } catch (err) {
           console.warn('Error extracting company name:', err);
           return '-';
@@ -574,36 +652,36 @@ const handleReadMoreClick = (e) => {
       })();
 
       const logo =
-    companyObj.logo ||
-    job.companyLogo ||
-    job.logo ||
-    companyObj.companyLogo ||
-    "";
-      
+        companyObj.logo ||
+        job.companyLogo ||
+        job.logo ||
+        companyObj.companyLogo ||
+        "";
+
       // Safe array handling for industries
       const companyIndustries = (() => {
         try {
-          return Array.isArray(companyObj.industries) ? companyObj.industries : 
-                 Array.isArray(job?.companyIndustries) ? job.companyIndustries : 
-                 [];
+          return Array.isArray(companyObj.industries) ? companyObj.industries :
+            Array.isArray(job?.companyIndustries) ? job.companyIndustries :
+              [];
         } catch (err) {
           console.warn('Error extracting company industries:', err);
           return [];
         }
       })();
-      
+
       // Safe array handling for specialities
       const companySpecialities = (() => {
         try {
-          return Array.isArray(companyObj.specialities) ? companyObj.specialities : 
-                 Array.isArray(job?.companySpecialities) ? job.companySpecialities : 
-                 [];
+          return Array.isArray(companyObj.specialities) ? companyObj.specialities :
+            Array.isArray(job?.companySpecialities) ? job.companySpecialities :
+              [];
         } catch (err) {
           console.warn('Error extracting company specialities:', err);
           return [];
         }
       })();
-      
+
       // Safe location string extraction
       const locationString = (() => {
         try {
@@ -611,7 +689,7 @@ const handleReadMoreClick = (e) => {
             if (typeof job.locations[0] === 'object' && job.locations[0]?.country) {
               return [...new Set(job.locations.map(loc => loc?.country).filter(Boolean))].join(', ');
             } else {
-              return [...new Set(job.locations.map(loc => 
+              return [...new Set(job.locations.map(loc =>
                 typeof loc === 'string' ? loc.split(',').pop()?.trim() : ''
               ).filter(Boolean))].join(', ');
             }
@@ -672,24 +750,24 @@ const handleReadMoreClick = (e) => {
   // Handle click events safely
 
   const handleCardClick = () => {
-  const jobId = job?.id;
+    const jobId = job?.id;
 
-  console.log("job id before navigate", jobId); // Should be 4264428501
+    console.log("job id before navigate", jobId); // Should be 4264428501
 
-  if (jobId) {
-    navigate(`/jobs/${jobId}`, { state: { job } });
-  } else {
-    alert("Job ID is missing. Cannot show details.");
-  }
+    if (jobId) {
+      navigate(`/jobs/${jobId}`, { state: { job } });
+    } else {
+      alert("Job ID is missing. Cannot show details.");
+    }
 
-  // try {
-  //   if (onClick && typeof onClick === "function") {
-  //     onClick();
-  //   }
-  // } catch (err) {
-  //   console.error("Error handling card click:", err);
-  // }
-};
+    // try {
+    //   if (onClick && typeof onClick === "function") {
+    //     onClick();
+    //   }
+    // } catch (err) {
+    //   console.error("Error handling card click:", err);
+    // }
+  };
 
 
   // const handleReadMoreClick = (e) => {
@@ -738,13 +816,13 @@ const handleReadMoreClick = (e) => {
   const tierColorClass = badgeClass.tier[jobData.tier] || badgeClass.tier.Default;
 
   // Layout classes
-   const cardBase = "bg-white rounded-lg shadow cursor-pointer hover:shadow-xl hover:scale-[1.025] hover:border-blue-400 border border-transparent transition-all duration-200 group min-h-[120px]";
+  const cardBase = "bg-white rounded-lg shadow cursor-pointer hover:shadow-xl hover:scale-[1.025] hover:border-blue-400 border border-transparent transition-all duration-200 group min-h-[120px]";
   const gridLayout = "flex flex-col";
   const listLayout = "flex flex-row items-stretch min-h-[120px]";
 
 
   return (
-  
+
     <div
       className={`${cardBase} ${view === "list" ? listLayout : gridLayout} p-2`}
       onClick={handleCardClick}
@@ -762,24 +840,74 @@ const handleReadMoreClick = (e) => {
             src={jobData.companyLogo}
             alt={jobData.companyName || "Company"}
             className="w-12 h-12 object-contain"
-            onError={e => { try { e.target.style.display = 'none'; } catch {} }}
+            onError={e => { try { e.target.style.display = 'none'; } catch { } }}
           />
         </a>
-     )}
+      )}
       {/* Main Content */}
       <div className={view === "list" ? "flex-1" : "flex-1 flex flex-col"}>
         {/* Header */}
         <div className="mb-2">
           <div className={view === "list" ? "flex items-center gap-2 mb-1" : "flex items-center gap-2 mb-1"}>
-            <h2 className="text-lg font-bold text-gray-800 flex-1">{jobData.title}</h2>
+            {/* <h2 className="text-lg font-bold text-gray-800 flex-1">{jobData.title}</h2> */}
+            <h2 className="text-lg font-bold text-gray-800 flex-1 truncate">{jobData.title || "Job Title"}</h2>
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-semibold ${statusPill[displayStatus] || statusPill.not_engaged}`}
+              title="Current status"
+            >
+              {statusLabels[displayStatus] || displayStatus}
+            </span>
+            <button
+              type="button"
+              onClick={openStatusMenu}
+              className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
+              title="Change status"
+            >
+              <Edit3 className="w-4 h-4" />
+              <ChevronDown className="w-4 h-4" />
+            </button>
             {jobData.tier && (
               <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass} ml-2`} title="Tier">
                 {jobData.tier === 'Green' ? 'AI Recommended' :
-                 jobData.tier === 'Yellow' ? 'Recommended' :
-                 jobData.tier === 'Red' ? 'Not Recommended' : jobData.tier}
+                  jobData.tier === 'Yellow' ? 'AI Not Recommended' :
+                    jobData.tier === 'Red' ? 'Not Eligible' : jobData.tier}
               </span>
             )}
           </div>
+          {/* Status dropdown panel */}
+          {statusOpen && (
+            <div
+              className="mb-2 flex items-center gap-2 bg-gray-50 border border-gray-200 rounded p-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <label className="text-xs text-gray-600">Status:</label>
+              <select
+                className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                value={selectedStatus}
+                onChange={handleStatusChange}
+              >
+                {STATUS_OPTIONS.map(s => (
+                  <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={handleSaveStatus}
+                disabled={saving}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700 disabled:opacity-60"
+              >
+                <Check className="w-4 h-4" /> Save
+              </button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setStatusOpen(false); setSelectedStatus(job?.currentStatus || 'not_engaged'); setError(""); }}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-100"
+              >
+                <X className="w-4 h-4" /> Cancel
+              </button>
+              {error && <span className="text-xs text-red-600 ml-2">{error}</span>}
+            </div>
+          )}
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mb-1">
             {jobData.employmentType && (
@@ -813,22 +941,22 @@ const handleReadMoreClick = (e) => {
             )}
           </div>
           {/* Description */}
-        <div className={`text-gray-700 text-sm mb-2 ${!showFullDesc ? 'line-clamp-3' : ''} min-h-[40px]`}>
-  <span className="font-bold">Description: </span>
-  {desc.length > 120 ? (
-    <>
-      {desc.slice(0, 120)}...
-      <button
-        className="text-blue-500 ml-1 text-xs underline hover:text-blue-700"
-        onClick={handleReadMoreClick}
-      >
-        Read more
-      </button>
-    </>
-  ) : (
-    desc
-  )}
-</div>
+          <div className={`text-gray-700 text-sm mb-2 ${!showFullDesc ? 'line-clamp-3' : ''} min-h-[40px]`}>
+            <span className="font-bold">Description: </span>
+            {desc.length > 120 ? (
+              <>
+                {desc.slice(0, 120)}...
+                <button
+                  className="text-blue-500 ml-1 text-xs underline hover:text-blue-700"
+                  onClick={handleReadMoreClick}
+                >
+                  Read more
+                </button>
+              </>
+            ) : (
+              desc
+            )}
+          </div>
         </div>
         {/* Company Section (in main content for both views) */}
         <div className="mb-2">
@@ -869,19 +997,19 @@ const handleReadMoreClick = (e) => {
             <span><span className="font-bold">Location:</span> {jobData.locationString}</span>
           )}
         </div>
-       
+
         {/* Footer */}
         <div className="flex gap-2 mt-auto pt-2">
           {jobData.linkedinUrl && (
- <div className={view === "list" ? "flex flex-col justify-between items-end ml-auto" : "flex justify-end w-full"}>
-  <button
-    className="px-3 py-1 bg-blue-600 text-white rounded text-xs"
-    onClick={handleViewJob}
-    tabIndex={0}
-  >
-    View Job
-  </button>
-</div>
+            <div className={view === "list" ? "flex flex-col justify-between items-end ml-auto" : "flex justify-end w-full"}>
+              <button
+                className="px-3 py-1 bg-blue-600 text-white rounded text-xs"
+                onClick={handleViewJob}
+                tabIndex={0}
+              >
+                View Job
+              </button>
+            </div>
           )}
           {jobData.easyApplyUrl && (
             <a

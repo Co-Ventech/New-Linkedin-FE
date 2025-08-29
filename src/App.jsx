@@ -234,35 +234,57 @@ import ScrollToTop from "./components/ScrollToTop";
 import AdminDashboard from './pages/AdminDashboard';
 import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
 // import UserDashboard from './pages/UserDashboard';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { validateTokenOnLoad } from './api/authApi';
+import { useEffect, dispatch } from "react";
 
 // Protected Route component with role-based access
-function ProtectedRoute({ children, allowedRoles = [] }) {
-  const user = useSelector(selectUser);
+const ProtectedRoute = ({ children, roles }) => {
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const user = useSelector((state) => state.user.user);
+  const token = localStorage.getItem('authToken');
+  
+  useEffect(() => {
+    validateTokenOnLoad(dispatch); // will clear auth if expired/corrupt
+  }, [dispatch]);
+
+  // Validate token on render
+  const valid = validateTokenOnLoad(dispatch);
+  if (!valid) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
   
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  
-  // If specific roles are required, check if user has access
-  if (allowedRoles.length > 0 && !allowedRoles.some(role => {
-    switch (role) {
-      case 'super_admin':
-        return isSuperAdmin(user);
-      case 'company_admin':
-        return isCompanyAdmin(user);
-      case 'company_user':
-        return isCompanyUser(user);
-      case 'admin':
-        return isSuperAdmin(user) || isCompanyAdmin(user);
-      default:
-        return false;
-    }
-  })) {
-    return <Navigate to="/CompanyAdminDashboard " replace />;
+
+  if (roles && user && !roles.includes(user.role)) {
+    return <Navigate to="/login" replace />;
   }
+
+  
+  // // If specific roles are required, check if user has access
+  // if (allowedRoles.length > 0 && !allowedRoles.some(role => {
+  //   switch (role) {
+  //     case 'super_admin':
+  //       return isSuperAdmin(user);
+  //     case 'company_admin':
+  //       return isCompanyAdmin(user);
+  //     case 'company_user':
+  //       return isCompanyUser(user);
+  //     case 'admin':
+  //       return isSuperAdmin(user) || isCompanyAdmin(user);
+  //     default:
+  //       return false;
+  //   }
+  // })) {
+  //   return <Navigate to="/CompanyAdminDashboard " replace />;
+  // }
   
   return children;
-}
+};
 
 // Role-based redirect component - FIXED to properly redirect company admins
 function RoleBasedRedirect() {
@@ -402,6 +424,8 @@ function App() {
         {/* Default redirect */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
+
+      
     </BrowserRouter>
   );
 }

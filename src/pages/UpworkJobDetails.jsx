@@ -413,8 +413,8 @@ const UpworkJobDetails = () => {
             {localJob.tier && (
               <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass}`} title="Tier">
                 {localJob.tier === 'Green' ? 'AI Recommended' :
-                  localJob.tier === 'Yellow' ? 'Recommended' :
-                    localJob.tier === 'Red' ? 'Not Recommended' : localJob.tier}
+                  localJob.tier === 'Yellow' ? 'AI Not Recommended' :
+                    localJob.tier === 'Red' ? 'Not Eligible' : localJob.tier}
               </span>
             )}
           </div>

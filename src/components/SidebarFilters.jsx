@@ -52,40 +52,8 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
         </label>
       </div>
     </div> */}
-    
-    {/* Status (engaged/not_engaged) */}
-    {statusOptions && !isPipelineView && (
-  <div>
-    <h3 className="font-semibold mb-2">Status</h3>
-    <div className="space-y-1">
-      <label className="flex items-center space-x-2 cursor-pointer">
-        <input
-          type="radio"
-          name="status"
-          value=""
-          checked={filters.status === ""}
-          onChange={() => onFilterChange("status", "")}
-          className="accent-blue-600"
-        />
-        <span>All</span>
-      </label>
-      {statusOptions.map(option => (
-        <label key={option} className="flex items-center space-x-2 cursor-pointer">
-          <input
-            type="radio"
-            name="status"
-            value={option}
-            checked={filters.status === option}
-            onChange={() => onFilterChange("status", option)}
-            className="accent-blue-600"
-          />
-          <span>{option.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
-        </label>
-      ))}
-    </div>
-  </div>
-)}
-  {/* Color (single-select with radio buttons) */}
+
+      {/* Color (single-select with radio buttons) */}
   {colors && (
   <div>
     <h3 className="font-semibold mb-2">Tier</h3>
@@ -125,6 +93,40 @@ const SidebarFilters = ({ paymentVerified, categories, jobTypes, colors, countri
     </div>
   </div>
 )}
+    
+    {/* Status (engaged/not_engaged) */}
+    {statusOptions && !isPipelineView && (
+  <div>
+    <h3 className="font-semibold mb-2">Status</h3>
+    <div className="space-y-1">
+      <label className="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="radio"
+          name="status"
+          value=""
+          checked={filters.status === ""}
+          onChange={() => onFilterChange("status", "")}
+          className="accent-blue-600"
+        />
+        <span>All</span>
+      </label>
+      {statusOptions.map(option => (
+        <label key={option} className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="radio"
+            name="status"
+            value={option}
+            checked={filters.status === option}
+            onChange={() => onFilterChange("status", option)}
+            className="accent-blue-600"
+          />
+          <span>{option.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+)}
+
 
 {/* Client History */}
 {typeof filters.clientHistory !== "undefined" && (

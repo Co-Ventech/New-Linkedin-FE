@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { Edit3, Check, X, ChevronDown } from 'lucide-react';
+import { updateUpworkJobStatusNewThunk, fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
 
 const badgeClass = {
   tier: {
@@ -13,9 +16,49 @@ const badgeClass = {
   projectLength: 'bg-gray-100 text-gray-800 border-gray-300',
 };
 
+const STATUS_OPTIONS = [
+  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
+];
+
+
 const UpworkJobCard = ({ job, view = "grid" }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [showFullDesc, setShowFullDesc] = React.useState(false);
+  const [statusOpen, setStatusOpen] = React.useState(false);
+  const [selectedStatus, setSelectedStatus] = React.useState(job?.currentStatus || 'not_engaged');
+  const [saving, setSaving] = React.useState(false);
+  const [error, setError] = React.useState("");
+
+
+  
+const [displayStatus, setDisplayStatus] = React.useState(job?.currentStatus || 'not_engaged');
+
+const statusLabels = {
+  not_engaged: 'Not Engaged',
+  applied: 'Applied',
+  engaged: 'Engaged',
+  interview: 'Interview',
+  offer: 'Offer',
+  rejected: 'Rejected',
+  onboard: 'Onboard',
+};
+
+const statusPill = {
+  not_engaged: 'bg-gray-100 text-gray-800 border border-gray-200',
+  applied: 'bg-blue-100 text-blue-800 border border-blue-200',
+  engaged: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+  interview: 'bg-purple-100 text-purple-800 border border-purple-200',
+  offer: 'bg-green-100 text-green-800 border border-green-200',
+  rejected: 'bg-red-100 text-red-800 border border-red-200',
+  onboard: 'bg-slate-100 text-slate-800 border border-slate-200',
+};
+
+useEffect(() => {
+  setDisplayStatus(job?.currentStatus || 'not_engaged');
+  setSelectedStatus(job?.currentStatus || 'not_engaged');
+}, [job?.currentStatus]);
+
 
   // Defensive extraction
   const companyName = job.companyName || "-";
@@ -46,6 +89,42 @@ const UpworkJobCard = ({ job, view = "grid" }) => {
     setShowFullDesc(true);
   };
 
+  const openStatusMenu = (e) => {
+    e.stopPropagation();
+    setStatusOpen(v => !v);
+    setError("");
+  };
+
+  const handleStatusChange = (e) => {
+    e.stopPropagation();
+    setSelectedStatus(e.target.value);
+  };
+
+  const handleSaveStatus = async (e) => {
+    e.stopPropagation();
+    if (!job?._id) {
+      setError("Missing job _id");
+      return;
+    }
+    if (!selectedStatus) return;
+    try {
+      setSaving(true);
+      // Optimistic local indicator (optional)
+      const payload = { jobId: job._id, status: selectedStatus };
+      await dispatch(updateUpworkJobStatusNewThunk(payload)).unwrap();
+      setStatusOpen(false);
+      setError("");
+      setDisplayStatus(selectedStatus);
+      // Background refresh to keep lists/kanban in sync
+      dispatch(fetchUpworkJobsByDateThunk({}));
+    } catch (err) {
+      console.error('Inline status update failed:', err);
+      setError(err?.message || 'Failed to update');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div
       className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-xl hover:scale-[1.025] border border-transparent transition-all duration-200 group min-h-[180px] flex flex-col"
@@ -54,14 +133,69 @@ const UpworkJobCard = ({ job, view = "grid" }) => {
       <div className="mb-2">
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-lg font-bold text-gray-800 flex-1 truncate">{job.title || "Job Title"}</h2>
+ <span
+  className={`px-2 py-0.5 rounded text-xs font-semibold ${statusPill[displayStatus] || statusPill.not_engaged}`}
+   title="Current status"
+ >
+   {statusLabels[displayStatus] || displayStatus}
+ </span>
+
+
+
+
+
+          {/* Inline status editor trigger */}
+          <button
+            type="button"
+            onClick={openStatusMenu}
+            className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 text-gray-600 hover:bg-gray-50"
+            title="Change status"
+          >
+            <Edit3 className="w-4 h-4" />
+            <ChevronDown className="w-4 h-4" />
+          </button>
           {tier && (
             <span className={`px-2 py-1 rounded text-xs font-semibold border ${tierColorClass} ml-2`} title="Tier">
               {tier === 'Green' ? 'AI Recommended' :
-                tier === 'Yellow' ? 'Recommended' :
-                  tier === 'Red' ? 'Not Recommended' : tier}
+                tier === 'Yellow' ? 'AI Not Recommended' :
+                  tier === 'Red' ? 'Not Eligible' : tier}
             </span>
           )}
         </div>
+        {/* Status dropdown panel */}
+        {statusOpen && (
+          <div
+            className="mb-2 flex items-center gap-2 bg-gray-50 border border-gray-200 rounded p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <label className="text-xs text-gray-600">Status:</label>
+            <select
+              className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+              value={selectedStatus}
+              onChange={handleStatusChange}
+            >
+              {STATUS_OPTIONS.map(s => (
+                <option key={s} value={s}>{s.replace('_', ' ')}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={handleSaveStatus}
+              disabled={saving}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700 disabled:opacity-60"
+            >
+              <Check className="w-4 h-4" /> Save
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setStatusOpen(false); setSelectedStatus(job?.currentStatus || 'not_engaged'); setError(""); }}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-300 text-gray-600 text-xs hover:bg-gray-100"
+            >
+              <X className="w-4 h-4" /> Cancel
+            </button>
+            {error && <span className="text-xs text-red-600 ml-2">{error}</span>}
+          </div>
+        )}
         <div className="flex flex-wrap gap-2 mb-1">
           {jobType && (
             <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${badgeClass.jobType}`} title="Job Type">
