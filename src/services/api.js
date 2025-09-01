@@ -9,6 +9,37 @@ const getAuthHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// Global 401 interceptor - install once
+let interceptorInstalled = false;
+if (!interceptorInstalled) {
+  axios.interceptors.response.use(
+    (res) => res,
+    (error) => {
+      const status = error?.response?.status;
+      if (status === 401) {
+        try {
+          // Clear all auth data
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('authUser');
+          localStorage.removeItem('authCompany');
+          document.cookie.split(';').forEach(c => {
+            const name = c.split('=')[0].trim();
+            if (name) {
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            }
+          });
+        } catch {}
+        // Hard redirect to login
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
+  interceptorInstalled = true;
+}
+
 // Company API
 export const companyAPI = {
   getAll: async () => {

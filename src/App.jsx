@@ -218,6 +218,221 @@
 
 // export default App;
 
+// import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// import Login from "./pages/Login";
+// import CompanySignup from "./pages/CompanySignup";
+// import ForgotPassword from "./pages/ForgotPassword";
+// import ResetPassword from "./pages/ResetPassword";
+// import Dashboard from "./pages/Dashboard";
+// import UpworkDashboard from "./pages/UpworkDashboard";
+// import UpworkJobDetails from "./pages/UpworkJobDetails";
+// import JobDetails from "./pages/JobDetails";
+// import UserManagement from "./pages/UserManagement";
+// import { useSelector } from "react-redux";
+// import { selectUser, isSuperAdmin, isCompanyAdmin, isCompanyUser } from "./slices/userSlice";
+// import ScrollToTop from "./components/ScrollToTop";
+// import AdminDashboard from './pages/AdminDashboard';
+// import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
+// // import UserDashboard from './pages/UserDashboard';
+// import { useDispatch } from 'react-redux';
+// import { useLocation } from 'react-router-dom';
+// import { validateTokenOnLoad } from './api/authApi';
+// import { useEffect, dispatch } from "react";
+
+// // Protected Route component with role-based access
+// const ProtectedRoute = ({ children, roles }) => {
+//   const dispatch = useDispatch();
+//   const location = useLocation();
+//   const user = useSelector((state) => state.user.user);
+//   const token = localStorage.getItem('authToken');
+  
+//   useEffect(() => {
+//     validateTokenOnLoad(dispatch); // will clear auth if expired/corrupt
+//   }, [dispatch]);
+
+//   // Validate token on render
+//   const valid = validateTokenOnLoad(dispatch);
+//   if (!valid) {
+//     return <Navigate to="/login" replace state={{ from: location }} />;
+//   }
+  
+//   if (!user) {
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   if (roles && user && !roles.includes(user.role)) {
+//     return <Navigate to="/login" replace />;
+//   }
+
+  
+//   // // If specific roles are required, check if user has access
+//   // if (allowedRoles.length > 0 && !allowedRoles.some(role => {
+//   //   switch (role) {
+//   //     case 'super_admin':
+//   //       return isSuperAdmin(user);
+//   //     case 'company_admin':
+//   //       return isCompanyAdmin(user);
+//   //     case 'company_user':
+//   //       return isCompanyUser(user);
+//   //     case 'admin':
+//   //       return isSuperAdmin(user) || isCompanyAdmin(user);
+//   //     default:
+//   //       return false;
+//   //   }
+//   // })) {
+//   //   return <Navigate to="/CompanyAdminDashboard " replace />;
+//   // }
+  
+//   return children;
+// };
+
+// // Role-based redirect component - FIXED to properly redirect company admins
+// function RoleBasedRedirect() {
+//   const user = useSelector(selectUser);
+  
+//   if (!user) {
+//     return <Navigate to="/login" replace />;
+//   }
+  
+//   // FIXED: Company admins should go to company-dashboard, not dashboard
+//   if (isSuperAdmin(user)) {
+//     return <Navigate to="/AdminDashboard" replace />;
+//   } else if (isCompanyAdmin(user)) {
+//     return <Navigate to="/CompanyAdminDashboard" replace />; // FIXED: Company admins go here
+//   } else if (isCompanyUser(user)) {
+//     return <Navigate to="/UserDashboard" replace />; // Regular users go to dashboard
+//   }
+  
+//   return <Navigate to="/dashboard" replace />;
+// }
+
+// function App() {
+//   const user = useSelector(selectUser);
+
+//   return (
+//     <BrowserRouter>
+//       <ScrollToTop />
+//       <Routes>
+//         {/* Public routes */}
+//         <Route
+//           path="/login"
+//           element={user ? <RoleBasedRedirect /> : <Login />}
+//         />
+//         <Route
+//           path="/company-signup"
+//           element={user ? <RoleBasedRedirect /> : <CompanySignup />}
+//         />
+//         <Route
+//           path="/forgot-password"
+//           element={user ? <RoleBasedRedirect /> : <ForgotPassword />}
+//         />
+//         <Route
+//           path="/reset-password"
+//           element={user ? <RoleBasedRedirect /> : <ResetPassword />}
+//         />
+        
+//         {/* Main Dashboard - redirect based on role */}
+//         <Route 
+//           path="/dashboard" 
+//           element={
+//             <ProtectedRoute allowedRoles={['company_user']}>
+//               <Navigate to="/dashboard/linkedin" />
+//             </ProtectedRoute>
+//           } 
+//         />
+        
+//         {/* LinkedIn Dashboard - accessible by company users only */}
+//         <Route
+//           path="/dashboard/linkedin"
+//           element={
+//             <ProtectedRoute allowedRoles={['company_user']}>
+//               <Dashboard />
+//             </ProtectedRoute>
+//           }
+//         />
+        
+//         {/* Upwork Dashboard - accessible by company users only */}
+//         <Route
+//           path="/dashboard/upwork"
+//           element={
+//             <ProtectedRoute allowedRoles={['company_user']}>
+//               <UpworkDashboard />
+//             </ProtectedRoute>
+//           }
+//         />
+        
+//         {/* Job Details - accessible by company users and admins */}
+//         <Route
+//           path="/jobs/:id"
+//           element={
+//             <ProtectedRoute allowedRoles={['company_admin', 'company_user']}>
+//               <JobDetails />
+//             </ProtectedRoute>
+//           }
+//         />
+        
+//         {/* Upwork Job Details - accessible by company users and admins */}
+//         <Route
+//           path="/upwork/jobs/:id"
+//           element={
+//             <ProtectedRoute allowedRoles={['company_admin', 'company_user']}>
+//               <UpworkJobDetails />
+//             </ProtectedRoute>
+//           }
+//         />
+        
+//         {/* Admin Dashboard - accessible only by super admins */}
+//         <Route
+//           path="/AdminDashboard"
+//           element={
+//             <ProtectedRoute allowedRoles={['super_admin']}>
+//               <AdminDashboard />
+//             </ProtectedRoute>
+//           }
+//         />
+
+//         {/* Company Admin Dashboard - accessible only by company admins */}
+//         <Route
+//           path="/CompanyAdminDashboard"
+//           element={
+//             <ProtectedRoute allowedRoles={['company_admin']}>
+//               <CompanyAdminDashboard />
+//             </ProtectedRoute>
+//           }
+//         />
+
+//         {/* User Dashboard - accessible only by company users */}
+//         {/* <Route
+//           path="/my-dashboard"
+//           element={
+//             <ProtectedRoute allowedRoles={['company_user']}>
+//               <UserDashboard />
+//             </ProtectedRoute>
+//           }
+//         /> */}
+        
+//         {/* User Management - accessible by company admins and super admins */}
+//         {/* <Route
+//           path="/user-management"
+//           element={
+//             <ProtectedRoute allowedRoles={['super_admin', 'company_admin']}>
+//               <UserManagement />
+//             </ProtectedRoute>
+//           }
+//         /> */}
+        
+//         {/* Default redirect */}
+//         <Route path="*" element={<Navigate to="/login" />} />
+//       </Routes>
+
+      
+//     </BrowserRouter>
+//   );
+// }
+
+// export default App;
+
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import CompanySignup from "./pages/CompanySignup";
@@ -228,29 +443,22 @@ import UpworkDashboard from "./pages/UpworkDashboard";
 import UpworkJobDetails from "./pages/UpworkJobDetails";
 import JobDetails from "./pages/JobDetails";
 import UserManagement from "./pages/UserManagement";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { selectUser, isSuperAdmin, isCompanyAdmin, isCompanyUser } from "./slices/userSlice";
 import ScrollToTop from "./components/ScrollToTop";
 import AdminDashboard from './pages/AdminDashboard';
 import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
-// import UserDashboard from './pages/UserDashboard';
-import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { validateTokenOnLoad } from './api/authApi';
-import { useEffect, dispatch } from "react";
+import { useEffect } from "react";
 
 // Protected Route component with role-based access
 const ProtectedRoute = ({ children, roles }) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const user = useSelector((state) => state.user.user);
-  const token = localStorage.getItem('authToken');
   
-  useEffect(() => {
-    validateTokenOnLoad(dispatch); // will clear auth if expired/corrupt
-  }, [dispatch]);
-
-  // Validate token on render
+  // Validate token on render - single call
   const valid = validateTokenOnLoad(dispatch);
   if (!valid) {
     return <Navigate to="/login" replace state={{ from: location }} />;
@@ -264,25 +472,6 @@ const ProtectedRoute = ({ children, roles }) => {
     return <Navigate to="/login" replace />;
   }
 
-  
-  // // If specific roles are required, check if user has access
-  // if (allowedRoles.length > 0 && !allowedRoles.some(role => {
-  //   switch (role) {
-  //     case 'super_admin':
-  //       return isSuperAdmin(user);
-  //     case 'company_admin':
-  //       return isCompanyAdmin(user);
-  //     case 'company_user':
-  //       return isCompanyUser(user);
-  //     case 'admin':
-  //       return isSuperAdmin(user) || isCompanyAdmin(user);
-  //     default:
-  //       return false;
-  //   }
-  // })) {
-  //   return <Navigate to="/CompanyAdminDashboard " replace />;
-  // }
-  
   return children;
 };
 
@@ -300,42 +489,66 @@ function RoleBasedRedirect() {
   } else if (isCompanyAdmin(user)) {
     return <Navigate to="/CompanyAdminDashboard" replace />; // FIXED: Company admins go here
   } else if (isCompanyUser(user)) {
-    return <Navigate to="/UserDashboard" replace />; // Regular users go to dashboard
+    return <Navigate to="/dashboard/linkedin" replace />; // Regular users go to dashboard
   }
   
-  return <Navigate to="/dashboard" replace />;
+  return <Navigate to="/dashboard/linkedin" replace />;
 }
 
 function App() {
+  const dispatch = useDispatch();
   const user = useSelector(selectUser);
+  
+  // Validate token once on app load
+  useEffect(() => {
+    validateTokenOnLoad(dispatch);
+  }, [dispatch]);
 
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
-        {/* Public routes */}
+        {/* Public routes - FIXED: Check both user AND token validity */}
         <Route
           path="/login"
-          element={user ? <RoleBasedRedirect /> : <Login />}
+          element={
+            user && localStorage.getItem('authToken') && !validateTokenOnLoad(dispatch) 
+              ? <Login /> 
+              : user 
+                ? <RoleBasedRedirect /> 
+                : <Login />
+          }
         />
         <Route
           path="/company-signup"
-          element={user ? <RoleBasedRedirect /> : <CompanySignup />}
+          element={
+            user && localStorage.getItem('authToken') 
+              ? <RoleBasedRedirect /> 
+              : <CompanySignup />
+          }
         />
         <Route
           path="/forgot-password"
-          element={user ? <RoleBasedRedirect /> : <ForgotPassword />}
+          element={
+            user && localStorage.getItem('authToken') 
+              ? <RoleBasedRedirect /> 
+              : <ForgotPassword />
+          }
         />
         <Route
           path="/reset-password"
-          element={user ? <RoleBasedRedirect /> : <ResetPassword />}
+          element={
+            user && localStorage.getItem('authToken') 
+              ? <RoleBasedRedirect /> 
+              : <ResetPassword />
+          }
         />
         
         {/* Main Dashboard - redirect based on role */}
         <Route 
           path="/dashboard" 
           element={
-            <ProtectedRoute allowedRoles={['company_user']}>
+            <ProtectedRoute roles={['company_user']}>
               <Navigate to="/dashboard/linkedin" />
             </ProtectedRoute>
           } 
@@ -345,7 +558,7 @@ function App() {
         <Route
           path="/dashboard/linkedin"
           element={
-            <ProtectedRoute allowedRoles={['company_user']}>
+            <ProtectedRoute roles={['company_user']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -355,7 +568,7 @@ function App() {
         <Route
           path="/dashboard/upwork"
           element={
-            <ProtectedRoute allowedRoles={['company_user']}>
+            <ProtectedRoute roles={['company_user']}>
               <UpworkDashboard />
             </ProtectedRoute>
           }
@@ -365,7 +578,7 @@ function App() {
         <Route
           path="/jobs/:id"
           element={
-            <ProtectedRoute allowedRoles={['company_admin', 'company_user']}>
+            <ProtectedRoute roles={['company_admin', 'company_user']}>
               <JobDetails />
             </ProtectedRoute>
           }
@@ -375,7 +588,7 @@ function App() {
         <Route
           path="/upwork/jobs/:id"
           element={
-            <ProtectedRoute allowedRoles={['company_admin', 'company_user']}>
+            <ProtectedRoute roles={['company_admin', 'company_user']}>
               <UpworkJobDetails />
             </ProtectedRoute>
           }
@@ -385,7 +598,7 @@ function App() {
         <Route
           path="/AdminDashboard"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
+            <ProtectedRoute roles={['super_admin']}>
               <AdminDashboard />
             </ProtectedRoute>
           }
@@ -395,37 +608,15 @@ function App() {
         <Route
           path="/CompanyAdminDashboard"
           element={
-            <ProtectedRoute allowedRoles={['company_admin']}>
+            <ProtectedRoute roles={['company_admin']}>
               <CompanyAdminDashboard />
             </ProtectedRoute>
           }
         />
-
-        {/* User Dashboard - accessible only by company users */}
-        {/* <Route
-          path="/my-dashboard"
-          element={
-            <ProtectedRoute allowedRoles={['company_user']}>
-              <UserDashboard />
-            </ProtectedRoute>
-          }
-        /> */}
-        
-        {/* User Management - accessible by company admins and super admins */}
-        {/* <Route
-          path="/user-management"
-          element={
-            <ProtectedRoute allowedRoles={['super_admin', 'company_admin']}>
-              <UserManagement />
-            </ProtectedRoute>
-          }
-        /> */}
         
         {/* Default redirect */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
-
-      
     </BrowserRouter>
   );
 }

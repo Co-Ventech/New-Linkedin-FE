@@ -483,6 +483,30 @@ const jobsSlice = createSlice({
     // setSelectedFilter(state, action) {
     //   state.selectedFilter = action.payload;
     // },
+    updateLocalJob: (state, action) => {
+      const { jobId, updatedJob } = action.payload;
+
+          // Update in upworkJobsByDate
+    state.upworkJobsByDate.forEach(day => {
+      if (day.jobs) {
+        const jobIndex = day.jobs.findIndex(j => String(j._id) === String(jobId));
+        if (jobIndex !== -1) {
+          day.jobs[jobIndex] = { ...day.jobs[jobIndex], ...updatedJob };
+        }
+      }
+    });
+    
+    // Update in jobsByDate if it exists there too
+    state.jobsByDate.forEach(day => {
+      if (day.jobs) {
+        const jobIndex = day.jobs.findIndex(j => String(j._id) === String(jobId));
+        if (jobIndex !== -1) {
+          day.jobs[jobIndex] = { ...day.jobs[jobIndex], ...updatedJob };
+        }
+      }
+    });
+  },
+  
 
     resetJobs(state) {
       state.jobs = [];
