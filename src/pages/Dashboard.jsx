@@ -483,6 +483,11 @@ const handleDateRangeChange = (e) => {
     }),
   }));
 
+  // ADD: only keep days that actually have jobs
+const nonEmptyDays = filteredJobsByDate.filter(
+  (d) => Array.isArray(d.jobs) && d.jobs.length > 0
+);
+
   // Dynamic filter options remain the same
   const categories = Array.from(new Set(allJobs.map((j) => j.seniority).filter(Boolean)));
   const countries = Array.from(
@@ -934,14 +939,14 @@ const handleDateRangeChange = (e) => {
                                  <span>{error}</span>
                                </div>
                              </div>
-                           ) : filteredJobsByDate.length === 0 ? (
+                           ) : nonEmptyDays.length === 0 ? (
                              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
                                <p className="text-gray-600">Try adjusting your filters to see more results.</p>
                              </div>
                            ) : (
-                             filteredJobsByDate.map((day) => (
+                             nonEmptyDays.map((day) => (
                                <section key={day.date} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                                  <div className={
                                    view === "grid"

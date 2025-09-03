@@ -126,6 +126,30 @@ const statusConfig = {
     dotColor: "bg-slate-400"
   },
 };
+// Utility to debounce functions
+function debounce(func, delay) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+}
+
+
+
+// Utility function for safe storage (added fix)
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    if (e.name === "QuotaExceededError") {
+      console.warn("Storage quota exceeded. Skipping localStorage set for", key);
+      // Optional: Clear old data, e.g., localStorage.removeItem('someOldKey');
+    } else {
+      throw e;
+    }
+  }
+}
 
 const dateRanges = [
   { label: "Last 24 Hours", value: "1d" },
@@ -232,7 +256,10 @@ const UpworkDashboard = () => {
     });
   }, [allJobs, filters]);
 
-
+// Debounced version
+const debouncedFetch = debounce((params) => {
+  dispatch(fetchUpworkJobsByDateThunk(params));
+}, 300); // 300ms delay
 
 
   useEffect(() => {
@@ -402,20 +429,38 @@ const UpworkDashboard = () => {
   const [hasMoreLocal, setHasMoreLocal] = useState(true);
   const observer = React.useRef(null);
 
-  useEffect(() => {
-    // Reset page and data when range changes
-    setPage(1);
-    setHasMoreLocal(true);
-    dispatch(resetJobsByDate()); // Reset the Redux state
-    dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1, limit: 20 }));
-  }, [dateRange, dispatch]);
+  // useEffect(() => {
+  //   // Reset page and data when range changes
+  //   setPage(1);
+  //   setHasMoreLocal(true);
+  //   dispatch(resetJobsByDate()); // Reset the Redux state
+  //   dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1, limit: 20 }));
+  // }, [dateRange, dispatch]);
 
   // Update the useEffect for pagination
+ 
+ // Effect for dateRange change (add loading/data check)
+useEffect(() => {
+  if (loading || (upworkJobsByDate.length > 0 && dateRange === range)) return; // Skip if loading or data exists for this range
+  setPage(1);
+  setHasMoreLocal(true);
+  dispatch(resetJobsByDate());
+  debouncedFetch({ range: dateRange || '1d', page: 1, limit: 20 });
+}, [dateRange, dispatch, loading, upworkJobsByDate.length, range]);
+
+
+  // useEffect(() => {
+  //   if (page > 1 && hasMoreLocal) {
+  //     dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page, limit: 20 }));
+  //   }
+  // }, [page, dateRange, dispatch, hasMoreLocal]);
+
+  // Effect for pagination (add loading/hasMore check)
   useEffect(() => {
-    if (page > 1 && hasMoreLocal) {
-      dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page, limit: 20 }));
+    if (page > 1 && hasMoreLocal && !loading) {
+      debouncedFetch({ range: dateRange || '1d', page, limit: 20 });
     }
-  }, [page, dateRange, dispatch, hasMoreLocal]);
+  }, [page, dateRange, dispatch, hasMoreLocal, loading]);
 
   // Update the lastJobRef callback
   const lastJobRef = React.useCallback(node => {
@@ -501,6 +546,17 @@ const UpworkDashboard = () => {
   };
 
   useEffect(() => {
+    // Initial fetch only if no data
+    if (!loading && upworkJobsByDate.length === 0) {
+      // Before dispatch
+console.log(`Fetching jobs: range=${dateRange}, page=${page}`);
+
+      dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1, limit: 20 }));
+    }
+  }, []); // Empty deps: runs once on mount
+
+  
+  useEffect(() => {
     // Check if we have more jobs based on the current data
     const totalJobs = upworkJobsByDate.flatMap(day => day.jobs || []).length;
     const expectedJobs = page * 20; // Assuming limit is 20
@@ -512,8 +568,27 @@ const UpworkDashboard = () => {
   }, [upworkJobsByDate, page]);
 
   useEffect(() => {
-    localStorage.setItem("upworkJobsByDate", JSON.stringify(upworkJobsByDate));
+    if (upworkJobsByDate.length > 0) {
+      // Trim data before storing to reduce size (added best practice)
+      const trimmedData = upworkJobsByDate.map(group => ({
+        date: group.date,
+        jobs: group.jobs.map(job => ({
+          id: job._id || job.jobId, // Minimal fields to avoid quota issues
+          title: job.title,
+          status: job.currentStatus
+          // Add only essential fields; fetch full details on demand
+        }))
+      }));
+
+      // Log size for debugging (best practice)
+      const dataString = JSON.stringify(trimmedData);
+      console.log('Data size to store:', dataString.length);
+
+      // Safe storage (added fix)
+      safeSetItem('upworkJobsByDate', dataString);
+    }
   }, [upworkJobsByDate]);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
