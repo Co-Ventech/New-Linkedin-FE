@@ -29,9 +29,9 @@ const PORT = import.meta.env.VITE_PORT;
 // Async thunk to add a comment to a job
 export const addJobCommentThunk = createAsyncThunk(
   'jobs/addJobComment',
-  async ({ jobId, text }, { rejectWithValue }) => {
+  async ({ jobId, comment }, { rejectWithValue }) => {
     try {
-      const updated = await addJobComment(jobId, { text });
+      const updated = await addJobComment(jobId, { comment });
       return { jobId, job: updated.job };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -197,9 +197,9 @@ export const updateUpworkAeCommentThunk = createAsyncThunk(
 
 export const addUpworkJobCommentThunk = createAsyncThunk(
   'jobs/addUpworkJobComment',
-  async ({ jobId, text }, { rejectWithValue }) => {
+  async ({ jobId, comment }, { rejectWithValue }) => {
     try {
-      const updated = await addUpworkJobComment(jobId, { text });
+      const updated = await addUpworkJobComment(jobId, { comment });
       return { jobId, job: updated.job };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -931,7 +931,7 @@ const jobsSlice = createSlice({
   const { jobId, ae_score, username } = action.payload;
   state.jobsByDate.forEach(day => {
     day.jobs.forEach(job => {
-      if (String(job.id) === String(jobId)) {
+      if (String(job._id) === String(jobId)) {
         job.ae_score = ae_score;
         job.ae_score_user = username; // Optionally store who set it
       }

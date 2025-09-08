@@ -1100,7 +1100,7 @@ const UpworkJobDetails = () => {
         try {
           const result = await dispatch(addUpworkJobCommentThunk({
             jobId: localJob._id,
-            text: formData.comment.trim()
+            comment: formData.comment.trim()
           })).unwrap();
 
           if (result?.job) {
@@ -1720,7 +1720,7 @@ const UpworkJobDetails = () => {
                       {localJob.comments.slice(-3).map((c, idx) => (
                         <div key={idx} className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
                           <div className="font-medium">{c.username || 'Unknown'}</div>
-                          <div className="text-gray-700">{c.text || c.comment || ""}</div>
+                          <div className="text-gray-700">{c.comment || ""}</div>
                           {c.date && (
                             <div className="text-gray-500 text-xs mt-1">
                               {new Date(c.date).toLocaleString()}

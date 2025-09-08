@@ -116,6 +116,12 @@ const [editableProposal, setEditableProposal] = useState(proposalState.text || "
 const proposalSaving = useSelector(state => state.jobs.proposalSaving);
 const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
 const [companyJobId, setCompanyJobId] = useState(localJob?._id || null);
+const user = useSelector(state => state.user.user);
+
+// Resolve correct jobId and current username
+const jobIdForCompanyAPIs = localJob?._id || localJob?.companyJobId || localJob?.id || localJob?.jobId;
+const currentUsername = user?.username || user?.name || (user?.email?.split("@")[0]) || "system";
+// const currentUsername = user?.username || user?.name || user?.email?.split('@')[0] || 'system';
 //   const [proposalType, setProposalType] = useState(""); // "Services" or "Products"
 // const [proposalCategory, setProposalCategory] = useState("");
 // const [editableProposal, setEditableProposal] = useState("");
@@ -228,7 +234,7 @@ const [companyJobId, setCompanyJobId] = useState(localJob?._id || null);
       setLocalJob(jobFromRedux);
     }
   }, [jobFromRedux, id]);
-  console.log("local jobs",localJob.ae_score );
+  // console.log("local jobs",localJob.ae_score );
 
   if (loadingJob) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Loading job...</div>;
@@ -337,7 +343,7 @@ const handleSaveStatus = async (e) => {
       }
   
       const result = await dispatch(
-        addJobCommentThunk({ jobId: idForApi, text: comment.trim() })
+        addJobCommentThunk({ jobId: idForApi, comment: comment.trim() })
       ).unwrap();
   
       // Update local job comments from API response (if provided)
@@ -391,24 +397,60 @@ const handleSaveStatus = async (e) => {
       setAePitchedSaving(false);
     }
   };
+
+  // const handleSaveAeScore = async (e) => {
+  //   e.preventDefault();
+  //   setAeScoreSaving(true);
+  //   setAeScoreError("");
+  //   try {
+  //     const value = Number(aeScoreInput);
+  //     if (!aeScoreUser) {
+  //       setAeScoreError("Please select a user.");
+  //       setAeScoreSaving(false);
+  //       return;
+  //     }
+  //     if (isNaN(value) || value < 0 || value > 100) {
+  //       setAeScoreError("Please enter a valid score (0-100).");
+  //       setAeScoreSaving(false);
+  //       return;
+  //     }
+  //     await dispatch(updateAeScoreThunk({ jobId: localJob.id, username: aeScoreUser, ae_score: value })).unwrap();
+  //     setAeScoreInput(ae_score);
+  //   } catch (err) {
+  //     setAeScoreError("Failed to save AE Score.");
+  //   } finally {
+  //     setAeScoreSaving(false);
+  //   }
+  // };
   const handleSaveAeScore = async (e) => {
     e.preventDefault();
     setAeScoreSaving(true);
     setAeScoreError("");
     try {
       const value = Number(aeScoreInput);
-      if (!aeScoreUser) {
-        setAeScoreError("Please select a user.");
-        setAeScoreSaving(false);
-        return;
-      }
       if (isNaN(value) || value < 0 || value > 100) {
         setAeScoreError("Please enter a valid score (0-100).");
         setAeScoreSaving(false);
         return;
       }
-      await dispatch(updateAeScoreThunk({ jobId: localJob.id, username: aeScoreUser, ae_score: value })).unwrap();
-      setAeScoreInput(ae_score);
+  
+      if (!jobIdForCompanyAPIs) {
+        setAeScoreError("Missing job id.");
+        setAeScoreSaving(false);
+        return;
+      }
+  
+      await dispatch(
+        updateAeScoreThunk({
+          jobId: jobIdForCompanyAPIs,
+          username: currentUsername,
+          ae_score: value
+        })
+      ).unwrap();
+  
+      // Update local UI
+      setAeScoreInput(value);
+      setLocalJob(prev => ({ ...prev, ae_score: value }));
     } catch (err) {
       setAeScoreError("Failed to save AE Score.");
     } finally {
@@ -605,6 +647,37 @@ const handleSaveStatus = async (e) => {
     
         {/* AE Score Section */}
         <section className="mb-6 border-b pb-4">
+  <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
+
+  {localJob.ae_score !== undefined && localJob.ae_score !== null && localJob.ae_score !== "" && (
+    <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900 mb-3">
+      <span className="font-semibold">AE Score:</span> {localJob.ae_score}
+    </div>
+  )}
+
+  <form onSubmit={handleSaveAeScore} className="flex flex-col gap-2 mb-2">
+    <input
+      type="number"
+      className="border rounded px-2 py-1 w-full"
+      placeholder="Enter AE Score (0-100)"
+      value={aeScoreInput}
+      onChange={e => setAeScoreInput(e.target.value)}
+      disabled={aeScoreSaving}
+      min={0}
+      max={100}
+      required
+    />
+    <button
+      type="submit"
+      className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+      disabled={aeScoreSaving || !aeScoreInput}
+    >
+      {aeScoreSaving ? "Saving..." : "Save"}
+    </button>
+    {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
+  </form>
+</section>
+        {/* <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
           {localJob.ae_score ? (
             <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
@@ -644,7 +717,7 @@ const handleSaveStatus = async (e) => {
               {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
             </form>
           )}
-        </section>
+        </section> */}
         {/* AE Pitched Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">AE Pitched</h2>

@@ -57,14 +57,19 @@ export async function updateJobStatus(jobId, { status /*, username*/ }) {
 }
 
 // PATCH for comment only
-export async function addJobComment(jobId, { text }) {
+export async function addJobComment(jobId, { comment }) {
   try {
     const url = `${API_BASE}/company-jobs/${jobId}/comments`;
-    const payload = { text };
+    const payload = { comment };
     const res = await axios.post(
       url,
       payload,
-      { headers: getAuthHeaders() }
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+        },
+      }
     );
     return res.data; // { message, job }
   } catch (err) {
@@ -158,10 +163,10 @@ export async function updateUpworkJobStatus(jobId, { status, username }) {
 // export async function addUpworkJobComment(jobId, { username, comment }) {
 //   const url = `${API_BASE}/upwork/job/${jobId}`;
 //   // ...same as before, but with Upwork endpoint...
-export async function addUpworkJobComment(jobId, { text }) {
+export async function addUpworkJobComment(jobId, { comment }) {
   try {
     const url = `${API_BASE}/company-jobs/${jobId}/comments`;
-    const payload = { text };
+    const payload = { comment };
     const res = await axios.post(
       url,
       payload,
@@ -227,9 +232,9 @@ export async function updateAePitched(jobId, ae_pitched) {
 
 export async function updateAeScore(jobId, { username, ae_score }) {
   try {
-    const url = `${API_BASE}/linkedin/job/${jobId}`;
+    const url = `${API_BASE}/company-jobs/${jobId}/ae-score`;
     const payload = { username, ae_score };
-    const res = await axios.patch(
+    const res = await axios.post(
       url,
       payload,
       {
