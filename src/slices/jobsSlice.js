@@ -2,9 +2,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { saveJobsToBackend, fetchJobsByDate } from '../api/jobService';
 import { updateEstimatedBudget, updateAePitched, updateAeScore, 
   updateUpworkEstimatedBudget,updateUpworkAePitched,updateUpworkAeScore,generateProposal ,
-  updateProposal,generateUpworkProposal,updateUpworkProposal,fetchLinkedinStatusHistory , fetchUpworkStatusHistory,
+  generateUpworkProposal,updateUpworkProposal,fetchLinkedinStatusHistory , fetchUpworkStatusHistory,
   updateUpworkJobStatusNew,updateJobStatusNew
  } from '../api/updateJobStatus';
+ import { updateLinkedinProposal } from '../api/updateJobStatus'; 
 //  import {persistReducer} from 'redux-persist';
 //  import storage from 'redux-persist/lib/storage';
 
@@ -29,9 +30,9 @@ const PORT = import.meta.env.VITE_PORT;
 // Async thunk to add a comment to a job
 export const addJobCommentThunk = createAsyncThunk(
   'jobs/addJobComment',
-  async ({ jobId, text }, { rejectWithValue }) => {
+  async ({ jobId, comment }, { rejectWithValue }) => {
     try {
-      const updated = await addJobComment(jobId, { text });
+      const updated = await addJobComment(jobId, { comment });
       return { jobId, job: updated.job };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -111,10 +112,12 @@ export const fetchJobsByDateThunk = createAsyncThunk(
 
 export const updateAeCommentThunk = createAsyncThunk(
   'jobs/updateAeComment',
-  async ({ jobId, ae_comment }, { rejectWithValue }) => {
+  async ({ jobId, ae_comment, username }, { rejectWithValue }) => {
     try {
-      const updated = await updateAeComment(jobId, ae_comment);
-      return { jobId, ae_comment: updated.ae_comment };
+      const updated = await updateAeComment(jobId, { ae_comment, username });
+      const newComment = updated?.job?.ae_comment ?? updated?.ae_comment ?? ae_comment;
+      const returnedId = updated?.job?._id ?? jobId;
+      return { jobId: returnedId, ae_comment: newComment };
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -183,23 +186,45 @@ export const updateUpworkJobStatusThunk = createAsyncThunk(
   }
 );
 
+   
 export const updateUpworkAeCommentThunk = createAsyncThunk(
   'jobs/updateUpworkAeComment',
   async ({ jobId, ae_comment }, { rejectWithValue }) => {
     try {
       const updated = await updateUpworkAeComment(jobId, ae_comment);
-      return { jobId, ae_comment: updated.ae_comment };
+      console.log('API Response for AE Comment:', updated);
+      
+      // Handle different possible response structures
+      const newComment = updated?.job?.ae_comment ?? updated?.ae_comment ?? ae_comment;
+      const returnedId = updated?.job?._id ?? jobId;
+      
+      console.log('Extracted comment:', newComment, 'ID:', returnedId);
+      
+      return { jobId: returnedId, ae_comment: newComment };
     } catch (err) {
+      console.error('AE Comment thunk error:', err);
       return rejectWithValue(err.message);
     }
   }
 );
+// export const updateUpworkAeCommentThunk = createAsyncThunk(
+//   'jobs/updateUpworkAeComment',
+//   async ({ jobId, ae_comment }, { rejectWithValue }) => {
+//     try {
+//       const updated = await updateUpworkAeComment(jobId, ae_comment);
+//       const newComment = updated?.job?.ae_comment ?? updated?.ae_comment ?? ae_comment;
+//       return { jobId, ae_comment: newComment };
+//     } catch (err) {
+//       return rejectWithValue(err.message);
+//     }
+//   }
+// );
 
 export const addUpworkJobCommentThunk = createAsyncThunk(
   'jobs/addUpworkJobComment',
-  async ({ jobId, text }, { rejectWithValue }) => {
+  async ({ jobId, comment }, { rejectWithValue }) => {
     try {
-      const updated = await addUpworkJobComment(jobId, { text });
+      const updated = await addUpworkJobComment(jobId, { comment });
       return { jobId, job: updated.job };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -210,9 +235,9 @@ export const addUpworkJobCommentThunk = createAsyncThunk(
 
 export const updateEstimatedBudgetThunk = createAsyncThunk(
   'jobs/updateEstimatedBudget',
-  async ({ jobId, estimated_budget }, { rejectWithValue }) => {
+  async ({ jobId, estimated_budget, username }, { rejectWithValue }) => {
     try {
-      await updateEstimatedBudget(jobId, estimated_budget);
+      await updateEstimatedBudget(jobId, { estimated_budget, username });
       return { jobId, estimated_budget };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -220,11 +245,12 @@ export const updateEstimatedBudgetThunk = createAsyncThunk(
   }
 );
 
+// New-Linkedin-FE/src/slices/jobsSlice.js
 export const updateAePitchedThunk = createAsyncThunk(
   'jobs/updateAePitched',
-  async ({ jobId, ae_pitched }, { rejectWithValue }) => {
+  async ({ jobId, ae_pitched, username }, { rejectWithValue }) => {
     try {
-      await updateAePitched(jobId, ae_pitched);
+      await updateAePitched(jobId, ae_pitched, username);
       return { jobId, ae_pitched };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -234,9 +260,9 @@ export const updateAePitchedThunk = createAsyncThunk(
 
 export const updateAeScoreThunk = createAsyncThunk(
   'jobs/updateAeScore',
-  async ({ jobId, username, ae_score }, { rejectWithValue }) => {
+  async ({ jobId, ae_score, username }, { rejectWithValue }) => {
     try {
-      await updateAeScore(jobId, { username, ae_score });
+      await updateAeScore(jobId, { ae_score, username });
       return { jobId, ae_score, username };
     } catch (err) {
       return rejectWithValue(err.message);
@@ -282,16 +308,15 @@ export const updateUpworkEstimatedBudgetThunk = createAsyncThunk(
 // Generate proposal thunk
 export const generateProposalThunk = createAsyncThunk(
   'jobs/generateProposal',
-  async ({ jobId, selectedCategory, isProduct }, { rejectWithValue }) => {
+  async ({ jobId, selectedCategory, isProduct, username }, { rejectWithValue }) => {
     try {
-      const data = await generateProposal(jobId, selectedCategory, isProduct);
+      const data = await generateProposal(jobId, selectedCategory, isProduct, username);
       return { jobId, proposal: data.proposal };
     } catch (err) {
       return rejectWithValue(err.message);
     }
   }
 );
-
 // Update proposal thunk
 export const updateProposalThunk = createAsyncThunk(
   'jobs/updateProposal',
@@ -304,14 +329,26 @@ export const updateProposalThunk = createAsyncThunk(
     }
   }
 );
-export const generateUpworkProposalThunk = createAsyncThunk(
-  'jobs/generateUpworkProposal',
-  async ({ jobId, selectedCategory }, { rejectWithValue }) => {
+
+export const updateProposalThunkLinkedin = createAsyncThunk(
+  'jobs/updateLinkedinProposal',
+  async ({ jobId, proposal, username }, { rejectWithValue }) => {
     try {
-      const data = await generateUpworkProposal(jobId, selectedCategory);
+      const data = await updateLinkedinProposal(jobId, { proposal, username });
       return { jobId, proposal: data.proposal };
     } catch (err) {
       return rejectWithValue(err.message);
+    }
+  }
+);
+export const generateUpworkProposalThunk = createAsyncThunk(
+  'jobs/generateUpworkProposal',
+  async ({ jobId, selectedCategory, isProduct, username }, { rejectWithValue }) => {
+    try {
+      const data = await generateUpworkProposal(jobId, selectedCategory, isProduct, username);
+      return { jobId, proposal: data.proposal };
+    } catch (err) {
+      return rejectWithValue(err.message || "Failed to generate proposal.");
     }
   }
 );
@@ -718,6 +755,11 @@ const jobsSlice = createSlice({
         state.proposalSaving = true;
         state.proposalSaveError = null;
       })
+      .addCase(updateProposalThunkLinkedin.fulfilled, (state, action) => {
+        const { jobId, proposal } = action.payload;
+        if (!state.proposals) state.proposals = {};
+        state.proposals[jobId] = { text: proposal, locked: true };
+      })
 
       .addCase(updateProposalThunk.fulfilled, (state, action) => {
         state.proposalSaving = false;
@@ -863,7 +905,11 @@ const jobsSlice = createSlice({
         const { jobId, ae_comment } = action.payload;
         state.jobsByDate.forEach(day => {
           day.jobs.forEach(job => {
-            if (String(job.id) === String(jobId)) {
+            if (
+              String(job._id) === String(jobId) ||
+              String(job.id) === String(jobId) ||
+              String(job.jobId) === String(jobId)
+            ) {
               job.ae_comment = ae_comment;
             }
           });
@@ -883,24 +929,39 @@ const jobsSlice = createSlice({
       })
 
       // For Upwork AE Remark
-.addCase(updateUpworkAeCommentThunk.fulfilled, (state, action) => {
-  const { jobId, ae_comment } = action.payload;
-  state.upworkJobsByDate.forEach(day => {
-    day.jobs.forEach(job => {
-      if (String(job.jobId) === String(jobId) || String(job.id) === String(jobId)) {
-        job.ae_comment = ae_comment;
-      }
-    });
-  });
-})
+
+      .addCase(updateUpworkAeCommentThunk.fulfilled, (state, action) => {
+        const { jobId, ae_comment } = action.payload;
+        state.upworkJobsByDate.forEach(day => {
+          day.jobs.forEach(job => {
+            if (
+              String(job._id) === String(jobId) ||
+              String(job.jobId) === String(jobId) ||
+              String(job.id) === String(jobId)
+            ) {
+              job.ae_comment = ae_comment;
+            }
+          });
+        });
+      })
+// .addCase(updateUpworkAeCommentThunk.fulfilled, (state, action) => {
+//   const { jobId, ae_comment } = action.payload;
+//   state.upworkJobsByDate.forEach(day => {
+//     day.jobs.forEach(job => {
+//       if (String(job.jobId) === String(jobId) || String(job.id) === String(jobId)) {
+//         job.ae_comment = ae_comment;
+//       }
+//     });
+//   });
+// })
 
 // For Upwork Comments
 .addCase(addUpworkJobCommentThunk.fulfilled, (state, action) => {
-  const { jobId, comments } = action.payload;
+  const { jobId, comment } = action.payload;
   state.upworkJobsByDate.forEach(day => {
     day.jobs.forEach(job => {
       if (String(job.jobId) === String(jobId) || String(job.id) === String(jobId)) {
-        job.comments = comments;
+        job.comment = comment;
       }
     });
   });
@@ -910,7 +971,11 @@ const jobsSlice = createSlice({
   const { jobId, estimated_budget } = action.payload;
   state.jobsByDate.forEach(day => {
     day.jobs.forEach(job => {
-      if (String(job.id) === String(jobId)) {
+      if (
+        String(job._id) === String(jobId) ||
+        String(job.id) === String(jobId) ||
+        String(job.jobId) === String(jobId)
+      ) {
         job.estimated_budget = estimated_budget;
       }
     });
@@ -921,7 +986,11 @@ const jobsSlice = createSlice({
   const { jobId, ae_pitched } = action.payload;
   state.jobsByDate.forEach(day => {
     day.jobs.forEach(job => {
-      if (String(job.id) === String(jobId)) {
+      if (
+        String(job._id) === String(jobId) ||
+        String(job.jobId) === String(jobId) ||
+        String(job.id) === String(jobId)
+      ) {
         job.ae_pitched = ae_pitched;
       }
     });
@@ -939,6 +1008,8 @@ const jobsSlice = createSlice({
   });
 })
 
+
+
 .addCase(updateUpworkAeScoreThunk.fulfilled, (state, action) => {
   const { jobId, ae_score, username } = action.payload;
   state.upworkJobsByDate.forEach(day => {
@@ -955,7 +1026,11 @@ const jobsSlice = createSlice({
   const { jobId, ae_pitched } = action.payload;
   state.upworkJobsByDate.forEach(day => {
     day.jobs.forEach(job => {
-      if (String(job.jobId) === String(jobId) || String(job.id) === String(jobId)) {
+      if (
+        String(job._id) === String(jobId) ||
+        String(job.jobId) === String(jobId) ||
+        String(job.id) === String(jobId)
+      ) {
         job.ae_pitched = ae_pitched;
       }
     });
@@ -966,12 +1041,15 @@ const jobsSlice = createSlice({
   const { jobId, estimated_budget } = action.payload;
   state.upworkJobsByDate.forEach(day => {
     day.jobs.forEach(job => {
-      if (String(job.jobId) === String(jobId) || String(job.id) === String(jobId)) {
+      if (
+        String(job._id) === String(jobId) ||
+        String(job.jobId) === String(jobId) ||
+        String(job.id) === String(jobId)
+      ) {
         job.estimated_budget = estimated_budget;
       }
     });
   });
-  
 })
 .addCase(updateJobStatusNewThunk.fulfilled, (state, action) => {
   const { jobId, status } = action.payload;

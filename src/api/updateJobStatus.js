@@ -56,15 +56,17 @@ export async function updateJobStatus(jobId, { status /*, username*/ }) {
   }
 }
 
-// PATCH for comment only
-export async function addJobComment(jobId, { text }) {
+
+export async function addJobComment(jobId, { comment}) {
   try {
     const url = `${API_BASE}/company-jobs/${jobId}/comments`;
-    const payload = { text };
+    const payload = { comment };
     const res = await axios.post(
       url,
       payload,
-      { headers: getAuthHeaders() }
+      { headers:
+         { Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json", } }
     );
     return res.data; // { message, job }
   } catch (err) {
@@ -74,13 +76,13 @@ export async function addJobComment(jobId, { text }) {
   }
 }
 
-export async function updateAeComment(jobId, ae_comment) {
+export async function updateAeComment(jobId, { ae_comment, username }) {
   try {
-    const url = `${API_BASE}/linkedin/job/${jobId}`; 
-    const payload = { ae_comment }; 
-    console.log("PATCH URL (ae_comment):", url);
-    console.log("PATCH DATA (ae_comment):", payload);
-    const res = await axios.patch(
+    const url = `${API_BASE}/company-jobs/${jobId}/ae-remark`;
+    const payload = { ae_comment, username };
+    console.log("PUT URL (ae_comment):", url);
+    console.log("PUT DATA (ae_comment):", payload);
+    const res = await axios.put(
       url,
       payload,
       {
@@ -131,13 +133,65 @@ export async function updateUpworkJobStatus(jobId, { status, username }) {
 //   const url = `${API_BASE}/upwork/job/${jobId}`;
   // ...same as before, but with Upwork endpoint...
 
+  // export async function updateUpworkAeComment(jobId, ae_comment) {
+  //   try {
+  //     const url = `${API_BASE}/upwork/job/${jobId}`;
+  //     const payload = { ae_comment }; 
+  //     console.log("PATCH URL (ae_comment):", url);
+  //     console.log("PATCH DATA (ae_comment):", payload);
+  //     const res = await axios.patch(
+  //       url,
+  //       payload,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+  //     return res.data;
+  //   } catch (err) {
+  //     console.error("API addUpworkJobComment error:", err, err?.response, err?.response?.data);
+  //     throw new Error(
+  //       err?.response?.data?.message || err?.message || "Failed to add comment."
+  //     );
+  //   }
+  // }
+
+  // export async function updateUpworkAeComment(jobId, ae_comment) {
+  //   try {
+  //     const url = `${API_BASE}/company-jobs/ ${jobId} /ae-remark`;
+  //     const payload = { ae_comment };
+  //     console.log("PATCH URL (ae_comment):", url);
+  //     console.log("PATCH DATA (ae_comment):", payload);
+  //     const res = await axios.put(
+  //       url,
+  //       payload,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+  //     return res.data;
+  //   } catch (err) {
+  //     console.error("API addUpworkJobComment error:", err, err?.response, err?.response?.data);
+  //     throw new Error(
+  //       err?.response?.data?.message || err?.message || "Failed to add comment."
+  //     );
+  //   }
+  // }
+
   export async function updateUpworkAeComment(jobId, ae_comment) {
     try {
-      const url = `${API_BASE}/upwork/job/${jobId}`;
-      const payload = { ae_comment }; 
-      console.log("PATCH URL (ae_comment):", url);
+      const url = `${API_BASE}/company-jobs/${jobId}/ae-remark`;
+      const payload = { ae_comment };
+      console.log("PUT URL (ae_comment):", url);
       console.log("PATCH DATA (ae_comment):", payload);
-      const res = await axios.patch(
+      console.log("JobId being sent:", jobId);
+      
+      const res = await axios.put(
         url,
         payload,
         {
@@ -147,6 +201,8 @@ export async function updateUpworkJobStatus(jobId, { status, username }) {
           },
         }
       );
+      
+      console.log("API Response:", res.data);
       return res.data;
     } catch (err) {
       console.error("API addUpworkJobComment error:", err, err?.response, err?.response?.data);
@@ -155,13 +211,14 @@ export async function updateUpworkJobStatus(jobId, { status, username }) {
       );
     }
   }
+
 // export async function addUpworkJobComment(jobId, { username, comment }) {
 //   const url = `${API_BASE}/upwork/job/${jobId}`;
 //   // ...same as before, but with Upwork endpoint...
-export async function addUpworkJobComment(jobId, { text }) {
+export async function addUpworkJobComment(jobId, { comment }) {
   try {
     const url = `${API_BASE}/company-jobs/${jobId}/comments`;
-    const payload = { text };
+    const payload = { comment };
     const res = await axios.post(
       url,
       payload,
@@ -181,11 +238,11 @@ export async function addUpworkJobComment(jobId, { text }) {
   }
 }
 
-export async function updateEstimatedBudget(jobId, estimated_budget) {
+export async function updateEstimatedBudget(jobId, { estimated_budget, username }) {
   try {
-    const url = `${API_BASE}/linkedin/job/${jobId}`; 
-    const payload = { estimated_budget };
-    const res = await axios.patch(
+    const url = `${API_BASE}/company-jobs/${jobId}/estimated-budget`;
+    const payload = { estimated_budget, username };
+    const res = await axios.put(
       url,
       payload,
       {
@@ -203,33 +260,32 @@ export async function updateEstimatedBudget(jobId, estimated_budget) {
   }
 }
 
-export async function updateAePitched(jobId, ae_pitched) {
+// New-Linkedin-FE/src/api/updateJobStatus.js
+export async function updateAePitched(jobId, ae_pitched, username) {
   try {
-    const url = `${API_BASE}/linkedin/job/${jobId}`;
-    const payload = { ae_pitched };
-    const res = await axios.patch(
-      url,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const url = `${API_BASE}/company-jobs/${jobId}/ae-pitched`;
+    const payload = { ae_pitched, username };
+    console.log('PUT URL (ae_pitched):', url);
+    console.log('PUT DATA (ae_pitched):', payload);
+
+    const res = await axios.put(url, payload, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        "Content-Type": "application/json",
+      },
+    });
     return res.data;
   } catch (err) {
-    throw new Error(
-      err.response?.data?.message || err.message || "Failed to update AE Pitched."
-    );
+    console.error('API updateAePitched error:', err, err.response?.data);
+    throw new Error(err.response?.data?.message || err.message || "Failed to update AE Pitched.");
   }
 }
 
 export async function updateAeScore(jobId, { username, ae_score }) {
   try {
-    const url = `${API_BASE}/linkedin/job/${jobId}`;
-    const payload = { username, ae_score };
-    const res = await axios.patch(
+    const url = `${API_BASE}/company-jobs/${jobId}/ae-score`;
+    const payload = { ae_score, username };
+    const res = await axios.post(
       url,
       payload,
       {
@@ -248,9 +304,9 @@ export async function updateAeScore(jobId, { username, ae_score }) {
 }
 export async function updateUpworkAeScore(jobId, { username, ae_score }) {
   try {
-    const url = `${API_BASE}/upwork/job/${jobId}`;
-    const payload = { username, ae_score };
-    const res = await axios.patch(
+    const url = `${API_BASE}/company-jobs/${jobId}/ae-score`;
+    const payload = { ae_score, username };
+    const res = await axios.post(
       url,
       payload,
       {
@@ -267,12 +323,11 @@ export async function updateUpworkAeScore(jobId, { username, ae_score }) {
     );
   }
 }
-
 export async function updateUpworkAePitched(jobId, ae_pitched) {
   try {
-    const url = `${API_BASE}/upwork/job/${jobId}`;
+    const url = `${API_BASE}/company-jobs/${jobId}/ae-pitched`;
     const payload = { ae_pitched };
-    const res = await axios.patch(
+    const res = await axios.put(
       url,
       payload,
       {
@@ -290,11 +345,33 @@ export async function updateUpworkAePitched(jobId, ae_pitched) {
   }
 }
 
+// export async function updateUpworkAePitched(jobId, ae_pitched) {
+//   try {
+//     const url = `${API_BASE}/upwork/job/${jobId}`;
+//     const payload = { ae_pitched };
+//     const res = await axios.patch(
+//       url,
+//       payload,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     return res.data;
+//   } catch (err) {
+//     throw new Error(
+//       err.response?.data?.message || err.message || "Failed to update AE Pitched."
+//     );
+//   }
+// }
+
 export async function updateUpworkEstimatedBudget(jobId, estimated_budget) {
   try {
-    const url = `${API_BASE}/upwork/job/${jobId}`;
+    const url = `${API_BASE}/company-jobs/${jobId}/estimated-budget`;
     const payload = { estimated_budget };
-    const res = await axios.patch(
+    const res = await axios.put(
       url,
       payload,
       {
@@ -311,12 +388,12 @@ export async function updateUpworkEstimatedBudget(jobId, estimated_budget) {
     );
   }
 }
-// Generate a proposal for a job
-export async function generateProposal(jobId, selectedCategory, isProduct) {
-  console.log("API CALL: generateProposal", jobId, selectedCategory, isProduct);
+
+export async function generateProposal(jobId, selectedCategory, isProduct, username) {
+  console.log("API CALL: generateProposal", jobId, selectedCategory, isProduct, username);
   try {
-    const url = `${API_BASE}/linkedin/job/${jobId}/generate-proposal`;
-    const payload = { selectedCategory, isProduct };
+    const url = `${API_BASE}/company-jobs/${jobId}/generate-proposal`;
+    const payload = { selectedCategory, isProduct, username };
     const res = await axios.post(
       url,
       payload,
@@ -327,7 +404,7 @@ export async function generateProposal(jobId, selectedCategory, isProduct) {
         },
       }
     );
-    return res.data; // Should contain { proposal: "..." }
+    return res.data; // { proposal: "..." }
   } catch (err) {
     throw new Error(
       err.response?.data?.message || err.message || "Failed to generate proposal."
@@ -335,11 +412,11 @@ export async function generateProposal(jobId, selectedCategory, isProduct) {
   }
 }
 
-// Update (save) a proposal for a job
-export async function updateProposal(jobId, proposal) {
+// Update LinkedIn Proposal (company jobs)
+export async function updateLinkedinProposal(jobId, { proposal, username }) {
   try {
-    const url = `${API_BASE}/linkedin/job/${jobId}/proposal`;
-    const payload = { proposal };
+    const url = `${API_BASE}/company-jobs/${jobId}/proposal`;
+    const payload = { proposal, username };
     const res = await axios.patch(
       url,
       payload,
@@ -358,11 +435,12 @@ export async function updateProposal(jobId, proposal) {
   }
 }
 
-// Generate Upwork Proposal
-export async function generateUpworkProposal(jobId, selectedCategory) {
+export async function generateUpworkProposal(jobId, selectedCategory, isProduct, username) {
   try {
-    const url = `${API_BASE}/upwork/job/${jobId}/generate-proposal`;
-    const payload = { selectedCategory };
+    const url = `${API_BASE}/company-jobs/${jobId}/generate-proposal`;
+    const payload = { selectedCategory, isProduct, username };
+    console.log("POST URL (generate proposal):", url);
+    console.log("POST DATA (generate proposal):", payload);
     const res = await axios.post(
       url,
       payload,
@@ -375,16 +453,14 @@ export async function generateUpworkProposal(jobId, selectedCategory) {
     );
     return res.data; // { proposal: "..." }
   } catch (err) {
-    throw new Error(
-      err.response?.data?.message || err.message || "Failed to generate proposal."
-    );
+    console.error("API generateUpworkProposal error:", err, err.response?.data);
+    throw new Error(err.response?.data?.message || err.message || "Failed to generate proposal.");
   }
 }
-
 // Update Upwork Proposal
 export async function updateUpworkProposal(jobId, proposal) {
   try {
-    const url = `${API_BASE}/upwork/job/${jobId}/proposal`;
+    const url = `${API_BASE}/company-jobs/${jobId}/proposal`;
     const payload = { proposal };
     const res = await axios.patch(
       url,

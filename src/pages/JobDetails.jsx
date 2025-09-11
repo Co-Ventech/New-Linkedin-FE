@@ -12,7 +12,24 @@ import { useDispatch, useSelector } from "react-redux";
 // import { updateJobStatusNewThunk } from "../slices/jobsSlice";
  // ↓ Replace the import line above with the one below (add updateJobStatusNewThunk; remove updateJobStatusThunk)
  import { fetchJobsByDateThunk, addJobCommentThunk, updateAeCommentThunk, fetchJobByIdThunk,
-  updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk , generateProposalThunk , updateProposalThunk, updateJobStatusNewThunk , setProposalLoading } from "../slices/jobsSlice";
+  updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk , generateProposalThunk , updateProposalThunkLinkedin, updateProposalThunk, updateJobStatusNewThunk , setProposalLoading } from "../slices/jobsSlice";
+  import { saveJobsToBackend, fetchJobsByDate } from '../api/jobService';
+  import {
+    updateEstimatedBudget,
+    updateAePitched,
+    updateAeScore,
+    updateUpworkEstimatedBudget,
+    updateUpworkAePitched,
+    updateUpworkAeScore,
+    generateProposal,
+    generateUpworkProposal,
+    updateUpworkProposal,
+     fetchLinkedinStatusHistory,
+    fetchUpworkStatusHistory,
+    updateUpworkJobStatusNew,
+    updateJobStatusNew,
+    updateLinkedinProposal
+  } from '../api/updateJobStatus';
 
 const tierColor = (tier) => {
   if (!tier) return "bg-gray-200 text-gray-700";
@@ -103,8 +120,32 @@ const JobDetails = () => {
   const [aeScoreUser, setAeScoreUser] = useState("");
   const [aeScoreSaving, setAeScoreSaving] = useState(false);
   const [aeScoreError, setAeScoreError] = useState("");
-  const jobId = localJob?.id;
-const proposalState = useSelector(state => state.jobs.proposals?.[jobId] || { text: '', locked: false });
+//   const jobId = localJob?.id;
+// const proposalState = useSelector(state => state.jobs.proposals?.[jobId] || { text: '', locked: false });
+// const proposalLoading = useSelector(state => state.jobs.proposalLoading);
+// const proposalError = useSelector(state => state.jobs.proposalError);
+
+// const [proposalType, setProposalType] = useState(""); // "Services" or "Products"
+// const [proposalCategory, setProposalCategory] = useState("");
+// const [showProposalUI, setShowProposalUI] = useState(true);
+// const [isEditingProposal, setIsEditingProposal] = useState(false);
+// const [editableProposal, setEditableProposal] = useState(proposalState.text || "");
+// const proposalSaving = useSelector(state => state.jobs.proposalSaving);
+// const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
+// const [companyJobId, setCompanyJobId] = useState(localJob?._id || null);
+// inside component (top-level)
+// const currentUser = useSelector((state) => state.user.user);
+
+const jobId = localJob?.id; // keep if used elsewhere
+
+// Use company job id for proposals and API
+const [companyJobId, setCompanyJobId] = useState(localJob?._id || null);
+const jobIdForCompanyAPIs = companyJobId || localJob?._id || localJob?.id;
+
+const proposalState = useSelector(state => {
+  const store = state.jobs.proposals || {};
+  return (jobIdForCompanyAPIs && store[jobIdForCompanyAPIs]) || { text: '', locked: false };
+});
 const proposalLoading = useSelector(state => state.jobs.proposalLoading);
 const proposalError = useSelector(state => state.jobs.proposalError);
 
@@ -115,7 +156,11 @@ const [isEditingProposal, setIsEditingProposal] = useState(false);
 const [editableProposal, setEditableProposal] = useState(proposalState.text || "");
 const proposalSaving = useSelector(state => state.jobs.proposalSaving);
 const proposalSaveError = useSelector(state => state.jobs.proposalSaveError);
-const [companyJobId, setCompanyJobId] = useState(localJob?._id || null);
+const currentUser = useSelector((state) => state.user.user);
+
+
+
+
 //   const [proposalType, setProposalType] = useState(""); // "Services" or "Products"
 // const [proposalCategory, setProposalCategory] = useState("");
 // const [editableProposal, setEditableProposal] = useState("");
@@ -184,17 +229,41 @@ const [companyJobId, setCompanyJobId] = useState(localJob?._id || null);
     }
   }, [proposalState.text]);
   
-  const handleGenerateProposal = (e) => {
+  // const handleGenerateProposal = (e) => {
+  //   e.preventDefault();
+  //   if (!proposalType || !proposalCategory) return;
+  
+  //   const companyJobId = localJob?._id || localJob?.id; // prefer _id
+  //   const username = currentUser?.email || currentUser?.username;
+  
+  //   dispatch(generateProposalThunk({
+  //     jobId: companyJobId,
+  //     selectedCategory: proposalCategory,
+  //     isProduct: proposalType === "Products",
+  //     username
+  //   }));
+  // };
+  const handleGenerateProposal = async (e) => {
     e.preventDefault();
     if (!proposalType || !proposalCategory) return;
-    console.log("Dispatching generateProposalThunk", { jobId, proposalType, proposalCategory });
-    dispatch(generateProposalThunk({
-      jobId,
-      selectedCategory: proposalCategory,
-      isProduct: proposalType === "Products"
-    }));
+  
+    const username = currentUser?.email || currentUser?.username;
+  
+    try {
+      const result = await dispatch(generateProposalThunk({
+        jobId: jobIdForCompanyAPIs,
+        selectedCategory: proposalCategory,
+        isProduct: proposalType === "Products",
+        username
+      })).unwrap();
+  
+      setEditableProposal(result?.proposal || "");
+      setShowProposalUI(false);
+      setIsEditingProposal(false);
+    } catch (err) {
+      alert(`Failed to generate proposal: ${err}`);
+    }
   };
-
   useEffect(() => {
     // Reset proposalLoading when job changes or component unmounts
     return () => {
@@ -309,20 +378,29 @@ const handleSaveStatus = async (e) => {
     setSaving(false);
   }
 };
-  const handleSaveAeRemark = async (e) => {
-    e.preventDefault();
-    setAeSaving(true);
-    try {
-      await dispatch(updateAeCommentThunk({ jobId: localJob.id, ae_comment: ae_commentInput })).unwrap();
-      await dispatch(fetchJobsByIdThunk(localJob.id)).unwrap();
-      setAe_comment(ae_commentInput);
-      setAe_commentInput("");
-    } catch (err) {
-      alert("Failed to save AE Remark.");
-    } finally {
-      setAeSaving(false);
-    }
-  };
+const handleSaveAeRemark = async (e) => {
+  e.preventDefault();
+  setAeSaving(true);
+  try {
+    const companyJobId = localJob?._id || localJob?.id; // prefer _id for company-jobs
+    if (!companyJobId) throw new Error("Company Job _id not found");
+
+    const username = (currentUser?.email || currentUser?.username || 'current_user');
+
+    await dispatch(updateAeCommentThunk({
+      jobId: companyJobId,
+      ae_comment: ae_commentInput,
+      username
+    })).unwrap();
+
+    setAe_comment(ae_commentInput);
+    setAe_commentInput("");
+  } catch (err) {
+    alert("Failed to save AE Remark.");
+  } finally {
+    setAeSaving(false);
+  }
+};
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!comment.trim()) return;
@@ -337,7 +415,7 @@ const handleSaveStatus = async (e) => {
       }
   
       const result = await dispatch(
-        addJobCommentThunk({ jobId: idForApi, text: comment.trim() })
+        addJobCommentThunk({ jobId: idForApi, comment: comment.trim() })
       ).unwrap();
   
       // Update local job comments from API response (if provided)
@@ -352,7 +430,6 @@ const handleSaveStatus = async (e) => {
       setCommentLoading(false);
     }
   };
-
   const handleSaveEstimatedBudget = async (e) => {
     e.preventDefault();
     setBudgetSaving(true);
@@ -364,7 +441,17 @@ const handleSaveStatus = async (e) => {
         setBudgetSaving(false);
         return;
       }
-      await dispatch(updateEstimatedBudgetThunk({ jobId: localJob.id, estimated_budget: value })).unwrap();
+      const companyJobId = localJob?._id || localJob?.id;
+      if (!companyJobId) throw new Error("Company Job _id not found");
+  
+      const username = currentUser?.email || currentUser?.username || 'current_user';
+  
+      await dispatch(updateEstimatedBudgetThunk({
+        jobId: companyJobId,
+        estimated_budget: value,
+        username
+      })).unwrap();
+  
       setEstimatedBudgetInput(value);
     } catch (err) {
       setBudgetError("Failed to save estimated budget.");
@@ -373,48 +460,95 @@ const handleSaveStatus = async (e) => {
     }
   };
 
-  const handleSaveAePitched = async (e) => {
-    e.preventDefault();
-    setAePitchedSaving(true);
-    setAePitchedError("");
-    try {
-      if (!aePitchedInput.trim()) {
-        setAePitchedError("Please enter a value.");
-        setAePitchedSaving(false);
-        return;
-      }
-      await dispatch(updateAePitchedThunk({ jobId: localJob.id, ae_pitched: aePitchedInput.trim() })).unwrap();
-      setAePitchedInput(aePitchedInput.trim());
-    } catch (err) {
-      setAePitchedError("Failed to save AE Pitched.");
-    } finally {
+// New-Linkedin-FE/src/pages/JobDetails.jsx
+const handleSaveAePitched = async (e) => {
+  e.preventDefault();
+  setAePitchedSaving(true);
+  setAePitchedError("");
+  try {
+    if (!aePitchedInput.trim()) {
+      setAePitchedError("Please enter a value.");
       setAePitchedSaving(false);
+      return;
     }
-  };
-  const handleSaveAeScore = async (e) => {
-    e.preventDefault();
-    setAeScoreSaving(true);
-    setAeScoreError("");
-    try {
-      const value = Number(aeScoreInput);
-      if (!aeScoreUser) {
-        setAeScoreError("Please select a user.");
-        setAeScoreSaving(false);
-        return;
-      }
-      if (isNaN(value) || value < 0 || value > 100) {
-        setAeScoreError("Please enter a valid score (0-100).");
-        setAeScoreSaving(false);
-        return;
-      }
-      await dispatch(updateAeScoreThunk({ jobId: localJob.id, username: aeScoreUser, ae_score: value })).unwrap();
-      setAeScoreInput(ae_score);
-    } catch (err) {
-      setAeScoreError("Failed to save AE Score.");
-    } finally {
+
+    // MUST be a 24-character company ObjectId for company-jobs endpoints
+    const companyJobId = localJob?._id || localJob?.companyJobId;
+    if (!companyJobId || String(companyJobId).length !== 24) {
+      setAePitchedError("Company Job _id not found for this LinkedIn job. Cannot update AE Pitched.");
+      setAePitchedSaving(false);
+      return;
+    }
+
+    const username = currentUser?.email || currentUser?.username || 'current_user';
+    await dispatch(updateAePitchedThunk({
+      jobId: companyJobId,
+      ae_pitched: aePitchedInput.trim(),
+      username
+    })).unwrap();
+
+    setAePitchedInput(aePitchedInput.trim());
+  } catch (err) {
+    console.error('AE Pitched save error:', err);
+    setAePitchedError("Failed to save AE Pitched.");
+  } finally {
+    setAePitchedSaving(false);
+  }
+};
+const handleSaveAeScore = async (e) => {
+  e.preventDefault();
+  setAeScoreSaving(true);
+  setAeScoreError("");
+  try {
+    const value = Number(aeScoreInput);
+    if (isNaN(value) || value < 0 || value > 100) {
+      setAeScoreError("Please enter a valid score (0-100).");
       setAeScoreSaving(false);
+      return;
     }
-  };
+    const companyJobId = localJob?._id || localJob?.id;
+    if (!companyJobId) throw new Error("Company Job _id not found");
+
+    const username = currentUser?.email || currentUser?.username;
+    await dispatch(updateAeScoreThunk({ jobId: companyJobId, ae_score: value, username })).unwrap();
+
+    setAeScoreInput(String(value));
+    setLocalJob(prev => ({ ...prev, ae_score: value }));
+  } catch (err) {
+    setAeScoreError("Failed to save AE Score.");
+  } finally {
+    setAeScoreSaving(false);
+  }
+};
+
+
+  // const handleSaveAeScore = async (e) => {
+  //   e.preventDefault();
+  //   setAeScoreSaving(true);
+  //   setAeScoreError("");
+  //   try {
+  //     const value = Number(aeScoreInput);
+  //     if (!aeScoreUser) {
+  //       setAeScoreError("Please select a user.");
+  //       setAeScoreSaving(false);
+  //       return;
+  //     }
+  //     if (isNaN(value) || value < 0 || value > 100) {
+  //       setAeScoreError("Please enter a valid score (0-100).");
+  //       setAeScoreSaving(false);
+  //       return;
+  //     }
+  //     await dispatch(updateAeScoreThunk({ jobId: localJob.id, username: aeScoreUser, ae_score: value })).unwrap();
+  //     // reflect immediately in UI
+  //     setAeScoreInput(String(value));
+  //     setLocalJob(prev => ({ ...prev, ae_score: value }));
+  //   } catch (err) {
+  //     setAeScoreError("Failed to save AE Score.");
+  //   } finally {
+  //     setAeScoreSaving(false);
+  //   }
+  // };
+
 
   if (!localJob) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500">Job not found.</div>;
   // console.log("proposalType:", proposalType);
@@ -604,7 +738,50 @@ const handleSaveStatus = async (e) => {
         </section>
     
         {/* AE Score Section */}
+        {/* AE Score Section */}
         <section className="mb-6 border-b pb-4">
+          <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
+          {(() => {
+            const aeScoreValue = Array.isArray(localJob?.ae_score)
+              ? localJob?.ae_score?.[0]?.value
+              : localJob?.ae_score;
+
+            const hasAeScore =
+              aeScoreValue !== undefined &&
+              aeScoreValue !== null &&
+              aeScoreValue !== '';
+
+            return hasAeScore ? (
+              <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
+                <span className="font-semibold">AE Score:</span> {aeScoreValue}
+              </div>
+            ) : (
+              <form onSubmit={handleSaveAeScore} className="flex flex-col gap-2 mb-2">
+              <input
+                type="number"
+                className="border rounded px-2 py-1 w-full"
+                placeholder="Enter AE Score (0-100)"
+                value={aeScoreInput}
+                onChange={e => setAeScoreInput(e.target.value)}
+                disabled={aeScoreSaving}
+                min={0}
+                max={100}
+                required
+              />
+              <button
+                type="submit"
+                className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+                disabled={aeScoreSaving || aeScoreInput === "" || Number.isNaN(Number(aeScoreInput))}
+              >
+                {aeScoreSaving ? "Saving..." : "Save"}
+              </button>
+              {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
+            </form>
+            );
+          })()}
+        </section>
+
+        {/* <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">AE Score</h2>
           {localJob.ae_score ? (
             <div className="bg-green-50 border border-green-200 rounded p-3 text-green-900">
@@ -644,7 +821,7 @@ const handleSaveStatus = async (e) => {
               {aeScoreError && <div className="text-red-500 text-sm">{aeScoreError}</div>}
             </form>
           )}
-        </section>
+        </section> */}
         {/* AE Pitched Section */}
         <section className="mb-6 border-b pb-4">
           <h2 className="text-lg font-bold mb-3 text-gray-800">AE Pitched</h2>
@@ -811,7 +988,115 @@ const handleSaveStatus = async (e) => {
     )}
   </ul>
 </section>
-        <section className="mb-6 border-b pb-4">
+
+<section className="mb-6 border-b pb-4">
+  <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>
+  {showProposalUI ? (
+    <form onSubmit={handleGenerateProposal} className="flex flex-col gap-2 mb-2">
+      <select
+        className="border rounded px-2 py-1"
+        value={proposalType}
+        onChange={e => {
+          setProposalType(e.target.value);
+          setProposalCategory("");
+        }}
+        required
+      >
+        <option value="">Select Type</option>
+        <option value="Services">Services</option>
+        <option value="Products">Products</option>
+      </select>
+      {proposalType === "Services" && (
+        <select
+          className="border rounded px-2 py-1"
+          value={proposalCategory}
+          onChange={e => setProposalCategory(e.target.value)}
+          required
+        >
+          <option value="">Select Service Category</option>
+          {SERVICE_CATEGORIES.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      )}
+      {proposalType === "Products" && (
+        <select
+          className="border rounded px-2 py-1"
+          value={proposalCategory}
+          onChange={e => setProposalCategory(e.target.value)}
+          required
+        >
+          <option value="">Select Product Category</option>
+          {PRODUCT_CATEGORIES.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      )}
+      <button
+        type="submit"
+        className="self-start px-4 py-1 bg-blue-600 text-white rounded"
+        disabled={proposalLoading || !proposalType || !proposalCategory}
+      >
+        {proposalLoading ? "Generating..." : "Generate Proposal"}
+      </button>
+      {proposalError && <div className="text-red-500 text-sm">{proposalError}</div>}
+    </form>
+  ) : (
+    <div>
+      <label className="block font-semibold mb-1">Generated Proposal:</label>
+      <textarea
+        className="border rounded px-2 py-1 w-full"
+        rows={8}
+        value={isEditingProposal ? editableProposal : (proposalState.text || editableProposal)}
+        onChange={e => setEditableProposal(e.target.value)}
+        readOnly={!isEditingProposal}
+      />
+      <div className="flex gap-2 mt-2">
+        {!isEditingProposal && !proposalState.locked && (
+          <button
+            className="px-4 py-1 bg-yellow-500 text-white rounded"
+            onClick={() => setIsEditingProposal(true)}
+          >
+            Edit
+          </button>
+        )}
+        {isEditingProposal && (
+          <>
+<button
+  className="px-4 py-1 bg-blue-600 text-white rounded"
+  onClick={async () => {
+    const text = (editableProposal || "").trim();
+    if (!text) return;
+    const username = currentUser?.email || currentUser?.username;
+    await dispatch(updateProposalThunkLinkedin({
+      jobId: jobIdForCompanyAPIs,
+      proposal: text,
+      username
+    })).unwrap();
+    setIsEditingProposal(false);
+  }}
+  disabled={proposalSaving}
+>
+  {proposalSaving ? "Saving..." : "Save"}
+</button>
+            <button
+              className="px-4 py-1 bg-gray-400 text-white rounded"
+              onClick={() => {
+                setEditableProposal(proposalState.text || "");
+                setIsEditingProposal(false);
+              }}
+              disabled={proposalSaving}
+            >
+              Cancel
+            </button>
+          </>
+        )}
+      </div>
+      {proposalSaveError && <div className="text-red-500 text-sm">{proposalSaveError}</div>}
+    </div>
+  )}
+</section>
+        {/* <section className="mb-6 border-b pb-4">
   <h2 className="text-lg font-bold mb-3 text-gray-800">Generate Proposal</h2>
   {showProposalUI ? (
     <form onSubmit={handleGenerateProposal} className="flex flex-col gap-2 mb-2">
@@ -911,7 +1196,7 @@ const handleSaveStatus = async (e) => {
       {proposalSaveError && <div className="text-red-500 text-sm">{proposalSaveError}</div>}
     </div>
   )}
-</section>
+</section> */}
        
       </div>
     </div>
