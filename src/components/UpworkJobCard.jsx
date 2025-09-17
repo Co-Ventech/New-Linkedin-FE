@@ -81,7 +81,10 @@ useEffect(() => {
   const isTruncated = description.length > 120;
 
   const handleCardClick = () => {
-    navigate(`/upwork/jobs/${job.jobId}`, { state: { job } });
+    const cid = job._id || job.companyJobId;
+    if (!cid || String(cid).length !== 24) return;
+    // Navigate to Upwork-specific route
+    navigate(`/upwork-jobs/${cid}`, { state: { job } });
   };
 
   const handleReadMoreClick = (e) => {

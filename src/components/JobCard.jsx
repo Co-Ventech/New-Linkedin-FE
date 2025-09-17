@@ -626,13 +626,20 @@ const JobCard = ({ job, onClick, view = "grid" }) => {
 
   const handleViewJob = (e) => {
     e.stopPropagation();
-    navigate(`/jobs/${job.id}`, { state: { job } });
+    const cid = job?._id || job?.companyJobId;
+    if (!cid || String(cid).length !== 24) return;
+    // Navigate to LinkedIn-specific route
+    navigate(`/linkedin-jobs/${cid}`, { state: { job } });
   };
 
-  const handleReadMoreClick = (e) => {
-    e.stopPropagation();
-    navigate(`/jobs/${job.id}`, { state: { job } });
-  };
+// And handleReadMoreClick around line 634:
+const handleReadMoreClick = (e) => {
+  e.stopPropagation();
+  const cid = job?._id || job?.companyJobId;
+  if (!cid || String(cid).length !== 24) return;
+  // Navigate to LinkedIn-specific route
+  navigate(`/linkedin-jobs/${cid}`, { state: { job } });
+};
   // Safe data extraction with try-catch
   const extractJobData = () => {
     try {
@@ -750,15 +757,14 @@ const JobCard = ({ job, onClick, view = "grid" }) => {
   // Handle click events safely
 
   const handleCardClick = () => {
-    const jobId = job?.id;
-
-    console.log("job id before navigate", jobId); // Should be 4264428501
-
-    if (jobId) {
-      navigate(`/jobs/${jobId}`, { state: { job } });
-    } else {
-      alert("Job ID is missing. Cannot show details.");
+    const cid = job?._id || job?.companyJobId;
+    if (!cid || String(cid).length !== 24) {
+      console.warn('Missing company job _id; cannot open details.', job);
+      return;
     }
+    // Navigate to LinkedIn-specific route
+    navigate(`/linkedin-jobs/${cid}`, { state: { job } });
+  };
 
     // try {
     //   if (onClick && typeof onClick === "function") {
@@ -767,7 +773,7 @@ const JobCard = ({ job, onClick, view = "grid" }) => {
     // } catch (err) {
     //   console.error("Error handling card click:", err);
     // }
-  };
+  // };
 
 
   // const handleReadMoreClick = (e) => {
@@ -787,17 +793,6 @@ const JobCard = ({ job, onClick, view = "grid" }) => {
     }
   };
 
-  // Error fallback UI
-  if (error || !jobData) {
-    return (
-      <div className="bg-red-50 rounded-lg shadow p-4 border border-red-200 min-h-[320px] flex flex-col justify-center items-center">
-        <div className="text-red-600 text-center">
-          <h3 className="font-bold mb-2">Error Loading Job</h3>
-          <p className="text-sm">{error || 'Failed to load job data'}</p>
-        </div>
-      </div>
-    );
-  }
 
   // Safe description processing
   const processDescription = () => {

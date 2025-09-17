@@ -313,7 +313,7 @@ const Dashboard = () => {
       });
 
       // Refresh in background
-      dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 10 }));
+      dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 250 }));
     } catch (err) {
       console.error('Failed to update job status:', err);
       setKanbanJobs(originalKanbanJobs);
@@ -365,12 +365,16 @@ const Dashboard = () => {
 
 const [page, setPage] = useState(1);
 const observer = React.useRef(null);
+const didInitialFetch = React.useRef(false);
 
 useEffect(() => {
-  // initial load and when range changes
+  // initial load and when range changes (only once per range)
   setPage(1);
   dispatch(resetJobsByDate());
-  dispatch(fetchJobsByDateThunk({ range: dateRange, page: 1, limit: 10 }));
+  if (!didInitialFetch.current) {
+    didInitialFetch.current = true;
+    dispatch(fetchJobsByDateThunk({ range: dateRange, page: 1, limit: 250 }));
+  }
 }, [dateRange, dispatch]);
 
 
@@ -392,25 +396,52 @@ const handleDateRangeChange = (e) => {
   dispatch(setRange(val));
   setPage(1);
   dispatch(resetJobsByDate());
-  dispatch(fetchJobsByDateThunk({ range: val, page: 1, limit: 10 }));
+  dispatch(fetchJobsByDateThunk({ range: val, page: 1, limit: 250 }));
 };
 
   useEffect(() => {
     localStorage.setItem("jobsByDate", JSON.stringify(jobsByDate));
   }, [jobsByDate]);
 
+  // // useEffect(() => {
+  // //   setFilters(getFiltersFromUrl());
+  // // }, [location.search]);
+
   // useEffect(() => {
-  //   setFilters(getFiltersFromUrl());
-  // }, [location.search]);
+  //   if (!jobsByDate || jobsByDate.length === 0 || jobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
+  //     dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 10 }));
+  //   }
+  // }, [dispatch, range, jobsByDate]);
 
-  useEffect(() => {
-    if (!jobsByDate || jobsByDate.length === 0 || jobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
-      dispatch(fetchJobsByDateThunk({ range, page: 1, limit: 10 }));
+  // const handleJobClick = (job) => {
+  //   navigate(`/jobs/${job.id}`, { state: { job } });
+  // };
+
+  const handleJobClick = async (job) => {
+    let cid = job._id || job.companyJobId;
+    if (!cid || String(cid).length !== 24) {
+      try {
+        const token = localStorage.getItem("authToken");
+        const res = await fetch(`${API_BASE}/company-jobs/user-jobs?page=1&limit=1000`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const jobs = Array.isArray(data?.jobs) ? data.jobs : [];
+        const externalId = job.jobId || job.id;
+        const match = jobs.find(j =>
+          String(j.jobId) === String(externalId) ||
+          String(j.masterJobId) === String(externalId)
+        );
+        cid = match?._id;
+      } catch (e) {
+        console.warn("Failed to resolve company job _id", e);
+      }
     }
-  }, [dispatch, range, jobsByDate]);
-
-  const handleJobClick = (job) => {
-    navigate(`/jobs/${job.id}`, { state: { job } });
+    if (!cid || String(cid).length !== 24) {
+      console.warn('Missing company job _id; cannot open details.', job);
+      return;
+    }
+    navigate(`/company-jobs/${cid}`, { state: { job } });
   };
 
   // All existing filter logic remains the same
@@ -440,68 +471,149 @@ const handleDateRangeChange = (e) => {
   // All existing data processing logic remains the same
   const allJobs = jobsByDate.flatMap((d) => d.jobs);
 
+  // const filteredJobsByDate = jobsByDate.map((day) => ({
+  //   date: day.date,
+  //   jobs: day.jobs.filter((job) => {
+  //     if (filters.type && !(Array.isArray(job.employmentType) ? job.employmentType.includes(filters.type) : job.employmentType === filters.type)) {
+  //       return false;
+  //     }
+  //     if (filters.field.length > 0 && !filters.field.includes(job.title)) {
+  //       return false;
+  //     }
+  //     if (filters.status && job.currentStatus !== filters.status) return false;
+  //     if (filters.domain.length > 0 && !filters.domain.includes(job.predicted_domain)) {
+  //       return false;
+  //     }
+  //     if (filters.country.length > 0) {
+  //       let jobCountries = [];
+  //       if (Array.isArray(job.locations)) {
+  //         jobCountries = job.locations.map((loc) => {
+  //           if (typeof loc === "string") {
+  //             const parts = loc.split(",");
+  //             return parts[parts.length - 1]?.trim();
+  //           }
+  //           if (typeof loc === "object" && loc !== null && "country" in loc) {
+  //             return loc.country;
+  //           }
+  //           return null;
+  //         }).filter(Boolean);
+  //       } else if (typeof job.locations === "string") {
+  //         const parts = job.locations.split(",");
+  //         jobCountries = [parts[parts.length - 1]?.trim()];
+  //       }
+  //       if (!jobCountries.some((c) => filters.country.includes(c))) {
+  //         return false;
+  //       }
+  //     }
+  //     const colorValue = job.tier || job.tierColor;
+  //     if (filters.color && filters.color !== "" && colorValue !== filters.color) {
+  //       return false;
+  //     }
+  //     if (filters.jobType && job.employmentType !== filters.jobType) return false;
+  //     return true;
+  //   }),
+  // }));
+
+  // ADD: only keep days that actually have jobs
+
   const filteredJobsByDate = jobsByDate.map((day) => ({
     date: day.date,
     jobs: day.jobs.filter((job) => {
-      if (filters.type && !(Array.isArray(job.employmentType) ? job.employmentType.includes(filters.type) : job.employmentType === filters.type)) {
-        return false;
-      }
-      if (filters.field.length > 0 && !filters.field.includes(job.title)) {
-        return false;
-      }
+      if (filters.type && !(Array.isArray(job.employmentType) ? job.employmentType.includes(filters.type) : job.employmentType === filters.type)) return false;
+      if (filters.field.length > 0 && !filters.field.includes(job.title)) return false;
       if (filters.status && job.currentStatus !== filters.status) return false;
-      if (filters.domain.length > 0 && !filters.domain.includes(job.predicted_domain)) {
-        return false;
-      }
+      if (filters.domain.length > 0 && !filters.domain.includes(job.predicted_domain)) return false;
+
+      // Country: only use country
       if (filters.country.length > 0) {
         let jobCountries = [];
-        if (Array.isArray(job.locations)) {
-          jobCountries = job.locations.map((loc) => {
-            if (typeof loc === "string") {
-              const parts = loc.split(",");
-              return parts[parts.length - 1]?.trim();
-            }
-            if (typeof loc === "object" && loc !== null && "country" in loc) {
-              return loc.country;
-            }
-            return null;
-          }).filter(Boolean);
-        } else if (typeof job.locations === "string") {
-          const parts = job.locations.split(",");
-          jobCountries = [parts[parts.length - 1]?.trim()];
+
+        // Prefer company.locations[*].country
+        if (Array.isArray(job.company?.locations)) {
+          jobCountries = job.company.locations
+            .map(loc => (loc && typeof loc === 'object' ? loc.country : null))
+            .filter(Boolean);
         }
-        if (!jobCountries.some((c) => filters.country.includes(c))) {
-          return false;
+
+        // Fallback to job.locations parse if no company countries found
+        if (jobCountries.length === 0) {
+          if (Array.isArray(job.locations)) {
+            jobCountries = job.locations
+              .map(loc => {
+                if (typeof loc === "object" && loc !== null && "country" in loc) return loc.country;
+                if (typeof loc === "string") {
+                  const parts = loc.split(",");
+                  return parts[parts.length - 1]?.trim();
+                }
+                return null;
+              })
+              .filter(Boolean);
+          } else if (typeof job.locations === "string") {
+            const parts = job.locations.split(",");
+            jobCountries = [parts[parts.length - 1]?.trim()];
+          }
         }
+
+        if (!jobCountries.some(c => filters.country.includes(c))) return false;
       }
+
       const colorValue = job.tier || job.tierColor;
-      if (filters.color && filters.color !== "" && colorValue !== filters.color) {
-        return false;
-      }
+      if (filters.color && filters.color !== "" && colorValue !== filters.color) return false;
       if (filters.jobType && job.employmentType !== filters.jobType) return false;
       return true;
     }),
   }));
-
-  // ADD: only keep days that actually have jobs
-const nonEmptyDays = filteredJobsByDate.filter(
+  
+  const nonEmptyDays = filteredJobsByDate.filter(
   (d) => Array.isArray(d.jobs) && d.jobs.length > 0
 );
 
   // Dynamic filter options remain the same
   const categories = Array.from(new Set(allJobs.map((j) => j.seniority).filter(Boolean)));
+  // const countries = Array.from(
+  //   new Set(
+  //     allJobs
+  //       .flatMap((j) => {
+  //         if (Array.isArray(j.locations)) {
+  //           return j.locations.map((loc) => {
+  //             if (typeof loc === "string") {
+  //               const parts = loc.split(",");
+  //               return parts[parts.length - 1]?.trim();
+  //             }
+  //             return null;
+  //           });
+  //         }
+  //         if (typeof j.locations === "string") {
+  //           const parts = j.locations.split(",");
+  //           return [parts[parts.length - 1]?.trim()];
+  //         }
+  //         return [];
+  //       })
+  //       .filter(Boolean)
+  //   )
+  // );
   const countries = Array.from(
     new Set(
       allJobs
         .flatMap((j) => {
+          // Prefer company.locations[*].country
+          if (Array.isArray(j.company?.locations)) {
+            return j.company.locations
+              .map(loc => (loc && typeof loc === 'object' ? loc.country : null))
+              .filter(Boolean);
+          }
+          // Fallback to job.locations
           if (Array.isArray(j.locations)) {
-            return j.locations.map((loc) => {
-              if (typeof loc === "string") {
-                const parts = loc.split(",");
-                return parts[parts.length - 1]?.trim();
-              }
-              return null;
-            });
+            return j.locations
+              .map(loc => {
+                if (typeof loc === "object" && loc !== null && "country" in loc) return loc.country;
+                if (typeof loc === "string") {
+                  const parts = loc.split(",");
+                  return parts[parts.length - 1]?.trim();
+                }
+                return null;
+              })
+              .filter(Boolean);
           }
           if (typeof j.locations === "string") {
             const parts = j.locations.split(",");
@@ -512,6 +624,8 @@ const nonEmptyDays = filteredJobsByDate.filter(
         .filter(Boolean)
     )
   );
+
+
 
   const fields = Array.from(
     new Set(
@@ -987,7 +1101,6 @@ const nonEmptyDays = filteredJobsByDate.filter(
 };
 
 export default Dashboard;
-
 // "use client"
 
 // import React, { useEffect, useState } from "react";
@@ -1968,3 +2081,4 @@ export default Dashboard;
 // };
 
 // export default Dashboard;
+

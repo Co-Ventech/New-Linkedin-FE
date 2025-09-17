@@ -14,7 +14,7 @@ import { selectUser, isSuperAdmin, isCompanyAdmin, isCompanyUser } from "../slic
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
 const PORT = import.meta.env.VITE_PORT;
 
-const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel }) => {
+const Header = ({ onExport, onLogout, user,source, onRefreshJobs , hideDownloadExcel }) => {
   const [showProfile, setShowProfile] = useState(false);
   const [loading, setLoading] = useState(""); // '', 'fetch', 'filter', 'score'
   const [message, setMessage] = useState("");
@@ -22,9 +22,12 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
   const [lastFetchTime, setLastFetchTime] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+  // const [loading, setLoading] = useState(false);
+  const [loaderText, setLoaderText] = useState("");
   
   // Get user from Redux store
   const currentUser = useSelector(selectUser) || user;
+  
   
   // Auto-hide message after 2 seconds
   // useEffect(() => {
@@ -58,6 +61,43 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
   //   setFetchCooldown(Math.floor(diff / 1000));
   // };
 
+  const handleGoogleSync = async () => {
+    try {
+      setLoading(true);
+      setLoaderText("Scraping jobs from Google...");
+      await axios.get("http://localhost:3000/api/google/scrape-jobs");
+
+      setLoaderText("Cleaning unique jobs...");
+      await axios.get("http://localhost:3000/api/google/scrape-jobs-clean");
+
+      setLoaderText("Fetching jobs...");
+      await axios.get("http://localhost:3000/api/google/file-jobs");
+
+      setLoaderText("Done! Refreshing jobs.");
+      if (onRefreshJobs) onRefreshJobs(); // Trigger dashboard refresh
+    } catch (e) {
+      setLoaderText("Error: " + (e.message || "Fetch failed"));
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        setLoaderText("");
+      }, 1500);
+    }
+  };
+
+//  // Somewhere in your header actions area (right side controls), gate the button:
+//  {source === 'google' && (
+//    <button
+//      type="button"
+//      onClick={handleGoogleSync}
+//      className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+//      disabled={loading}
+//   >
+//      {loading ? loaderText || 'Fetching...' : 'Fetch Google Jobs'}
+//    </button>
+//  )}
+
+  
 
   const handleDownloadExcel = async () => {
     try {
@@ -116,7 +156,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
           
         <Menu as="div" className="relative inline-block text-left mr-4">
             <Menu.Button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100">
-              {location.pathname.includes("upwork") ? "Upwork Jobs" : "LinkedIn Jobs"} ▼
+              {location.pathname.includes("upwork") ? "Upwork Jobs" : location.pathname.includes("google") ? "Google Jobs" : "LinkedIn Jobs"} ▼
             </Menu.Button>
             <Menu.Items className="absolute left-0 mt-2 w-44 origin-top-left bg-white border border-gray-200 rounded-md shadow-lg z-50">
               <div className="py-1">
@@ -145,9 +185,20 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
                   )}
                 </Menu.Item>
               </div>
+              
+<Menu.Item>
+  {({ active }) => (
+    <button
+      className={`w-full text-left px-4 py-2 text-sm ${active ? "bg-gray-100 text-gray-900" : "text-gray-700"}`}
+      onClick={() => navigate("/dashboard/google")}
+    >
+      Google Jobs
+    </button>
+  )}
+</Menu.Item>
             </Menu.Items>
           </Menu> 
-          {!hideDownloadExcel && (
+          {!hideDownloadExcel &&   (
           <button
         className="ml-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
         onClick={handleDownloadExcel}
@@ -157,7 +208,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
         )}
           {/* Action buttons moved right before menu */}
           <div className="flex items-center gap-2">
-  {location.pathname.includes("upwork") ? (
+  {location.pathname.includes("upwork" ) || location.pathname.includes("google") ? (
     // Upwork Dashboard Buttons
     <>
       {/* {fetchCooldown === 0 ? (
@@ -251,6 +302,27 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
             </button>
             */}
           </div>
+          {source === 'google' && (
+        <button
+          type="button"
+          onClick={handleGoogleSync}
+          className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
+          disabled={loading}
+        >
+          {loading ? loaderText || 'Fetching...' : 'Fetch Google Jobs'}
+        </button>
+      )}
+      {loading && (
+        <div className="mt-2 flex items-center gap-2">
+          <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          <span>Fetching Google Jobs...</span>
+        </div>
+      )}
+
+
           {/* Menu remains at the far right */}
           <Menu as="div" className="relative inline-block text-left ml-4">
             <Menu.Button className="flex items-center p-2 rounded-full hover:bg-gray-100 focus:outline-none">
@@ -317,6 +389,7 @@ const Header = ({ onExport, onLogout, user, onRefreshJobs , hideDownloadExcel })
                 </Menu.Item>
               </div>
             </Menu.Items>
+     
             {/* Profile Popover/Modal */}
             {showProfile && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">

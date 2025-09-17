@@ -451,7 +451,8 @@ import CompanyAdminDashboard from './pages/CompanyAdminDashboard';
 import { useLocation } from 'react-router-dom';
 import { validateTokenOnLoad } from './api/authApi';
 import { useEffect } from "react";
-
+import GoogleDashboard from "./pages/GoogleDashboard";
+import GoogleJobDetails from "./pages/GoogleJobDetails";
 // Protected Route component with role-based access
 const ProtectedRoute = ({ children, roles }) => {
   const dispatch = useDispatch();
@@ -573,18 +574,55 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* // LinkedIn Job Details Route */}
+<Route 
+  path="/linkedin-jobs/:id" 
+  element={
+    <ProtectedRoute roles={['company_admin', 'company_user']}>
+      <JobDetails />
+    </ProtectedRoute>
+  } 
+/>
+
+{/* // Upwork Job Details Route   */}
+<Route 
+  path="/upwork-jobs/:id" 
+  element={
+    <ProtectedRoute roles={['company_admin', 'company_user']}>
+      <UpworkJobDetails />
+    </ProtectedRoute>
+  } 
+/>
+
+{/* // Keep the generic route for backward compatibility (optional) */}
+<Route 
+  path="/company-jobs/:id" 
+  element={
+    <ProtectedRoute roles={['company_admin', 'company_user']}>
+      <JobDetails />
+    </ProtectedRoute>
+  } 
+/>
+<Route
+  path="/dashboard/google"
+  element={
+    <ProtectedRoute roles={['company_user']}>
+      <GoogleDashboard />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/google-job-details/:id"
+  element={
+    <ProtectedRoute roles={['company_admin', 'company_user']}>
+      <GoogleJobDetails />
+    </ProtectedRoute>
+  }
+/>
+     
         
-        {/* Job Details - accessible by company users and admins */}
-        <Route
-          path="/jobs/:id"
-          element={
-            <ProtectedRoute roles={['company_admin', 'company_user']}>
-              <JobDetails />
-            </ProtectedRoute>
-          }
-        />
-        
-        {/* Upwork Job Details - accessible by company users and admins */}
+        {/* Upwork Job Details - accessible by company users and admins
         <Route
           path="/upwork/jobs/:id"
           element={
@@ -592,7 +630,22 @@ function App() {
               <UpworkJobDetails />
             </ProtectedRoute>
           }
-        />
+            
+        /> */}
+
+{/* <Route 
+path="/company-jobs/:id" element={
+<ProtectedRoute>
+  <UpworkJobDetails />
+  </ProtectedRoute>} />
+
+
+        <Route path="/company-jobs/:id" element={
+  <ProtectedRoute>
+    <JobDetails />
+  </ProtectedRoute>
+} /> */}
+
         
         {/* Admin Dashboard - accessible only by super admins */}
         <Route

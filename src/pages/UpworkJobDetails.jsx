@@ -862,7 +862,7 @@ const STATUS_OPTIONS = [
   'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
 ];
 
-const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
+// const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 
 const UPWORK_SERVICE_CATEGORIES = [
   "AI/ML", "QA", "Software Development", "Mobile App Development", "UI/UX",
@@ -902,6 +902,31 @@ const UpworkJobDetails = () => {
       .find(j => String(j._id) === String(id) || String(j.jobId) === String(id) || String(j.id) === String(id))
   );
 
+  const [localJob, setLocalJob] = useState(jobFromRedux || null);
+  const [loadingJob, setLoadingJob] = useState(false);
+  const [jobError, setJobError] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [showProposalUI, setShowProposalUI] = useState(true);
+  const [isEditingProposal, setIsEditingProposal] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+
+
+  // Always resolve the company job _id (24-char) from the route first,
+  // falling back to the loaded job's _id
+  const companyJobId = React.useMemo(() => {
+    if (id && String(id).length === 24) return String(id);
+    if (localJob?._id && String(localJob._id).length === 24) return String(localJob._id);
+    return null;
+  }, [id, localJob?._id]);
+
+  const getCompanyJobIdOrThrow = () => {
+    if (!companyJobId) throw new Error("Company job _id not available");
+    return companyJobId;
+  };
+
+
+
   // Local state for form inputs
   const [formData, setFormData] = useState({
     status: 'not_engaged',
@@ -916,14 +941,6 @@ const UpworkJobDetails = () => {
   });
 
   // UI state
-  const [localJob, setLocalJob] = useState(jobFromRedux || null);
-  const [loadingJob, setLoadingJob] = useState(false);
-  const [jobError, setJobError] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [showProposalUI, setShowProposalUI] = useState(true);
-  const [isEditingProposal, setIsEditingProposal] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
 
   // Proposal state
   const jobId = localJob?.jobId || localJob?.id;
@@ -937,6 +954,23 @@ const UpworkJobDetails = () => {
   const upworkProposalSaveError = useSelector(state => state.jobs.upworkProposalSaveError);
   const jobIdForCompanyAPIs = localJob?._id || jobId;
 
+  // // Initialize form data when job loads
+  // useEffect(() => {
+  //   if (localJob) {
+  //     setFormData({
+  //       status: localJob.currentStatus || 'not_engaged',
+  //       ae_comment: localJob.ae_comment || '',
+  //       ae_score: localJob.ae_score?.[0]?.value || '',
+  //       ae_score_user: localJob.ae_score?.[0]?.username || '',
+  //       ae_pitched: localJob.ae_pitched || '',
+  //       estimated_budget: localJob.estimated_budget || '',
+  //       comment: '',
+  //       proposal_category: '',
+  //       proposal_text: upworkProposalState.text || ''
+  //     });
+  //     setHasUnsavedChanges(false);
+  //   }
+  // }, [localJob, upworkProposalState.text]);
   // Initialize form data when job loads
   useEffect(() => {
     if (localJob) {
@@ -949,24 +983,22 @@ const UpworkJobDetails = () => {
         estimated_budget: localJob.estimated_budget || '',
         comment: '',
         proposal_category: '',
-        proposal_text: upworkProposalState.text || ''
+        proposal_text: localJob.proposal || upworkProposalState.text || ''
       });
       setHasUnsavedChanges(false);
     }
   }, [localJob, upworkProposalState.text]);
 
-  // Load job if not in Redux
   useEffect(() => {
-    if (!jobFromRedux && id) {
+    if (id && id.length === 24) {
+      // Always fetch from company-jobs endpoint for Upwork jobs
       setLoadingJob(true);
       setJobError(null);
-      axios.get(`${REMOTE_HOST}/api/upwork/job?id=${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
+      axios.get(`${REMOTE_HOST}/api/company-jobs/${id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("authToken")}` }
       })
         .then(res => {
-          const data = res.data.job ? res.data.job : res.data;
+          const data = res.data?.job ? res.data.job : res.data;
           setLocalJob(data);
           setLoadingJob(false);
         })
@@ -974,10 +1006,9 @@ const UpworkJobDetails = () => {
           setJobError("Job not found.");
           setLoadingJob(false);
         });
-    } else if (jobFromRedux) {
-      setLocalJob(jobFromRedux);
+      return;
     }
-  }, [jobFromRedux, id]);
+  }, [id]);
 
   // Handle form input changes
   const handleInputChange = (field, value) => {
@@ -985,6 +1016,17 @@ const UpworkJobDetails = () => {
     setHasUnsavedChanges(true);
   };
 
+  useEffect(() => {
+    // If a proposal exists (either from API or Redux), show the proposal view
+    if ((localJob?.proposal && localJob.proposal.trim()) || (upworkProposalState.text && upworkProposalState.text.trim())) {
+      setShowProposalUI(false);
+      // Ensure form has the proposal content for the textarea
+      setFormData(prev => ({
+        ...prev,
+        proposal_text: localJob?.proposal || upworkProposalState.text || prev.proposal_text || ''
+      }));
+    }
+  }, [localJob?.proposal, upworkProposalState.text]);
   // Check for unsaved changes before navigation
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -1021,7 +1063,7 @@ const UpworkJobDetails = () => {
       if (formData.status !== (localJob?.currentStatus || 'not_engaged')) {
         try {
           const result = await dispatch(updateUpworkJobStatusNewThunk({
-            jobId: localJob._id,
+            jobId: getCompanyJobIdOrThrow(),
             status: formData.status
           })).unwrap();
 
@@ -1038,11 +1080,51 @@ const UpworkJobDetails = () => {
         }
       }
 
+      // // Update AE Comment if changed
+      // if (formData.ae_comment !== (localJob?.ae_comment || '')) {
+      //   try {
+      //     await dispatch(updateUpworkAeCommentThunk({
+      //       jobId: localJob._id,
+      //       ae_comment: formData.ae_comment
+      //     })).unwrap();
+      //     updatedJobData.ae_comment = formData.ae_comment;
+      //     updates.push('AE Comment');
+      //   } catch (err) {
+      //     errors.push(`AE Comment: ${err.message}`);
+      //   }
+      // }
+
+      // // Update AE Comment if changed
+      // if (formData.ae_comment !== (localJob?.ae_comment || '')) {
+      //   try {
+      //     const companyJobId = jobIdForCompanyAPIs; // localJob?._id || (localJob?.jobId || localJob?.id)
+      //     console.log('Company Job ID for AE Comment:', companyJobId);
+      //     console.log('Local Job:', localJob);
+      //     if (!companyJobId) throw new Error("Company Job _id not found");
+      //     await dispatch(updateUpworkAeCommentThunk({
+      //       jobId: companyJobId,
+      //       ae_comment: formData.ae_comment
+      //     })).unwrap();
+      //     updatedJobData.ae_comment = formData.ae_comment;
+      //     updates.push('AE Comment');
+      //   } catch (err) {
+      //     console.error('AE Comment error:', err);
+      //     errors.push(`AE Comment: ${err.message}`);
+      //   }
+      // }
       // Update AE Comment if changed
       if (formData.ae_comment !== (localJob?.ae_comment || '')) {
         try {
+          // TEMPORARY DEBUGGING - Remove after fixing
+          console.log('=== JOB DATA DEBUG ===');
+          console.log('localJob._id:', localJob?._id);
+          console.log('localJob.jobId:', localJob?.jobId);
+          console.log('localJob.id:', localJob?.id);
+          console.log('Full localJob object:', localJob);
+          console.log('========================');
+
           await dispatch(updateUpworkAeCommentThunk({
-            jobId: localJob.jobId || localJob.id,
+            jobId: getCompanyJobIdOrThrow(),
             ae_comment: formData.ae_comment
           })).unwrap();
           updatedJobData.ae_comment = formData.ae_comment;
@@ -1053,14 +1135,14 @@ const UpworkJobDetails = () => {
       }
 
       // Update AE Score if changed
-      if (formData.ae_score !== (localJob?.ae_score?.[0]?.value || '') && formData.ae_score_user) {
+      if (formData.ae_score !== (localJob?.ae_score?.[0]?.value || '') && (currentUser?.email || currentUser?.username)) {
         try {
           await dispatch(updateUpworkAeScoreThunk({
-            jobId: localJob.jobId || localJob.id,
-            username: formData.ae_score_user,
+            jobId: getCompanyJobIdOrThrow(),
+            username: currentUser?.email || currentUser?.username,
             ae_score: Number(formData.ae_score)
           })).unwrap();
-          updatedJobData.ae_score = [{ value: Number(formData.ae_score), username: formData.ae_score_user }];
+          updatedJobData.ae_score = [{ value: Number(formData.ae_score), username: currentUser?.email || currentUser?.username }];
           updates.push('AE Score');
         } catch (err) {
           errors.push(`AE Score: ${err.message}`);
@@ -1071,7 +1153,7 @@ const UpworkJobDetails = () => {
       if (formData.ae_pitched !== (localJob?.ae_pitched || '')) {
         try {
           await dispatch(updateUpworkAePitchedThunk({
-            jobId: localJob.jobId || localJob.id,
+            jobId: getCompanyJobIdOrThrow(),
             ae_pitched: formData.ae_pitched
           })).unwrap();
           updatedJobData.ae_pitched = formData.ae_pitched;
@@ -1085,7 +1167,7 @@ const UpworkJobDetails = () => {
       if (formData.estimated_budget !== (localJob?.estimated_budget || '')) {
         try {
           await dispatch(updateUpworkEstimatedBudgetThunk({
-            jobId: localJob.jobId || localJob.id,
+            jobId: getCompanyJobIdOrThrow(),
             estimated_budget: Number(formData.estimated_budget)
           })).unwrap();
           updatedJobData.estimated_budget = Number(formData.estimated_budget);
@@ -1098,10 +1180,11 @@ const UpworkJobDetails = () => {
       // Add comment if provided
       if (formData.comment.trim()) {
         try {
-          const result = await dispatch(addUpworkJobCommentThunk({
-            jobId: localJob._id,
-            comment: formData.comment.trim()
-          })).unwrap();
+          const result = await dispatch(
+            addUpworkJobCommentThunk({
+              jobId: getCompanyJobIdOrThrow(),
+              comment: formData.comment.trim()
+            })).unwrap();
 
           if (result?.job) {
             updatedJobData = {
@@ -1112,7 +1195,7 @@ const UpworkJobDetails = () => {
             };
           }
           updates.push('Comment');
-          setFormData(prev => ({ ...prev, comment: '' }));
+          setFormData(prev => ({ ...prev, comment: formData.comment.trim() }));
         } catch (err) {
           errors.push(`Comment: ${err.message}`);
         }
@@ -1122,7 +1205,7 @@ const UpworkJobDetails = () => {
       if (formData.proposal_text !== (upworkProposalState.text || '') && formData.proposal_text.trim()) {
         try {
           await dispatch(updateUpworkProposalThunk({
-            jobId,
+            jobId: getCompanyJobIdOrThrow(),
             proposal: formData.proposal_text.trim()
           })).unwrap();
           updates.push('Proposal');
@@ -1140,7 +1223,7 @@ const UpworkJobDetails = () => {
         // This ensures the dashboard shows the updated data
         dispatch({
           type: 'jobs/updateLocalJob',
-          payload: { jobId: localJob._id, updatedJob: updatedJobData }
+          payload: { jobId: getCompanyJobIdOrThrow(), updatedJob: updatedJobData }
         });
       }
 
@@ -1166,8 +1249,10 @@ const UpworkJobDetails = () => {
     try {
       const result = await dispatch(
         generateUpworkProposalThunk({
-          jobId: jobIdForCompanyAPIs,
-          selectedCategory: formData.proposal_category,
+          jobId: getCompanyJobIdOrThrow(),                     // localJob._id
+          selectedCategory: formData.proposal_category,  // e.g. "Mobile App Development"
+          isProduct: false,
+          username: currentUser?.email || currentUser?.username
         })
       ).unwrap();
 
@@ -1179,7 +1264,7 @@ const UpworkJobDetails = () => {
       setShowProposalUI(false);
       setHasUnsavedChanges(true);
     } catch (err) {
-      alert(`Failed to generate proposal: ${err.message}`);
+      alert(`Failed to generate proposal: ${err}`);
     }
   };
   const handleSaveProposal = async () => {
@@ -1188,7 +1273,7 @@ const UpworkJobDetails = () => {
 
     try {
       await dispatch(updateUpworkProposalThunk({
-        jobId: jobIdForCompanyAPIs,
+        jobId: getCompanyJobIdOrThrow(),
         proposal: text,
       })).unwrap();
       setHasUnsavedChanges(false);
@@ -1322,8 +1407,8 @@ const UpworkJobDetails = () => {
                 onClick={handleSaveAll}
                 disabled={!hasUnsavedChanges || saving}
                 className={`px-6 py-2 rounded-lg font-medium transition-colors ${hasUnsavedChanges
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
               >
                 {saving ? (
@@ -1503,32 +1588,54 @@ const UpworkJobDetails = () => {
                       <label className="block text-sm font-medium text-gray-700">Generated Proposal</label>
                       <textarea
                         className="w-full border rounded p-2 min-h-[160px]"
-                        value={formData.proposal_text}
+                        value={isEditingProposal ? formData.proposal_text : upworkProposalState.text || formData.proposal_text}
                         onChange={e => {
-                          setFormData(prev => ({ ...prev, proposal_text: e.target.value }));
-                          setHasUnsavedChanges(true);
+                          if (isEditingProposal) {
+                            setFormData(prev => ({ ...prev, proposal_text: e.target.value }));
+                            setHasUnsavedChanges(true);
+                          }
                         }}
+                        readOnly={!isEditingProposal}
                         placeholder="Your generated proposal will appear here..."
                       />
                       <div className="flex gap-2">
-                        <button
-                          onClick={handleSaveProposal}
-                          className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                        >
-                          Save Proposal
-                        </button>
-                        <button
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, proposal_text: upworkProposalState.text || '' }));
-                            setHasUnsavedChanges(false);
-                          }}
-                          className="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                        >
-                          Reset
-                        </button>
+                        {!isEditingProposal && !upworkProposalState.locked && (
+                          <button
+                            onClick={() => setIsEditingProposal(true)}
+                            className="px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                          >
+                            Edit
+                          </button>
+                        )}
+
+                        {isEditingProposal && (
+                          <>
+                            <button
+                              onClick={handleSaveProposal}
+                              className="px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                              disabled={!formData.proposal_text?.trim() || upworkProposalSaving}
+                            >
+                              {upworkProposalSaving ? "Saving..." : "Save"}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setFormData(prev => ({ ...prev, proposal_text: upworkProposalState.text || '' }));
+                                setIsEditingProposal(false);
+                                setHasUnsavedChanges(false);
+                              }}
+                              className="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                              disabled={upworkProposalSaving}
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
                       </div>
                       {upworkProposalSaveError && (
                         <div className="text-red-500 text-sm">{upworkProposalSaveError}</div>
+                      )}
+                      {upworkProposalState.locked && (
+                        <div className="text-xs text-gray-500">Proposal is locked after edit.</div>
                       )}
                     </div>
                   )}
@@ -1585,8 +1692,50 @@ const UpworkJobDetails = () => {
                 </div>
               )}
             </div>
-
             {/* AE Score */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">AE Score</h2>
+
+              {(() => {
+                const latest =
+                  Array.isArray(localJob?.companyScore) && localJob.companyScore.length > 0
+                    ? localJob.companyScore[localJob.companyScore.length - 1]
+                    : null;
+                if (latest) {
+                  return (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="text-green-900">
+                        <span className="font-semibold">AE Score:</span> {latest.ae_score}%
+                      </div>
+                      <div className="text-green-700 text-sm">
+                        <span className="font-medium">By:</span> {latest.username}
+                      </div>
+                      <div className="text-green-600 text-xs">
+                        <span className="font-medium">Date:</span> {new Date(latest.date).toLocaleDateString()}
+                      </div>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Score (0-100)</label>
+                      <input
+                        type="number"
+                        value={formData.ae_score}
+                        onChange={(e) => handleInputChange('ae_score', e.target.value)}
+                        min="0"
+                        max="100"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter score"
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* AE Score
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">AE Score</h2>
 
@@ -1601,7 +1750,7 @@ const UpworkJobDetails = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">User</label>
                     <select
                       value={formData.ae_score_user}
@@ -1613,9 +1762,9 @@ const UpworkJobDetails = () => {
                         <option key={user} value={user}>{user}</option>
                       ))}
                     </select>
-                  </div>
+                  </div> */}
 
-                  <div>
+            {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Score (0-100)</label>
                     <input
                       type="number"
@@ -1629,9 +1778,9 @@ const UpworkJobDetails = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
 
-            {/* AE Comment */}
+            {/* AE Comment
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">AE Remark</h2>
 
@@ -1651,6 +1800,33 @@ const UpworkJobDetails = () => {
                   />
                 </div>
               )}
+            </div> */}
+            {/* AE Remark */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">AE Remark</h2>
+
+              {localJob.ae_comment ? (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="text-blue-900">{localJob.ae_comment}</div>
+                  <div className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Updated by:</span> {currentUser?.username || currentUser?.email || 'Current User'}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Add Remark</label>
+                  <textarea
+                    value={formData.ae_comment}
+                    onChange={(e) => handleInputChange('ae_comment', e.target.value)}
+                    rows={4}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Write AE remark..."
+                  />
+                  <div className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Updated by:</span> {currentUser?.username || currentUser?.email || 'Current User'}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* AE Pitched */}
@@ -1660,6 +1836,9 @@ const UpworkJobDetails = () => {
               {localJob.ae_pitched ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="text-green-900">{localJob.ae_pitched}</div>
+                  <div className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Updated by:</span> {currentUser?.username || currentUser?.email || 'Current User'}
+                  </div>
                 </div>
               ) : (
                 <div>
@@ -1671,11 +1850,14 @@ const UpworkJobDetails = () => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Write AE pitch..."
                   />
+                  <div className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Updated by:</span> {currentUser?.username || currentUser?.email || 'Current User'}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Estimated Budget */}
+            {/* Estimated Budget
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Estimated Budget</h2>
 
@@ -1696,6 +1878,36 @@ const UpworkJobDetails = () => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter budget amount"
                   />
+                </div>
+              )}
+            </div> */}
+            {/* Estimated Budget */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">Estimated Budget</h2>
+
+              {localJob.estimated_budget ? (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="text-green-900">
+                    <span className="font-semibold">Budget:</span> ${localJob.estimated_budget}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Updated by:</span> {currentUser?.username || currentUser?.email || 'Current User'}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Set Budget</label>
+                  <input
+                    type="number"
+                    value={formData.estimated_budget}
+                    onChange={(e) => handleInputChange('estimated_budget', e.target.value)}
+                    min="1"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter budget amount"
+                  />
+                  <div className="text-sm text-gray-600 mt-2">
+                    <span className="font-medium">Updated by:</span> {currentUser?.username || currentUser?.email || 'Current User'}
+                  </div>
                 </div>
               )}
             </div>

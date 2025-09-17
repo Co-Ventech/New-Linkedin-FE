@@ -33,43 +33,56 @@ export async function saveJobsToBackend(jobs) {
     );
   }
 }
-
-export async function fetchJobsByDate(range = '1d', page = 1, limit = 10) {
+export async function fetchGoogleFileJobs() {
   try {
-    // Use the new API endpoint for company users
+    const url = `${API_BASE}/google/file-jobs`;
+    const res = await axios.get(url, { headers: getAuthHeaders() });
+
+    // Extract the jobs array from the response
+    const data = res.data || {};
+    const jobs = Array.isArray(data.jobs) ? data.jobs : [];
+
+    // Normalize the jobs with additional fields
+    return jobs.map((job) => ({
+      ...job,
+      _platform: 'google', // Add platform identifier
+      _id: job.primary_hash || job.secondary_hash || job.job_id || job.share_link || String(Math.random()), // Generate a stable ID
+      _dateKey: (job.scraped_at || job.posted_time || new Date().toISOString()).slice(0, 10), // Extract or generate a date key
+    }));
+  } catch (err) {
+    console.error("[fetchGoogleFileJobs] Error:", err.response?.data || err.message);
+    throw new Error(err.response?.data?.message || err.message || "Failed to fetch Google file jobs.");
+  }
+}
+
+export async function fetchJobsByDate(range = '1d', page = 1, limit = 10, platform) {
+  try {
     const url = `${REMOTE_HOST}/api/company-jobs/user-jobs`;
     
     const res = await axios.get(url, { 
-      params: { page, limit },
+      params: { page, limit, ...(platform ? { platform } : {}) },
       headers: getAuthHeaders() 
     });
     
     const data = res.data || {};
     
-    // Transform the response to match the expected format
-    // The new API returns { jobs: [...] } but we need [{ date, jobs: [...] }]
     if (data.jobs && Array.isArray(data.jobs)) {
-      // Group jobs by date (using ts_publish or createdAt)
       const jobsByDate = {};
       
       data.jobs.forEach(job => {
-        // Use ts_publish if available, otherwise use createdAt or current date
         const jobDate = job.ts_publish || job.createdAt || job.distributedAt || new Date().toISOString();
-        const dateKey = jobDate.slice(0, 10); // YYYY-MM-DD format
-        
+        const dateKey = jobDate.slice(0, 10);
         if (!jobsByDate[dateKey]) {
           jobsByDate[dateKey] = [];
         }
         jobsByDate[dateKey].push(job);
       });
       
-      // Convert to array format expected by the UI
       const result = Object.entries(jobsByDate).map(([date, jobs]) => ({
         date,
         jobs
       }));
       
-      // Sort by date (newest first)
       result.sort((a, b) => new Date(b.date) - new Date(a.date));
       
       return result;

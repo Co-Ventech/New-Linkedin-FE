@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState , useMemo} from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import SidebarFilters from "../components/SidebarFilters";
 import UpworkJobCard from "../components/UpworkJobCard";
 import Header from "../components/Header";
@@ -215,14 +215,14 @@ const UpworkDashboard = () => {
       if (filters.jobType && job.jobType !== filters.jobType) return false;
       if (filters.status && job.currentStatus !== filters.status) return false;
       if (filters.paymentVerified !== "" && String(job.isPaymentMethodVerified) !== filters.paymentVerified) return false;
-  
+
       if (filters.clientHistory) {
         const hires = job.buyerTotalJobsWithHires;
         if (filters.clientHistory === "no_hires" && (hires !== null && hires !== undefined && hires > 0)) return false;
         if (filters.clientHistory === "1_9" && (!hires || hires < 1 || hires > 9)) return false;
         if (filters.clientHistory === "10_plus" && (!hires || hires < 10)) return false;
       }
-  
+
       if (filters.projectLength) {
         const weeks = job.hourlyWeeks;
         let group = "";
@@ -233,7 +233,7 @@ const UpworkDashboard = () => {
         else if (weeks >= 25) group = "more_6";
         if (filters.projectLength !== group) return false;
       }
-  
+
       if (filters.hoursPerWeek) {
         const minHours = job.minHoursWeek;
         let group = "";
@@ -242,24 +242,24 @@ const UpworkDashboard = () => {
         else if (minHours > 30) group = "more_30";
         if (filters.hoursPerWeek !== group) return false;
       }
-  
+
       if (filters.jobDuration) {
         const isContractToHire = job.isContractToHire;
         let group = isContractToHire === true ? "contract_to_hire" : "not_given";
         if (filters.jobDuration !== group) return false;
       }
-  
+
       const colorValue = job.tier || job.tierColor;
       if (filters.color && filters.color !== "" && colorValue !== filters.color) return false;
-  
+
       return true;
     });
   }, [allJobs, filters]);
 
-// Debounced version
-const debouncedFetch = debounce((params) => {
-  dispatch(fetchUpworkJobsByDateThunk(params));
-}, 300); // 300ms delay
+  // Debounced version
+  const debouncedFetch = debounce((params) => {
+    dispatch(fetchUpworkJobsByDateThunk(params));
+  }, 300); // 300ms delay
 
 
   useEffect(() => {
@@ -269,7 +269,7 @@ const debouncedFetch = debounce((params) => {
       grouped[status] = filteredJobs.filter(job => job.currentStatus === status);
     });
     setKanbanJobs(grouped);
-  }, [kanbanView, filteredJobs]); 
+  }, [kanbanView, filteredJobs]);
 
 
   const onDragEnd = async (result) => {
@@ -438,15 +438,15 @@ const debouncedFetch = debounce((params) => {
   // }, [dateRange, dispatch]);
 
   // Update the useEffect for pagination
- 
- // Effect for dateRange change (add loading/data check)
-useEffect(() => {
-  if (loading || (upworkJobsByDate.length > 0 && dateRange === range)) return; // Skip if loading or data exists for this range
-  setPage(1);
-  setHasMoreLocal(true);
-  dispatch(resetJobsByDate());
-  debouncedFetch({ range: dateRange || '1d', page: 1, limit: 20 });
-}, [dateRange, dispatch, loading, upworkJobsByDate.length, range]);
+
+  // Effect for dateRange change (add loading/data check)
+  useEffect(() => {
+    if (loading || (upworkJobsByDate.length > 0 && dateRange === range)) return; // Skip if loading or data exists for this range
+    setPage(1);
+    setHasMoreLocal(true);
+    dispatch(resetJobsByDate());
+    debouncedFetch({ range: dateRange || '1d', page: 1, limit: 100 });
+  }, [dateRange, dispatch, loading, upworkJobsByDate.length, range]);
 
 
   // useEffect(() => {
@@ -458,7 +458,7 @@ useEffect(() => {
   // Effect for pagination (add loading/hasMore check)
   useEffect(() => {
     if (page > 1 && hasMoreLocal && !loading) {
-      debouncedFetch({ range: dateRange || '1d', page, limit: 20 });
+      debouncedFetch({ range: dateRange || '1d', page, limit: 100 });
     }
   }, [page, dateRange, dispatch, hasMoreLocal, loading]);
 
@@ -482,7 +482,7 @@ useEffect(() => {
     setPage(1);
     setHasMoreLocal(true);
     dispatch(resetJobsByDate());
-    dispatch(fetchUpworkJobsByDateThunk({ range: value, page: 1, limit: 20 }));
+    dispatch(fetchUpworkJobsByDateThunk({ range: value, page: 1, limit: 100 }));
   };
 
   const handleExport = () => {
@@ -549,17 +549,17 @@ useEffect(() => {
     // Initial fetch only if no data
     if (!loading && upworkJobsByDate.length === 0) {
       // Before dispatch
-console.log(`Fetching jobs: range=${dateRange}, page=${page}`);
+      console.log(`Fetching jobs: range=${dateRange}, page=${page}`);
 
-      dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1, limit: 20 }));
+      dispatch(fetchUpworkJobsByDateThunk({ range: dateRange || '1d', page: 1, limit: 100 }));
     }
   }, []); // Empty deps: runs once on mount
 
-  
+
   useEffect(() => {
     // Check if we have more jobs based on the current data
     const totalJobs = upworkJobsByDate.flatMap(day => day.jobs || []).length;
-    const expectedJobs = page * 20; // Assuming limit is 20
+    const expectedJobs = page * 100; // Assuming limit is 20
 
     // If we got fewer jobs than expected, we've reached the end
     if (totalJobs < expectedJobs && page > 1) {
@@ -874,9 +874,22 @@ console.log(`Fetching jobs: range=${dateRange}, page=${page}`);
                                             <div className="flex items-center gap-2 mb-2">
                                               <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                               <p className="text-gray-600 text-sm truncate">
-                                                {job.company || job.companyName}
+                                                {(() => {
+                                                  const c = job.company;
+                                                  if (typeof c === 'string') return c;
+                                                  if (c && typeof c === 'object') {
+                                                    return c.name || c.companyName || c.title || job.companyName || 'Company';
+                                                  }
+                                                  return job.companyName || 'Company';
+                                                })()}
                                               </p>
                                             </div>
+                                            {/* <div className="flex items-center gap-2 mb-2">
+                                              <Building2 className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                              <p className="text-gray-600 text-sm truncate">
+                                                {job.company || job.companyName}
+                                              </p>
+                                            </div> */}
                                             <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.textColor} ${config.color}`}>
                                               {config.label}
                                               {job.isUpdating && (
