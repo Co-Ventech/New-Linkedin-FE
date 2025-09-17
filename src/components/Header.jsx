@@ -65,13 +65,13 @@ const Header = ({ onExport, onLogout, user,source, onRefreshJobs , hideDownloadE
     try {
       setLoading(true);
       setLoaderText("Scraping jobs from Google...");
-      await axios.get("http://localhost:3000/api/google/scrape-jobs");
+      await axios.get(`${REMOTE_HOST}/api/google/scrape-jobs`);
 
       setLoaderText("Cleaning unique jobs...");
-      await axios.get("http://localhost:3000/api/google/scrape-jobs-clean");
+      await axios.get(`${REMOTE_HOST}/api/google/scrape-jobs-clean`);
 
       setLoaderText("Fetching jobs...");
-      await axios.get("http://localhost:3000/api/google/file-jobs");
+      await axios.get(`${REMOTE_HOST}/api/google/file-jobs`);
 
       setLoaderText("Done! Refreshing jobs.");
       if (onRefreshJobs) onRefreshJobs(); // Trigger dashboard refresh
