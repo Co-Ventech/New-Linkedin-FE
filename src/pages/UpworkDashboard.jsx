@@ -272,6 +272,10 @@ const UpworkDashboard = () => {
   }, [kanbanView, filteredJobs]);
 
 
+
+// Use groupedJobs directly instead of setting with setState.
+
+
   const onDragEnd = async (result) => {
 
     const { source, destination } = result;
