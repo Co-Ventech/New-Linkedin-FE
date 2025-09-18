@@ -33,6 +33,8 @@ import {
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_REMOTE_HOST;
+const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
+import axios from "axios";
 
 const SuperAdminDashboard = () => {
   const user = useSelector(selectUser);
@@ -49,7 +51,10 @@ const SuperAdminDashboard = () => {
   const [subscription, setSubscription] = useState(null);
   const [companyOverviews, setCompanyOverviews] = useState({});
   const [overviewLoading, setOverviewLoading] = useState(false);
- const [upworkFetchLoading, setUpworkFetchLoading] = useState(false);
+  const [upworkFetchLoading, setUpworkFetchLoading] = useState(false);
+  const [linkedinFetchLoading, setLinkedinFetchLoading] = useState(false);
+  const [googleFetchLoading, setGoogleFetchLoading] = useState(false);
+  const [googleFetchText, setGoogleFetchText] = useState("");
 
 
 
@@ -278,6 +283,24 @@ const SuperAdminDashboard = () => {
       showMessage('error', 'Failed to fetch company overviews');
     } finally {
       setOverviewLoading(false);
+    }
+  };
+
+  const handleGoogleSync = async () => {
+    try {
+      setGoogleFetchLoading(true);
+      setGoogleFetchText("Scraping jobs from Google...");
+      await axios.get(`${REMOTE_HOST}/api/google/scrape-jobs`);
+      setGoogleFetchText("Done! Refreshing...");
+      await loadInitialData();
+      showMessage && showMessage('success', 'Fetched Google jobs successfully');
+    } catch (e) {
+      showMessage && showMessage('error', e?.response?.data?.message || e.message || 'Fetch failed');
+    } finally {
+      setTimeout(() => {
+        setGoogleFetchLoading(false);
+        setGoogleFetchText("");
+      }, 800);
     }
   };
 
@@ -592,12 +615,12 @@ const SuperAdminDashboard = () => {
     try {
       setLoading(true);
       const response = await companyAPI.create({
-        name: companyData.name,
-        description: companyData.description,
+        companyName: companyData.companyName || companyData.name,
+        companyDescription: companyData.companyDescription || companyData.description,
         adminEmail: companyData.adminEmail,
-        // initial subscription
-        ...(companyData.subscriptionPlan ? { subscriptionPlan: companyData.subscriptionPlan } : {}),
-        ...(companyData.jobsQuota ? { jobsQuota: Number(companyData.jobsQuota) } : {})
+        pipeline: companyData.pipeline || { mode: (companyData.pipelineMode || 'default') },
+        // ...(companyData.subscriptionPlan ? { subscriptionPlan: companyData.subscriptionPlan } : {}),
+        // ...(companyData.jobsQuota ? { jobsQuota: Number(companyData.jobsQuota) } : {})
       });
       showMessage('success', 'Company created successfully! A temporary password has been sent to the admin email.');
       setShowCreateCompany(false);
@@ -736,11 +759,11 @@ const SuperAdminDashboard = () => {
       });
       if (!res.ok) {
         let err;
-        try { err = await res.json(); } catch {}
+        try { err = await res.json(); } catch { }
         throw new Error(err?.error || `Request failed (${res.status})`);
       }
       let data;
-      try { data = await res.json(); } catch {}
+      try { data = await res.json(); } catch { }
       showMessage('success', data?.message || 'Upwork pipeline completed. Jobs saved.');
       await loadInitialData();
     } catch (error) {
@@ -749,14 +772,46 @@ const SuperAdminDashboard = () => {
     } finally {
       setUpworkFetchLoading(false);
     }
-      };
+  };
+
+  const handleRunLinkedInPipeline = async () => {
+    try {
+      setLinkedinFetchLoading(true);
+      showMessage('success', 'Starting Linkedin pipeline... This may take up to 5 minutes.');
+      const res = await fetch(`${API_BASE}/api/linkedin-scheduler/run-linkedin-pipeline`, {
+        method: 'POST',
+        // headers: {
+        //   'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        // }
+      });
+      if (!res.ok) {
+        let err;
+        try { err = await res.json(); } catch { }
+        throw new Error(err?.error || `Request failed (${res.status})`);
+      }
+      let data;
+      try { data = await res.json(); } catch { }
+      showMessage('success', data?.message || 'Upwork pipeline completed. Jobs saved.');
+      await loadInitialData();
+    } catch (error) {
+      console.error('Error running Upwork pipeline:', error);
+      showMessage('error', error.message || 'Failed to run Upwork pipeline');
+    } finally {
+      setLinkedinFetchLoading(false);
+    }
+  };
 
   // View batch details
   const handleViewBatchDetails = async (batchId) => {
     try {
       setLoading(true);
       const details = await masterJobAPI.getBatchDetails(batchId);
-      setBatchDetails(details);
+      const batch = details?.batch || details || {};
+      const merged = {
+        ...batch,
+        distribution: details?.distribution || batch?.distribution || null
+      };
+      setBatchDetails(merged);
       setSelectedBatchForDetails(batchId);
       setShowBatchDetailsModal(true);
     } catch (error) {
@@ -1134,6 +1189,31 @@ const SuperAdminDashboard = () => {
     setShowEditPlan(true);
   };
 
+  // src/pages/AdminDashboard.jsx
+  // place near other helpers
+  const computeDistributionStats = (batches = []) => {
+    let totalJobs = 0;
+    let distributedJobs = 0;
+    const companiesSet = new Set();
+
+    for (const b of batches) {
+      totalJobs += (b.stats?.totalJobsScraped ?? 0);
+      distributedJobs += (b.distribution?.jobsDistributed ??
+        b.distribution?.totalDistributed ?? 0);
+
+      const comps = b.distribution?.companies;
+      if (Array.isArray(comps)) {
+        comps.forEach(c => companiesSet.add(c.companyId || c._id || c.companyName));
+      }
+    }
+
+    return {
+      totalJobs,
+      distributedJobs,
+      undistributedJobs: Math.max(totalJobs - distributedJobs, 0),
+      activeCompanies: companiesSet.size
+    };
+  };
   const handleDeletePlan = async (planId) => {
     if (!window.confirm('Are you sure you want to delete this plan? This action cannot be undone.')) {
       return;
@@ -1721,30 +1801,57 @@ const SuperAdminDashboard = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Job Batches & Distribution</h2>
         <div className="flex items-center space-x-3">
-         
-      
-         <button
-           onClick={handleRunUpworkPipeline}
-           disabled={upworkFetchLoading}
-           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
-           title="Run Upwork pipeline and save jobs to DB"
-         >
-           {upworkFetchLoading ? (
-             <>
-               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-               <span>Fetching Upwork Jobs...</span>
-             </>
-           ) : (
-             <>
-               <Play className="h-4 w-4" />
-               <span>Fetch Jobs for Upwork</span>
-             </>
-           )}
-   </button>
-        
+
+          <button
+            onClick={handleRunUpworkPipeline}
+            disabled={upworkFetchLoading}
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
+            title="Run Upwork pipeline and save jobs to DB"
+          >
+            {upworkFetchLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Fetching Upwork Jobs...</span>
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                <span>Fetch Jobs for Upwork</span>
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleRunLinkedInPipeline}
+            disabled={linkedinFetchLoading}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            title="Run Linkedin pipeline and save jobs to DB"
+          >
+            {linkedinFetchLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Fetching Linkedin Jobs...</span>
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                <span>Fetch Jobs for Linkedin</span>
+              </>
+            )}
+          </button>
 
 
 
+          <button
+            onClick={handleGoogleSync}
+            disabled={googleFetchLoading}
+            className="flex items-center space-x-2 px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50 transition-colors"
+          >
+            <Play className="h-4 w-4" />
+            <span>{googleFetchLoading ? (googleFetchText || 'Fetching...') : 'Fetch Google Jobs'}</span>
+          </button>
+
+          
           <button
             onClick={handleDistributeAll}
             disabled={distributionLoading}
@@ -1757,7 +1864,7 @@ const SuperAdminDashboard = () => {
             )}
             <span>Distribute All Jobs</span>
           </button>
-          <button
+          {/* <button
             onClick={() => {
               setDistributionType('companies');
               setShowDistributionModal(true);
@@ -1768,8 +1875,21 @@ const SuperAdminDashboard = () => {
             <Users className="h-4 w-4" />
             <span>Distribute to Companies</span>
           </button>
+           */}
+          {/* <button
+            onClick={() => {
+              setDistributionType('companies');
+              setShowDistributionModal(true);
+            }}
+            disabled={distributionLoading}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 transition-colors"
+          >
+            <Users className="h-4 w-4" />
+            <span>Distribute to Companies</span>
+          </button> */}
         </div>
       </div>
+
 
       {/* Enhanced Distribution Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
@@ -1800,6 +1920,8 @@ const SuperAdminDashboard = () => {
             </div>
           </div>
         </div>
+
+        
 
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
           <div className="flex items-center">
@@ -2016,7 +2138,11 @@ const SuperAdminDashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="flex items-center space-x-2">
                         <Share2 className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium">{batch.distribution?.jobsDistributed || 0}</span>
+                        <span className="font-medium">
+                          {(batch.distribution?.jobsDistributed ??
+                            batch.distribution?.totalDistributed ??
+                            0)}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -2245,17 +2371,71 @@ const SuperAdminDashboard = () => {
                   <p className="text-gray-600">{batchDetails.status}</p>
                 </div>
                 <div>
-                  <span className="font-medium">Total Jobs:</span>
-                  <p className="text-gray-600">{batchDetails.count}</p>
+                  <span className="font-medium">Executed By:</span>
+                  <p className="text-gray-600">{batchDetails.executedBy || 'N/A'}</p>
                 </div>
                 <div>
                   <span className="font-medium">Created:</span>
                   <p className="text-gray-600">
-                    {new Date(batchDetails.createdAt).toLocaleString()}
+                    {batchDetails.createdAt ? new Date(batchDetails.createdAt).toLocaleString() : '—'}
                   </p>
+                </div>
+                <div>
+                  <span className="font-medium">Total Jobs Scraped:</span>
+                  <p className="text-gray-600">{batchDetails.stats?.totalJobsScraped ?? 0}</p>
+                </div>
+                <div>
+                  <span className="font-medium">New Jobs Added:</span>
+                  <p className="text-gray-600">{batchDetails.stats?.newJobsAdded ?? 0}</p>
+                </div>
+                <div>
+                  <span className="font-medium">Errors Encountered:</span>
+                  <p className="text-gray-600">{batchDetails.stats?.errorsEncountered ?? 0}</p>
                 </div>
               </div>
             </div>
+
+            {/* Distribution Overview */}
+            {batchDetails.distribution && (
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="font-medium mb-3">Distribution</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+                  <div>
+                    <span className="font-medium">Total Distributed:</span>{' '}
+                    {batchDetails.distribution.totalDistributed ?? 0}
+                  </div>
+                  <div>
+                    <span className="font-medium">Companies:</span>{' '}
+                    {Array.isArray(batchDetails.distribution.companies) ? batchDetails.distribution.companies.length : 0}
+                  </div>
+                </div>
+
+                {Array.isArray(batchDetails.distribution.companies) && batchDetails.distribution.companies.length > 0 && (
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="min-w-full divide-y divide-blue-200">
+                      <thead className="bg-blue-100">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase">Company</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase">Jobs</th>
+                          <th className="px-4 py-2 text-left text-xs font-medium text-blue-900 uppercase">Last Distribution</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-blue-100">
+                        {batchDetails.distribution.companies.map((c) => (
+                          <tr key={c._id || c.companyId}>
+                            <td className="px-4 py-2 text-sm text-gray-900">{c.companyName || c.companyId}</td>
+                            <td className="px-4 py-2 text-sm text-gray-700">{c.jobCount ?? 0}</td>
+                            <td className="px-4 py-2 text-sm text-gray-700">
+                              {c.lastDistribution ? new Date(c.lastDistribution).toLocaleString() : '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Jobs List */}
             {batchDetails.jobs && batchDetails.jobs.length > 0 && (
@@ -2303,18 +2483,6 @@ const SuperAdminDashboard = () => {
                       ))}
                     </tbody>
                   </table>
-                </div>
-              </div>
-            )}
-
-            {/* Distribution Info */}
-            {batchDetails.distribution && (
-              <div className="bg-blue-50 rounded-lg p-4">
-                <h3 className="font-medium mb-3">Distribution Information</h3>
-                <div className="text-sm text-gray-700">
-                  <p><span className="font-medium">Strategy:</span> {batchDetails.distribution.strategy}</p>
-                  <p><span className="font-medium">Companies:</span> {batchDetails.distribution.companyCount || 0}</p>
-                  <p><span className="font-medium">Distributed:</span> {batchDetails.distribution.distributedCount || 0}</p>
                 </div>
               </div>
             )}

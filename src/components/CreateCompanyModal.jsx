@@ -119,13 +119,12 @@ const CreateCompanyModal = ({ isOpen, onClose, onSubmit, loading, plans = [] }) 
     name: '',
     description: '',
     adminEmail: '',
-    subscriptionPlan: '',
-    jobsQuota: ''
+    pipelineMode:'default'
   });
 
   useEffect(() => {
     if (!isOpen) {
-      setForm({ name: '', description: '', adminEmail: '', subscriptionPlan: '', jobsQuota: '' });
+      setForm({ name: '', description: '', adminEmail: '',pipelineMode:'default' });
     }
   }, [isOpen]);
 
@@ -134,11 +133,12 @@ const CreateCompanyModal = ({ isOpen, onClose, onSubmit, loading, plans = [] }) 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit({
-      name: form.name,
-      description: form.description,
+      companyName: form.name,
+      companyDescription: form.description,
       adminEmail: form.adminEmail,
-      subscriptionPlan: form.subscriptionPlan,
-      jobsQuota: form.jobsQuota ? Number(form.jobsQuota) : undefined
+      pipeline:{mode:form.pipelineMode || 'default'},
+      // subscriptionPlan: form.subscriptionPlan,
+      // jobsQuota: form.jobsQuota ? Number(form.jobsQuota) : undefined
     });
   };
 
@@ -183,7 +183,20 @@ const CreateCompanyModal = ({ isOpen, onClose, onSubmit, loading, plans = [] }) 
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Pipeline */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Pipeline Mode</label>
+            <select
+              value={form.pipelineMode || 'default'}
+              onChange={(e) => setForm({ ...form, pipelineMode: e.target.value })}
+              className="w-full border border-gray-300 rounded-md px-3 py-2"
+            >
+              <option value="default">Default</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">“Currently, only the ‘default’ option is available. The company admin can update or modify the letter as needed.</p>
+          </div>
+
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Initial Plan (optional)</label>
               <select
@@ -207,7 +220,7 @@ const CreateCompanyModal = ({ isOpen, onClose, onSubmit, loading, plans = [] }) 
                 className="w-full border border-gray-300 rounded-md px-3 py-2"
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-end space-x-3 pt-2">
             <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-md">Cancel</button>

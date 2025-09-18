@@ -61,29 +61,29 @@ const Header = ({ onExport, onLogout, user,source, onRefreshJobs , hideDownloadE
   //   setFetchCooldown(Math.floor(diff / 1000));
   // };
 
-  const handleGoogleSync = async () => {
-    try {
-      setLoading(true);
-      setLoaderText("Scraping jobs from Google...");
-      await axios.get(`${REMOTE_HOST}/api/google/scrape-jobs`);
+  // const handleGoogleSync = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setLoaderText("Scraping jobs from Google...");
+  //     await axios.get(`${REMOTE_HOST}/api/google/scrape-jobs`);
 
-      setLoaderText("Cleaning unique jobs...");
-      await axios.get(`${REMOTE_HOST}/api/google/scrape-jobs-clean`);
+  //     // setLoaderText("Cleaning unique jobs...");
+  //     // await axios.get("http://localhost:3000/api/google/scrape-jobs-clean");
 
-      setLoaderText("Fetching jobs...");
-      await axios.get(`${REMOTE_HOST}/api/google/file-jobs`);
+  //     // setLoaderText("Fetching jobs...");
+  //     // await axios.get("http://localhost:3000/api/google/file-jobs");
 
-      setLoaderText("Done! Refreshing jobs.");
-      if (onRefreshJobs) onRefreshJobs(); // Trigger dashboard refresh
-    } catch (e) {
-      setLoaderText("Error: " + (e.message || "Fetch failed"));
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-        setLoaderText("");
-      }, 1500);
-    }
-  };
+  //     setLoaderText("Done! Refreshing jobs.");
+  //     if (onRefreshJobs) onRefreshJobs(); // Trigger dashboard refresh
+  //   } catch (e) {
+  //     setLoaderText("Error: " + (e.message || "Fetch failed"));
+  //   } finally {
+  //     setTimeout(() => {
+  //       setLoading(false);
+  //       setLoaderText("");
+  //     }, 1500);
+  //   }
+  // };
 
 //  // Somewhere in your header actions area (right side controls), gate the button:
 //  {source === 'google' && (
@@ -302,16 +302,7 @@ const Header = ({ onExport, onLogout, user,source, onRefreshJobs , hideDownloadE
             </button>
             */}
           </div>
-          {source === 'google' && (
-        <button
-          type="button"
-          onClick={handleGoogleSync}
-          className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors"
-          disabled={loading}
-        >
-          {loading ? loaderText || 'Fetching...' : 'Fetch Google Jobs'}
-        </button>
-      )}
+
       {loading && (
         <div className="mt-2 flex items-center gap-2">
           <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24">
