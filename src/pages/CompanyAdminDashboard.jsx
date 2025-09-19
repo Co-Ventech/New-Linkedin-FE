@@ -2995,11 +2995,12 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { selectUser, isCompanyAdmin, selectCompany } from "../slices/userSlice"
-import { CreateUserModal } from "../components/CreateUserModal"
+// import { CreateUserModal } from "../components/CreateUserModal"
 import { EditUserModal } from "../components/EditUserModal"
 import { AssignJobsModal } from "../components/AssignJobsModal"
 import { useNavigate } from "react-router-dom"
 import { logoutUser } from "../api/authApi"
+import CreateComUserModal from "../components/CreateComUserModal"
 // import {  isCompanyAdmin, selectCompany } from '../slices/userSlice';
 import {
   BarChart3,
@@ -3101,32 +3102,44 @@ const CompanyAdminDashboard = () => {
   // Replace the incorrect API calls with the correct ones
 
   // 1. Fix the createUser function (around line 140)
-  const createUser = async (userData) => {
-    try {
-      const response = await fetch(`${API_BASE}/api/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-        body: JSON.stringify({
-          username: userData.username,
-          email: userData.email,
-          password: userData.password,
-        }),
-      })
+// inside CompanyAdminDashboard.jsx
+const createUser = async (userData) => {
+  try {
+    const response = await fetch(`${API_BASE}/api/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: JSON.stringify({
+        username: userData.username,
+        email: userData.email,
+        password: userData.password,
+        ...(userData.companyId ? { companyId: userData.companyId } : {})
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+    const isJson = response.headers.get("content-type")?.includes("application/json");
+    const payload = isJson ? await response.json() : null;
+
+    if (!response.ok) {
+      const backendMsg = payload?.error || payload?.message;
+      // Normalize known errors → friendlier copy
+      if (backendMsg?.toLowerCase().includes("already exists")) {
+        throw new Error("A user with this email already exists. Try a different email.");
       }
-
-      const result = await response.json()
-      return result
-    } catch (error) {
-      console.error("Error creating user:", error)
-      throw error
+      throw new Error(backendMsg || `Request failed (${response.status}). Please try again.`);
     }
+
+    return payload;
+  } catch (error) {
+    // Network or parsing error
+    const friendly = error?.message?.includes("already exists")
+      ? error.message
+      : (error?.message || "Something went wrong. Please try again.");
+    throw new Error(friendly);
   }
+};
 
   // 2. Fix the updateUser function (around line 160)
   const updateUser = async (userId, userData) => {
@@ -3350,7 +3363,7 @@ const CompanyAdminDashboard = () => {
         setActivities(Array.isArray(tailResults[1].value) ? tailResults[1].value : [])
       else setActivities([])
     } catch {
-      setMessage({ type: "error", text: "Failed to load initial data" })
+      setMessage({ type: "error", text: "" })
     } finally {
       setLoading(false)
     }
@@ -3460,30 +3473,72 @@ const CompanyAdminDashboard = () => {
   }
 
   // User operations
-  const handleCreateUser = async (userData) => {
-    if (!userData.username || !userData.email || !userData.password) {
-      setMessage({ type: "error", text: "All fields are required" })
-      return
-    }
+  // const handleCreateUser = async (userData) => {
+  //   if (!userData.username || !userData.email || !userData.password) {
+  //     setMessage({ type: "error", text: "All fields are required" })
+  //     return
+  //   }
 
-    try {
-      setLoading(true)
-      const result = await createUser(userData)
+  //   try {
+  //     setLoading(true)
+  //     const result = await createUser(userData)
 
-      if (result.message === "User created successfully") {
-        setMessage({ type: "success", text: "User created successfully!" })
-        setUserForm({ username: "", email: "", password: "", role: "company_user" })
-        setShowCreateUser(false)
-        await loadInitialData()
-      } else {
-        setMessage({ type: "error", text: result.message || "Failed to create user" })
-      }
-    } catch (error) {
-      setMessage({ type: "error", text: error.message || "Failed to create user" })
-    } finally {
-      setLoading(false)
-    }
+  //     if (result.message === "User created successfully") {
+  //       setMessage({ type: "success", text: "User created successfully!" })
+  //       setUserForm({ username: "", email: "", password: "", role: "company_user" })
+  //       setShowCreateUser(false)
+  //       await loadInitialData()
+  //     } else {
+  //       setMessage({ type: "error", text: result.message || "Failed to create user" })
+  //     }
+  //   } catch (error) {
+  //     setMessage({ type: "error", text: error.message || "Failed to create user" })
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+// inside CompanyAdminDashboard.jsx
+const handleCreateUser = async (userData) => {
+  // Basic client-side validation
+  if (!userData.username || !userData.email || !userData.password) {
+    setMessage({ type: "error", text: "All fields are required." });
+    return;
   }
+  
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email);
+  if (!emailOk) {
+    setMessage({ type: "error", text: "Please enter a valid email address." });
+    return;
+  }
+
+  try {
+    setLoading(true);
+    
+    // Use the userAPI.create instead of the old createUser function
+    const result = await userAPI.create({
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+      phone: userData.phone,
+      location: userData.location,
+      companyId: userData.companyId // This should be the current company's ID
+    });
+
+    if (result?.message === "User created successfully") {
+      setMessage({ type: "success", text: "User created successfully!" });
+      setUserForm({ username: "", email: "", password: "", phone: "", location: "", role: "company_user" });
+      setShowCreateUser(false);
+      await loadInitialData();
+    } else {
+      setMessage({ type: "error", text: result?.message || "Failed to create user." });
+    }
+  } catch (error) {
+    // This will now show the user-friendly error message
+    setMessage({ type: "error", text: error.message });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleUpdateUser = async (userId, userData) => {
     try {
@@ -4380,6 +4435,14 @@ const CompanyAdminDashboard = () => {
           </button>
         </div>
 
+        {message?.text && (
+  <div className={`mt-3 px-4 py-2 rounded ${
+    message.type === "error" ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"
+  }`}>
+    {message.text}
+  </div>
+)} 
+
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -4700,6 +4763,8 @@ const CompanyAdminDashboard = () => {
         </div>
       )} */}
 
+
+
       <main className="max-w-7xl mx-auto p-4 space-y-2">
         {/* Header */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -4779,7 +4844,7 @@ const CompanyAdminDashboard = () => {
         {renderTabContent()}
       </main>
 
-      {/* Modals */}
+      {/* Modals
       <CreateUserModal
         isOpen={showCreateUser}
         onClose={() => setShowCreateUser(false)}
@@ -4787,7 +4852,7 @@ const CompanyAdminDashboard = () => {
         loading={loading}
         formData={userForm}
         setFormData={setUserForm}
-      />
+      /> */}
 
       <EditUserModal
         isOpen={showEditUser}
@@ -4798,6 +4863,14 @@ const CompanyAdminDashboard = () => {
         setFormData={setUserForm}
         user={selectedUser}
       />
+
+<CreateComUserModal
+  isOpen={showCreateUser}
+  onClose={() => setShowCreateUser(false)}
+  onSubmit={handleCreateUser}
+  loading={loading}
+  company={currentCompany} // Make sure this has the company ID
+/>
 
       <AssignJobsModal
         isOpen={showAssignJobs}

@@ -6,6 +6,10 @@ import CreateCompanyModal from '../components/CreateCompanyModal';
 import SubscriptionModal from '../components/SubscriptionModal';
 import JobDistributionModal from '../components/JobDistributionModal';
 import CreatePlanModal from '../components/CreatePlanModal';
+import CreateComUserModal from '../components/CreateComUserModal.jsx';
+import UserDetailsModal from '../components/UserDetailsModal.jsx';
+// import { userAPI } from '../services/api.js';
+import { userAPI } from '../services/api.js';
 import { companyAPI, masterJobAPI, subscriptionAPI } from '../services/api';
 import {
   Building2,
@@ -55,6 +59,17 @@ const SuperAdminDashboard = () => {
   const [linkedinFetchLoading, setLinkedinFetchLoading] = useState(false);
   const [googleFetchLoading, setGoogleFetchLoading] = useState(false);
   const [googleFetchText, setGoogleFetchText] = useState("");
+  const [usersByCompany, setUsersByCompany] = useState({});
+const [usersLoading, setUsersLoading] = useState({});
+const [usersPagination, setUsersPagination] = useState({});
+const [showCreateUser, setShowCreateUser] = useState(false);
+const [selectedCompanyForUsers, setSelectedCompanyForUsers] = useState(null);
+const [creatingUser, setCreatingUser] = useState(false);
+const [showUserDetails, setShowUserDetails] = useState(false);
+const [userDetails, setUserDetails] = useState(null);
+const [userDetailsLoading, setUserDetailsLoading] = useState(false);
+const [phone, setPhone] = useState('');
+const [location, setLocation] = useState('');
 
 
 
@@ -301,6 +316,56 @@ const SuperAdminDashboard = () => {
         setGoogleFetchLoading(false);
         setGoogleFetchText("");
       }, 800);
+    }
+  };
+
+  const loadCompanyUsers = async (companyId, page = 1, limit = 20) => {
+    try {
+      setUsersLoading(prev => ({ ...prev, [companyId]: true }));
+      const res = await userAPI.getByCompany(companyId, page, limit);
+      setUsersByCompany(prev => ({ ...prev, [companyId]: res.users || [] }));
+      if (res.pagination) {
+        setUsersPagination(prev => ({ ...prev, [companyId]: res.pagination }));
+      }
+    } catch (e) {
+      showMessage && showMessage('error', e.message || 'Failed to load users');
+    } finally {
+      setUsersLoading(prev => ({ ...prev, [companyId]: false }));
+    }
+  };
+  
+  const openCreateUser = (company) => {
+    setSelectedCompanyForUsers(company);
+    setShowCreateUser(true);
+  };
+  
+  const handleCreateUser = async ({ username, email, password, phone, location }) => {
+    if (!selectedCompanyForUsers) return;
+    const companyId = selectedCompanyForUsers.id || selectedCompanyForUsers._id;
+    try {
+      setCreatingUser(true);
+      await userAPI.create({ username, email, password,phone,location, companyId });
+      showMessage && showMessage('success', 'User created successfully');
+      setShowCreateUser(false);
+      await loadCompanyUsers(companyId, 1, 20);
+    } catch (e) {
+      showMessage && showMessage('error', e.message || 'Failed to create user');
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
+  const openUserDetails = async (userId) => {
+    try {
+      setUserDetails(null);
+      setUserDetailsLoading(true);
+      setShowUserDetails(true);
+      const data = await userAPI.getById(userId);
+      setUserDetails(data);
+    } catch (e) {
+      showMessage && showMessage('error', e.message || 'Failed to fetch user');
+    } finally {
+      setUserDetailsLoading(false);
     }
   };
 
@@ -612,16 +677,29 @@ const SuperAdminDashboard = () => {
 
   // Company operations
   const handleCreateCompany = async (companyData) => {
+    // Basic client-side validation
+    if (!companyData.companyName || !companyData.adminEmail) {
+      showMessage('error', 'Company name and admin email are required.');
+      return;
+    }
+    
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyData.adminEmail);
+    if (!emailOk) {
+      showMessage('error', 'Please enter a valid email address.');
+      return;
+    }
+  
     try {
       setLoading(true);
       const response = await companyAPI.create({
         companyName: companyData.companyName || companyData.name,
         companyDescription: companyData.companyDescription || companyData.description,
         adminEmail: companyData.adminEmail,
-        pipeline: companyData.pipeline || { mode: (companyData.pipelineMode || 'default') },
-        // ...(companyData.subscriptionPlan ? { subscriptionPlan: companyData.subscriptionPlan } : {}),
-        // ...(companyData.jobsQuota ? { jobsQuota: Number(companyData.jobsQuota) } : {})
+        adminPhone: companyData.adminPhone,
+        adminLocation: companyData.adminLocation,
+        pipeline: companyData.pipeline || { mode: (companyData.pipelineMode || 'default') }
       });
+      
       showMessage('success', 'Company created successfully! A temporary password has been sent to the admin email.');
       setShowCreateCompany(false);
       await loadInitialData();
@@ -1624,6 +1702,9 @@ const SuperAdminDashboard = () => {
         )}
       </div>
 
+                    
+         
+
       {/* Individual Company Sections */}
       <div className="space-y-6">
         <h3 className="text-xl font-bold text-gray-900">Individual Company Performance</h3>
@@ -1745,7 +1826,31 @@ const SuperAdminDashboard = () => {
                 </div>
 
                 {/* User Activity */}
-                {overview?.userActivity && overview.userActivity.length > 0 && (
+                {/* {overview?.userActivity && overview.userActivity.length > 0 && (
+                  <div className="mt-6">
+                    <h5 className="text-sm font-semibold text-gray-900 mb-3">User Activity</h5>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="space-y-2">
+                        {overview.userActivity
+                          .filter(user => user.username !== 'system')
+                          .slice(0, 5)
+                          .map((user, idx) => (
+                            <div key={idx} className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">{user.username}</span>
+                              <div className="flex items-center space-x-4">
+                                <span className="text-sm text-gray-500">{user.statusChanges} changes</span>
+                                <span className="text-xs text-gray-400">
+                                  {user.lastActivity ? new Date(user.lastActivity).toLocaleDateString() : 'N/A'}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                )} */}
+
+{overview?.userActivity && overview.userActivity.length > 0 && (
                   <div className="mt-6">
                     <h5 className="text-sm font-semibold text-gray-900 mb-3">User Activity</h5>
                     <div className="bg-gray-50 rounded-lg p-4">
@@ -1768,6 +1873,101 @@ const SuperAdminDashboard = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Company Users */}
+                <div className="mt-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h5 className="text-sm font-semibold text-gray-900">Company Users</h5>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => loadCompanyUsers(companyId, 1, 20)}
+                        className="px-3 py-1.5 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                        disabled={!!usersLoading[companyId]}
+                      >
+                        {usersLoading[companyId] ? 'Loading...' : 'Load Users'}
+                      </button>
+                      <button
+                        onClick={() => openCreateUser(company)}
+                        className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        Create User
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border rounded-lg overflow-hidden">
+                    {usersLoading[companyId] && !(usersByCompany[companyId]?.length) ? (
+                      <div className="p-4 text-sm text-gray-500">Loading users...</div>
+                    ) : (usersByCompany[companyId]?.length ? (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+  <tr>
+    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active</th>
+    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+  </tr>
+</thead>
+<tbody className="bg-white divide-y divide-gray-200">
+  {usersByCompany[companyId].map((u) => (
+    <tr key={u._id} className="hover:bg-gray-50">
+      <td className="px-4 py-2 text-sm text-gray-900">{u.username}</td>
+      <td className="px-4 py-2 text-sm text-gray-600">{u.email}</td>
+      <td className="px-4 py-2 text-sm">
+        <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+          {u.role || 'company_user'}
+        </span>
+      </td>
+      <td className="px-4 py-2 text-sm">
+        <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${u.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+          {u.isActive ? 'Yes' : 'No'}
+        </span>
+      </td>
+      <td className="px-4 py-2 text-sm text-gray-500">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+      <td className="px-4 py-2 text-sm">
+        <button
+          onClick={() => openUserDetails(u._id)}
+          className="px-2 py-1 text-blue-600 hover:text-blue-800"
+        >
+          View
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="p-4 text-sm text-gray-500">No users loaded. Click “Load Users”.</div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {usersPagination[companyId]?.pages > 1 && (
+                    <div className="flex items-center justify-end space-x-2 mt-3">
+                      <button
+                        onClick={() => loadCompanyUsers(companyId, usersPagination[companyId].current - 1, usersPagination[companyId].limit)}
+                        disabled={usersLoading[companyId] || !usersPagination[companyId].hasPrev}
+                        className="px-3 py-1 border rounded-md disabled:opacity-50"
+                      >
+                        Prev
+                      </button>
+                      <span className="text-sm text-gray-600">
+                        Page {usersPagination[companyId].current} of {usersPagination[companyId].pages}
+                      </span>
+                      <button
+                        onClick={() => loadCompanyUsers(companyId, usersPagination[companyId].current + 1, usersPagination[companyId].limit)}
+                        disabled={usersLoading[companyId] || !usersPagination[companyId].hasNext}
+                        className="px-3 py-1 border rounded-md disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 {/* Company Details */}
                 <div className="mt-6 pt-4 border-t border-gray-200">
@@ -1893,7 +2093,7 @@ const SuperAdminDashboard = () => {
 
       {/* Enhanced Distribution Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+        {/* <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Database className="h-6 w-6 text-blue-600" />
@@ -1919,11 +2119,11 @@ const SuperAdminDashboard = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         
 
-        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
+        {/* <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <Clock className="h-6 w-6 text-yellow-600" />
@@ -1949,7 +2149,7 @@ const SuperAdminDashboard = () => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
           <div className="flex items-center">
@@ -2990,6 +3190,12 @@ const SuperAdminDashboard = () => {
       {renderTabContent()}
 
 
+      <UserDetailsModal
+        isOpen={showUserDetails}
+        onClose={() => setShowUserDetails(false)}
+        user={userDetails}
+        loading={userDetailsLoading}
+      />
 
       {/* Enhanced Modals */}
       <CreateCompanyModal
@@ -2999,6 +3205,7 @@ const SuperAdminDashboard = () => {
         plans={plans}
         loading={loading}
       />
+
 
       {/* Primary modals (single instances) */}
       <SubscriptionModal
@@ -3033,6 +3240,13 @@ const SuperAdminDashboard = () => {
         onSubmit={handleCreatePlan}
         loading={loading}
       />
+      <CreateComUserModal
+  isOpen={showCreateUser}
+  onClose={() => setShowCreateUser(false)}
+  onSubmit={handleCreateUser}
+  loading={creatingUser}
+  company={selectedCompanyForUsers}
+/>
 
       <EditPlanModal
         isOpen={showEditPlan}

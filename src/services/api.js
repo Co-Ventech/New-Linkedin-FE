@@ -66,7 +66,23 @@ export const companyAPI = {
       });
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to create company');
+      // Enhanced error handling for user-friendly messages
+      const backendError = error.response?.data?.error || error.response?.data?.message;
+      
+      if (backendError?.toLowerCase().includes('already exists') || 
+          backendError?.toLowerCase().includes('duplicate')) {
+        throw new Error('A company with this email already exists. Please use a different admin email address.');
+      }
+      
+      if (backendError?.toLowerCase().includes('required')) {
+        throw new Error('Please fill in all required fields.');
+      }
+      
+      if (backendError?.toLowerCase().includes('invalid email')) {
+        throw new Error('Please enter a valid email address.');
+      }
+      
+      throw new Error(backendError || 'Failed to create company. Please try again.');
     }
   },
 
@@ -430,6 +446,40 @@ export const companyOverviewAPI = {
 
 
 // Analytics API
+// export const analyticsAPI = {
+//   getGlobal: async () => {
+//     try {
+//       const response = await axios.get(`${API_BASE}/analytics/global`, {
+//         headers: getAuthHeaders()
+//       });
+//       return response.data;
+//     } catch (error) {
+//       throw new Error(error.response?.data?.message || 'Failed to fetch global analytics');
+//     }
+//   },
+
+//   getCompany: async (companyId) => {
+//     try {
+//       const response = await axios.get(`${API_BASE}/analytics/company/${companyId}`, {
+//         headers: getAuthHeaders()
+//       });
+//       return response.data;
+//     } catch (error) {
+//       throw new Error(error.response?.data?.message || 'Failed to fetch company analytics');
+//     }
+//   },
+
+//   getUser: async (userId) => {
+//     try {
+//       const response = await axios.get(`${API_BASE}/analytics/user/${userId}`, {
+//         headers: getAuthHeaders()
+//       });
+//       return response.data;
+//     } catch (error) {
+//       throw new Error(error.response?.data?.message || 'Failed to fetch user analytics');
+//     }
+//   }
+// };
 export const analyticsAPI = {
   getGlobal: async () => {
     try {
@@ -441,33 +491,66 @@ export const analyticsAPI = {
       throw new Error(error.response?.data?.message || 'Failed to fetch global analytics');
     }
   },
-
-  getCompany: async (companyId) => {
+  // ...
+};
+ 
+export const userAPI = {
+  getByCompany: async (companyId, page = 1, limit = 20) => {
     try {
-      const response = await axios.get(`${API_BASE}/analytics/company/${companyId}`, {
+      const response = await axios.get(`${API_BASE}/users/company/${companyId}?page=${page}&limit=${limit}`, {
         headers: getAuthHeaders()
       });
-      return response.data;
+      return response.data; // { users: [...], pagination: {...} }
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch company analytics');
+      throw new Error(error.response?.data?.message || 'Failed to fetch company users');
     }
   },
 
-  getUser: async (userId) => {
+  create: async ({ username, email, password, phone, location, companyId }) => {
     try {
-      const response = await axios.get(`${API_BASE}/analytics/user/${userId}`, {
+      const response = await axios.post(`${API_BASE}/users`, { 
+        username, 
+        email, 
+        password, 
+        phone, 
+        location, 
+        companyId 
+      }, {
         headers: getAuthHeaders()
       });
-      return response.data;
+      return response.data; // { message, user }
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to fetch user analytics');
+      // Enhanced error handling for user-friendly messages
+      const backendError = error.response?.data?.error || error.response?.data?.message;
+      if (backendError?.toLowerCase().includes('already exists')) {
+        throw new Error('A user with this email already exists. Please try a different email.');
+      }
+      throw new Error(backendError || 'Failed to create user');
+    }
+  },
+
+  getById: async (userId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/users/${userId}`, {
+        headers: getAuthHeaders()
+      });
+      // Handle the API response structure: { "users": [...] }
+      const data = response.data;
+      if (data.users && Array.isArray(data.users) && data.users.length > 0) {
+        return data.users[0]; // Return the first user object
+      }
+      return data; // Fallback to direct response
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch user');
     }
   }
 };
+
 
 export default {
   companyAPI,
   masterJobAPI,
   subscriptionAPI,
-  analyticsAPI
+  analyticsAPI,
+  userAPI
 };
