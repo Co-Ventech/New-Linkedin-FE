@@ -6,6 +6,8 @@ import { useSelector, useDispatch } from "react-redux";
 import JobCard from "../components/JobCard";
 import Header from "../components/Header";
 import SidebarFilters from "../components/SidebarFilters";
+import {selectStatusOptions, selectPipeline} from "../slices/userSlice";
+import { fetchCompanyPipelineThunk } from "../slices/userSlice";
 import {
   fetchJobsByDateThunk,
   resetJobsByDate,
@@ -19,85 +21,17 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { logoutUser } from "../api/authApi";
 import { Calendar, Grid3X3, List, Kanban, Users, AlertCircle, Briefcase, Building2, Filter, Download, Search, ChevronDown, Eye, BarChart3 } from 'lucide-react';
 
-const statusLabels = {
-  not_engaged: "Not Engaged",
-  applied: "Applied",
-  engaged: "Engaged",
-  interview: "Interview",
-  offer: "Offer",
-  rejected: "Rejected",
-  onboard: "Onboard",
+// Colors for known default stages; unknown stages get neutral styling
+const KNOWN_COLORS = {
+  not_engaged: { dotColor: "bg-gray-400", headerColor: "bg-gray-100", textColor: "text-gray-700", borderColor: "border-gray-200", color: "bg-gray-50" },
+  applied:     { dotColor: "bg-blue-400", headerColor: "bg-blue-100", textColor: "text-blue-700", borderColor: "border-blue-200", color: "bg-blue-50" },
+  engaged:     { dotColor: "bg-indigo-400", headerColor: "bg-indigo-100", textColor: "text-indigo-700", borderColor: "border-indigo-200", color: "bg-indigo-50" },
+  interview:   { dotColor: "bg-purple-400", headerColor: "bg-purple-100", textColor: "text-purple-700", borderColor: "border-purple-200", color: "bg-purple-50" },
+  offer:       { dotColor: "bg-emerald-400", headerColor: "bg-emerald-100", textColor: "text-emerald-700", borderColor: "border-emerald-200", color: "bg-emerald-50" },
+  rejected:    { dotColor: "bg-red-400", headerColor: "bg-red-100", textColor: "text-red-700", borderColor: "border-red-200", color: "bg-red-50" },
+  onboard:     { dotColor: "bg-teal-400", headerColor: "bg-teal-100", textColor: "text-teal-700", borderColor: "border-teal-200", color: "bg-teal-50" },
 };
-
-const statusOrder = [
-  "not_engaged",
-  "applied",
-  "engaged",
-  "interview",
-  "offer",
-  "rejected",
-  "onboard",
-];
-
-// Enhanced status configuration with colors
-const statusConfig = {
-  not_engaged: {
-    label: "Not Engaged",
-    color: "bg-gray-50",
-    headerColor: "bg-gray-100",
-    textColor: "text-gray-700",
-    borderColor: "border-gray-200",
-    dotColor: "bg-gray-400"
-  },
-  applied: {
-    label: "Applied",
-    color: "bg-blue-50",
-    headerColor: "bg-blue-100",
-    textColor: "text-blue-700",
-    borderColor: "border-blue-200",
-    dotColor: "bg-blue-400"
-  },
-  engaged: {
-    label: "Engaged",
-    color: "bg-yellow-50",
-    headerColor: "bg-yellow-100",
-    textColor: "text-yellow-700",
-    borderColor: "border-yellow-200",
-    dotColor: "bg-yellow-400"
-  },
-  interview: {
-    label: "Interview",
-    color: "bg-purple-50",
-    headerColor: "bg-purple-100",
-    textColor: "text-purple-700",
-    borderColor: "border-purple-200",
-    dotColor: "bg-purple-400"
-  },
-  offer: {
-    label: "Offer",
-    color: "bg-green-50",
-    headerColor: "bg-green-100",
-    textColor: "text-green-700",
-    borderColor: "border-green-200",
-    dotColor: "bg-green-400"
-  },
-  rejected: {
-    label: "Rejected",
-    color: "bg-red-50",
-    headerColor: "bg-red-100",
-    textColor: "text-red-700",
-    borderColor: "border-red-200",
-    dotColor: "bg-red-400"
-  },
-  onboard: {
-    label: "Onboard",
-    color: "bg-slate-50",
-    headerColor: "bg-slate-100",
-    textColor: "text-slate-700",
-    borderColor: "border-slate-200",
-    dotColor: "bg-slate-400"
-  },
-};
+const NEUTRAL = { dotColor: "bg-slate-400", headerColor: "bg-slate-100", textColor: "text-slate-700", borderColor: "border-slate-200", color: "bg-slate-50" };
 
 // Default filters remain the same
 const defaultFilters = {
@@ -121,15 +55,16 @@ const linkedInJobTypeOptions = [
 ];
 
 const colors = ["Yellow", "Green", "Red"];
-const statusOptions = [
-  "not_engaged",
-  "applied",
-  "engaged",
-  "interview",
-  "offer",
-  "rejected",
-  "onboard"
-];
+// const statusOptions = [
+//   "not_engaged",
+//   "applied",
+//   "engaged",
+//   "interview",
+//   "offer",
+//   "rejected",
+//   "onboard"
+// ];
+
 
 const timeRanges = [
   { value: 'last24h', label: 'Last Batch (Last 24 Hours)' },
@@ -169,12 +104,48 @@ const Dashboard = () => {
   const [kanbanError, setKanbanError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [optimisticUpdates, setOptimisticUpdates] = useState(new Set());
+  const statusOptions = useSelector(selectStatusOptions) || [];
+  const pipeline = useSelector(selectPipeline);
+  // const authInitializing = useSelector(selectAuthInitializing);
+  const pipelineLoading = useSelector((state) => state.user.pipelineLoading);
+  const [pipelineRequested, setPipelineRequested] = useState(false);
   const [failedUpdates, setFailedUpdates] = useState(new Map());
 // const [page, setPage] = useState(1);
 
   const {hasMore, jobsByDate, loading, error, range } = useSelector(
     (state) => state.jobs
   );
+  // Ensure pipeline is loaded (initial loader)
+  useEffect(() => {
+    if (!pipelineRequested && statusOptions.length === 0) {
+      setPipelineRequested(true);
+      dispatch(fetchCompanyPipelineThunk());
+    }
+  }, [dispatch, statusOptions.length, pipelineRequested]);
+  useEffect(() => {
+    dispatch(fetchCompanyPipelineThunk())
+
+  }, [])
+
+  const DEFAULT_STAGES = [
+    { name: "not_engaged", displayName: "Not Engaged", sortOrder: 0 },
+    { name: "applied", displayName: "Applied", sortOrder: 1 },
+    { name: "engaged", displayName: "Engaged", sortOrder: 2 },
+    { name: "interview", displayName: "Interview", sortOrder: 3 },
+    { name: "offer", displayName: "Offer", sortOrder: 4 },
+    { name: "rejected", displayName: "Rejected", sortOrder: 5 },
+    { name: "onboard", displayName: "Onboard", sortOrder: 6 },
+  ];
+
+  const stages = (pipeline?.statusStages?.length
+    ? [...pipeline.statusStages].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    : DEFAULT_STAGES
+  );
+
+  const statusOrder = stages.map(s => s.name);
+  const statusLabels = stages.reduce((acc, s) => { acc[s.name] = s.displayName || s.name; return acc; }, {});
+  const statusConfig = statusOrder.reduce((acc, name) => { const base = KNOWN_COLORS[name] || NEUTRAL; acc[name] = { label: statusLabels[name] || name, ...base }; return acc; }, {});
+
   const user = useSelector((state) => state.user.user);
 
   // Parse filters from URL (logic remains the same)
@@ -858,7 +829,17 @@ const handleDateRangeChange = (e) => {
               )}
             </div>
 
-            {/* Content Area */}
+              {/* Pipeline/pipeline loader */}
+              {(!pipeline ) && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-blue-700 text-sm">Loading pipeline...</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Content Area */}
             {kanbanView ? (
               // Enhanced Kanban View
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -1067,16 +1048,17 @@ const handleDateRangeChange = (e) => {
                                      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
                                      : "flex flex-col gap-4"
                                  }>
-                                   {Array.isArray(day.jobs) && day.jobs.length > 0 ? (
-                                     day.jobs.map((job) => (
-                                       <JobCard
-                                         key={job.id}
-                                         job={job}
-                                         onClick={() => handleJobClick(job)}
-                                         view={view}
-                                       />
-                                     ))
-                                   ) : (
+                                      {Array.isArray(day.jobs) && day.jobs.length > 0 ? (
+                                        day.jobs.map((job) => (
+                                          <JobCard
+                                            key={job.id}
+                                            job={job}
+                                            onClick={() => handleJobClick(job)}
+                                            view={view}
+                                            statusOptions={statusOptions}
+                                          />
+                                        ))
+                                      ) : (
                                      <div className="col-span-full text-center py-8 text-gray-500">
                                        <Briefcase className="h-8 w-8 mx-auto mb-2 opacity-50" />
                                        <p>No jobs for this date.</p>

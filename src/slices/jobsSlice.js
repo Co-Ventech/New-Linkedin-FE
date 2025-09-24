@@ -24,7 +24,7 @@ import {
 import axios from "axios";
 import { normalizeJob } from '../utils/normalizeJob';
 import { fetchJobById , upworkfetchJobById} from '../api/jobService'; 
-import { fetchGoogleFileJobs} from '../api/jobService';
+// import { fetchGoogleFileJobs} from '../api/jobService';
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
 const PORT = import.meta.env.VITE_PORT;
 
@@ -219,32 +219,47 @@ export const fetchUpworkJobsByDateThunk = createAsyncThunk(
   }
 );
 
-export const fetchGoogleFileJobsThunk = createAsyncThunk(
-  'jobs/fetchGoogleFileJobs',
-  async (_, { rejectWithValue }) => {
+// add this thunk (or update existing one) to call the platform endpoint
+export const fetchGoogleJobsByDateThunk = createAsyncThunk(
+  'jobs/fetchGoogleJobsByDate',
+  async (_ , { rejectWithValue }) => {
     try {
-      const jobs = await fetchGoogleFileJobs(); // Call the updated API function
-      const groupedJobs = {};
-
-      // Group jobs by date
-      jobs.forEach((job) => {
-        const dateKey = job._dateKey || 'Unknown';
-        if (!groupedJobs[dateKey]) {
-          groupedJobs[dateKey] = [];
-        }
-        groupedJobs[dateKey].push(job);
-      });
-
-      // Convert grouped jobs into an array
-      return Object.entries(groupedJobs).map(([date, jobs]) => ({
-        date,
-        jobs,
-      }));
+      // use correct signature: (range, page, limit, platform)
+      const groups = await fetchJobsByDate('1d', 1, 1000, 'google');
+      return groups; // [{ date, jobs }]
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.message || 'Failed to fetch Google jobs');
     }
   }
 );
+
+
+// export const fetchGoogleFileJobsThunk = createAsyncThunk(
+//   'jobs/fetchGoogleFileJobs',
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const jobs = await fetchGoogleFileJobs(); // Call the updated API function
+//       const groupedJobs = {};
+
+//       // Group jobs by date
+//       jobs.forEach((job) => {
+//         const dateKey = job._dateKey || 'Unknown';
+//         if (!groupedJobs[dateKey]) {
+//           groupedJobs[dateKey] = [];
+//         }
+//         groupedJobs[dateKey].push(job);
+//       });
+
+//       // Convert grouped jobs into an array
+//       return Object.entries(groupedJobs).map(([date, jobs]) => ({
+//         date,
+//         jobs,
+//       }));
+//     } catch (err) {
+//       return rejectWithValue(err.message);
+//     }
+//   }
+// );
 
 
 export const updateUpworkJobStatusThunk = createAsyncThunk(
@@ -583,9 +598,9 @@ page: 1,
 range: 'last24h',
 // googleJobsByDate: [],
 // googlePage: 1,
-googleFileJobsByDate: [],
-googleFileLoading: false,
-googleFileError: null,
+googleJobsByDate: [],
+googleLoading: false,
+googleError: null,
 // selectedFilter: "24hours",
 // jobsByFilter: {}, // { "24hours": [...], "7days": [...] }
 // upworkJobsByFilter: {},
@@ -671,18 +686,19 @@ const jobsSlice = createSlice({
     //   state.loading = false;
     //   state.error = action.payload || 'Failed to fetch jobs.';
     // })
-    .addCase(fetchGoogleFileJobsThunk.pending, (state) => {
-      state.googleFileLoading = true;
-      state.googleFileError = null;
-    })
-    .addCase(fetchGoogleFileJobsThunk.fulfilled, (state, action) => {
-      state.googleFileLoading = false;
-      state.googleFileJobsByDate = action.payload || [];
-    })
-    .addCase(fetchGoogleFileJobsThunk.rejected, (state, action) => {
-      state.googleFileLoading = false;
-      state.googleFileError = action.payload || 'Failed to fetch Google file jobs';
-    })
+    // in extraReducers
+.addCase(fetchGoogleJobsByDateThunk.pending, (state) => {
+  state.googleLoading = true;
+  state.googleError = null;
+})
+.addCase(fetchGoogleJobsByDateThunk.fulfilled, (state, action) => {
+  state.googleLoading = false;
+  state.googleJobsByDate = action.payload || [];
+})
+.addCase(fetchGoogleJobsByDateThunk.rejected, (state, action) => {
+  state.googleLoading = false;
+  state.googleError = action.payload || 'Failed to fetch Google jobs';
+})
 
     .addCase(fetchCombinedStatusHistoryThunk.pending, (state) => {
       state.combinedStatusLoading = true;

@@ -33,29 +33,29 @@ export async function saveJobsToBackend(jobs) {
     );
   }
 }
-export async function fetchGoogleFileJobs() {
-  try {
-    const url = `${API_BASE}/google/file-jobs`;
-    const res = await axios.get(url, { headers: getAuthHeaders() });
+// export async function fetchGoogleFileJobs() {
+//   try {
+//     const url = `${API_BASE}/google/file-jobs`;
+//     const res = await axios.get(url, { headers: getAuthHeaders() });
 
-    // Extract the jobs array from the response
-    const data = res.data || {};
-    const jobs = Array.isArray(data.jobs) ? data.jobs : [];
+//     // Extract the jobs array from the response
+//     const data = res.data || {};
+//     const jobs = Array.isArray(data.jobs) ? data.jobs : [];
 
-    // Normalize the jobs with additional fields
-    return jobs.map((job) => ({
-      ...job,
-      _platform: 'google', // Add platform identifier
-      _id: job.primary_hash || job.secondary_hash || job.job_id || job.share_link || String(Math.random()), // Generate a stable ID
-      _dateKey: (job.scraped_at || job.posted_time || new Date().toISOString()).slice(0, 10), // Extract or generate a date key
-    }));
-  } catch (err) {
-    console.error("[fetchGoogleFileJobs] Error:", err.response?.data || err.message);
-    throw new Error(err.response?.data?.message || err.message || "Failed to fetch Google file jobs.");
-  }
-}
+//     // Normalize the jobs with additional fields
+//     return jobs.map((job) => ({
+//       ...job,
+//       _platform: 'google', // Add platform identifier
+//       _id: job.primary_hash || job.secondary_hash || job.job_id || job.share_link || String(Math.random()), // Generate a stable ID
+//       _dateKey: (job.scraped_at || job.posted_time || new Date().toISOString()).slice(0, 10), // Extract or generate a date key
+//     }));
+//   } catch (err) {
+//     console.error("[fetchGoogleFileJobs] Error:", err.response?.data || err.message);
+//     throw new Error(err.response?.data?.message || err.message || "Failed to fetch Google file jobs.");
+//   }
+// }
 
-export async function fetchJobsByDate(range = '1d', page = 1, limit = 10, platform) {
+export async function fetchJobsByDate(range = '1d', page = 1, limit = 50, platform) {
   try {
     const url = `${REMOTE_HOST}/api/company-jobs/user-jobs`;
     

@@ -9,8 +9,9 @@ import CreatePlanModal from '../components/CreatePlanModal';
 import CreateComUserModal from '../components/CreateComUserModal.jsx';
 import UserDetailsModal from '../components/UserDetailsModal.jsx';
 // import { userAPI } from '../services/api.js';
-import { userAPI } from '../services/api.js';
-import { companyAPI, masterJobAPI, subscriptionAPI } from '../services/api';
+// import { userAPI } from '../services/api.js';
+import { adminCompanyPipelineAPI, userAPI, companyAPI, masterJobAPI, subscriptionAPI } from '../services/api';
+// import { comp masterJobAPI, subscriptionAPI } from '../services/api';
 import {
   Building2,
   Users,
@@ -60,16 +61,16 @@ const SuperAdminDashboard = () => {
   const [googleFetchLoading, setGoogleFetchLoading] = useState(false);
   const [googleFetchText, setGoogleFetchText] = useState("");
   const [usersByCompany, setUsersByCompany] = useState({});
-const [usersLoading, setUsersLoading] = useState({});
-const [usersPagination, setUsersPagination] = useState({});
-const [showCreateUser, setShowCreateUser] = useState(false);
-const [selectedCompanyForUsers, setSelectedCompanyForUsers] = useState(null);
-const [creatingUser, setCreatingUser] = useState(false);
-const [showUserDetails, setShowUserDetails] = useState(false);
-const [userDetails, setUserDetails] = useState(null);
-const [userDetailsLoading, setUserDetailsLoading] = useState(false);
-const [phone, setPhone] = useState('');
-const [location, setLocation] = useState('');
+  const [usersLoading, setUsersLoading] = useState({});
+  const [usersPagination, setUsersPagination] = useState({});
+  const [showCreateUser, setShowCreateUser] = useState(false);
+  const [selectedCompanyForUsers, setSelectedCompanyForUsers] = useState(null);
+  const [creatingUser, setCreatingUser] = useState(false);
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [userDetails, setUserDetails] = useState(null);
+  const [userDetailsLoading, setUserDetailsLoading] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [location, setLocation] = useState('');
 
 
 
@@ -101,6 +102,20 @@ const [location, setLocation] = useState('');
   const [selectedBatchForDetails, setSelectedBatchForDetails] = useState(null);
   const [showBatchDetailsModal, setShowBatchDetailsModal] = useState(false);
   const [batchDetails, setBatchDetails] = useState(null);
+  const [showPipelineModal, setShowPipelineModal] = useState(false);
+  const [pipelineLoading, setPipelineLoading] = useState(false);
+  const [pipelineCompany, setPipelineCompany] = useState(null);
+  const [pipelineForm, setPipelineForm] = useState({
+    name: 'Custom Pipeline',
+    useCustomPipeline: true,
+    statusStages: [
+      { name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 },
+      { name: 'applied', displayName: 'Applied', sortOrder: 1 },
+      { name: 'engaged', displayName: 'Engaged', sortOrder: 2 }
+    ],
+  });
+
+
   // const [batchId , setBatchId] = useState(null);
   const [uploadForm, setUploadForm] = useState({
     file: null,
@@ -333,18 +348,18 @@ const [location, setLocation] = useState('');
       setUsersLoading(prev => ({ ...prev, [companyId]: false }));
     }
   };
-  
+
   const openCreateUser = (company) => {
     setSelectedCompanyForUsers(company);
     setShowCreateUser(true);
   };
-  
+
   const handleCreateUser = async ({ username, email, password, phone, location }) => {
     if (!selectedCompanyForUsers) return;
     const companyId = selectedCompanyForUsers.id || selectedCompanyForUsers._id;
     try {
       setCreatingUser(true);
-      await userAPI.create({ username, email, password,phone,location, companyId });
+      await userAPI.create({ username, email, password, phone, location, companyId });
       showMessage && showMessage('success', 'User created successfully');
       setShowCreateUser(false);
       await loadCompanyUsers(companyId, 1, 20);
@@ -369,6 +384,26 @@ const [location, setLocation] = useState('');
     }
   };
 
+  const handleDistributeAllWithLimit = async () => {
+    const input = window.prompt('Enter per-company job limit (e.g., 50):', '50');
+    if (input === null) return; // canceled
+    const perCompanyLimit = parseInt(input, 10);
+    if (!Number.isFinite(perCompanyLimit) || perCompanyLimit <= 0) {
+      showMessage('error', 'Please enter a valid positive number.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await masterJobAPI.distributeAll(perCompanyLimit);
+      showMessage('success', `Started distribution with per-company limit = ${perCompanyLimit}.`);
+      await loadInitialData();
+    } catch (e) {
+      showMessage('error', e.message || 'Failed to distribute jobs.');
+    } finally {
+      setLoading(false);
+    }
+  };
   // Update the loadInitialData function to add more debugging
   // const loadInitialData = async () => {
   //   setLoading(true);
@@ -682,13 +717,13 @@ const [location, setLocation] = useState('');
       showMessage('error', 'Company name and admin email are required.');
       return;
     }
-    
+
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyData.adminEmail);
     if (!emailOk) {
       showMessage('error', 'Please enter a valid email address.');
       return;
     }
-  
+
     try {
       setLoading(true);
       const response = await companyAPI.create({
@@ -699,7 +734,7 @@ const [location, setLocation] = useState('');
         adminLocation: companyData.adminLocation,
         pipeline: companyData.pipeline || { mode: (companyData.pipelineMode || 'default') }
       });
-      
+
       showMessage('success', 'Company created successfully! A temporary password has been sent to the admin email.');
       setShowCreateCompany(false);
       await loadInitialData();
@@ -766,7 +801,18 @@ const [location, setLocation] = useState('');
     }
   };
 
-  // Add these new handlers after the existing handlers (around line 280)
+  // Stable id generator (fallback if crypto.randomUUID not available)
+  const genKey = () =>
+    (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `stage_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+  const slug = (v) =>
+    String(v || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+
 
   // File upload handler
   const handleFileUpload = async (e) => {
@@ -919,11 +965,23 @@ const [location, setLocation] = useState('');
     }
   };
 
-  const handleDistributeBatch = async (batchId) => {
+  // const handleDistributeBatch = async (batchId) => {
+  //   setDistributionType('batch');
+  //   setSelectedBatch(batchId);
+  //   setShowDistributionModal(true);
+  // };
+
+  const handleDistributeBatch = async (batchIdOrObj) => {
+    // batchIdOrObj may be a full batch object or a string; normalize here
+    const id = typeof batchIdOrObj === 'object'
+      ? (batchIdOrObj.batchId || batchIdOrObj._id || batchIdOrObj.id)
+      : batchIdOrObj;
     setDistributionType('batch');
-    setSelectedBatch(batchId);
+    setSelectedBatch(id);
     setShowDistributionModal(true);
   };
+
+
 
   const handleDistributeAll = async () => {
     if (!window.confirm('Are you sure you want to distribute all undistributed jobs? This will send jobs to all active companies.')) {
@@ -976,7 +1034,15 @@ const [location, setLocation] = useState('');
             showMessage('error', 'Please select at least one company');
             return;
           }
-          await masterJobAPI.distributeBatchToCompanies(selectedBatch, distributionData.companyIds);
+          // Ask for per-company limit
+          const raw = window.prompt('Enter per-company job limit (optional). Leave blank for no limit:', '20');
+          const perCompanyLimit = raw === null || raw.trim() === '' ? undefined : parseInt(raw, 10);
+          if (perCompanyLimit !== undefined && (!Number.isFinite(perCompanyLimit) || perCompanyLimit <= 0)) {
+            showMessage('error', 'Please enter a valid positive number for per-company limit.');
+            return;
+          }
+
+          await masterJobAPI.distributeBatchToCompanies(selectedBatch, distributionData.companyIds, perCompanyLimit);
           showMessage('success', 'Batch distributed to selected companies successfully!');
         } else {
           await masterJobAPI.distributeBatch(selectedBatch, {});
@@ -1131,6 +1197,128 @@ const [location, setLocation] = useState('');
   //   }
   // };
 
+  const openCompanyPipeline = async (company) => {
+    const companyId = company._id || company.id;
+    if (!companyId) return;
+    try {
+      setPipelineLoading(true);
+      setPipelineCompany(company);
+      const pipeline = await adminCompanyPipelineAPI.getByCompany(companyId);
+      if (pipeline) {
+        const stages = Array.isArray(pipeline.statusStages)
+          ? pipeline.statusStages.map((s, i) => ({
+              _key: genKey(),
+              name: s.name,
+              displayName: s.displayName || s.name,
+              sortOrder: Number(s.sortOrder) || i
+            }))
+          : [];
+        const hasNotEngaged = stages.some(s => s.name === 'not_engaged');
+        const normalized = hasNotEngaged
+          ? stages
+          : [{ _key: genKey(), name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 }, ...stages]
+              .map((s, i) => ({ ...s, sortOrder: i }));
+        setPipelineForm({
+          name: pipeline.name || 'Custom Pipeline',
+          useCustomPipeline: pipeline.useCustomPipeline ?? true,
+          statusStages: normalized.length > 0
+            ? normalized
+            : [
+                { _key: genKey(), name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 },
+                { _key: genKey(), name: 'applied', displayName: 'Applied', sortOrder: 1 }
+              ]
+        });
+      } else {
+        setPipelineForm({
+          name: 'Custom Pipeline',
+          useCustomPipeline: true,
+          statusStages: [
+            { _key: genKey(), name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 },
+            { _key: genKey(), name: 'applied', displayName: 'Applied', sortOrder: 1 }
+          ]
+        });
+      }
+      setShowPipelineModal(true);
+    } catch (e) {
+      showMessage && showMessage('error', e.message || 'Failed to load pipeline');
+    } finally {
+      setPipelineLoading(false);
+    }
+  };
+
+  const addPipelineStage = () => {
+    const next = (pipelineForm.statusStages?.length || 0);
+    setPipelineForm(prev => ({
+      ...prev,
+      statusStages: [
+        ...(prev.statusStages || []),
+        { _key: genKey(), name: 'new_stage', displayName: 'New Stage', sortOrder: next }
+      ]
+    }));
+  };
+
+  const updatePipelineStage = (idx, field, value) => {
+    setPipelineForm(prev => {
+      const list = [...(prev.statusStages || [])];
+      if (!list[idx]) return prev;
+      list[idx] = {
+        ...list[idx],
+        [field]: field === 'sortOrder' ? Number(value) : value
+      };
+      return { ...prev, statusStages: list };
+    });
+  };
+
+  const removePipelineStage = (idx) => {
+    setPipelineForm(prev => {
+      const list = [...(prev.statusStages || [])];
+      list.splice(idx, 1);
+      // re-assign sortOrder to keep stable sequence (optional)
+      const normalized = list.map((s, i) => ({ ...s, sortOrder: i }));
+      return { ...prev, statusStages: normalized };
+    });
+  };
+
+  const saveCompanyPipeline = async () => {
+    if (!pipelineCompany) return;
+    const companyId = pipelineCompany._id || pipelineCompany.id;
+    try {
+      // simple validation
+      const names = new Set();
+      let stages = [...(pipelineForm.statusStages || [])];
+      // Ensure required 'not_engaged' stage exists
+      if (!stages.some(s => s.name === 'not_engaged')) {
+        stages = [
+          { _key: genKey(), name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 },
+          ...stages
+        ].map((s, i) => ({ ...s, sortOrder: i }));
+      } else {
+        // normalize sortOrder sequentially
+        stages = stages.map((s, i) => ({ ...s, sortOrder: i }));
+      }
+      for (const s of stages) {
+        if (!s.name) throw new Error('Stage name is required');
+        if (names.has(s.name)) throw new Error(`Duplicate stage name: ${s.name}`);
+        names.add(s.name);
+      }
+      setPipelineLoading(true);
+      await adminCompanyPipelineAPI.updateForCompany(companyId, {
+        name: pipelineForm.name,
+        statusStages: stages.map(s => ({
+          name: s.name, displayName: s.displayName || s.name, sortOrder: Number(s.sortOrder) || 0
+        })),
+        useCustomPipeline: !!pipelineForm.useCustomPipeline
+      });
+      showMessage && showMessage('success', 'Pipeline updated');
+      setShowPipelineModal(false);
+      setPipelineCompany(null);
+    } catch (e) {
+      showMessage && showMessage('error', e.message || 'Failed to update pipeline');
+    } finally {
+      setPipelineLoading(false);
+    }
+  };
+
   // Handle job status filter change
   const handleJobStatusChange = (newStatus) => {
     setJobsStatus(newStatus);
@@ -1202,6 +1390,7 @@ const [location, setLocation] = useState('');
     }
   };
 
+  
 
   const handleEditPlan = async (planData) => {
     if (!editingPlan) {
@@ -1430,7 +1619,7 @@ const [location, setLocation] = useState('');
             </div>
           ) : (
             <div className="space-y-4">
-              {batches.slice(0, 5).map((batch) => (
+              {/* {batches.slice(0, 5).map((batch) => (
                 <div key={batch.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex items-center space-x-3">
                     <div className={`w-2 h-2 rounded-full ${batch.status === 'completed' ? 'bg-green-500' :
@@ -1449,7 +1638,54 @@ const [location, setLocation] = useState('');
                     <span>{new Date(batch.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
+              ))} */}
+              {batches.slice(0, 5).map((batch) => {
+                const jobCount =
+                  batch?.stats?.totalJobsScraped ??
+                  batch?.count ??
+                  batch?.jobsScraped ??
+                  0;
+                const label = `New job batch created • ${jobCount} job${jobCount === 1 ? '' : 's'}`;
+
+                // Optional: detect other activities (examples only; keep if your API provides them)
+                // const activityItems = [
+                //   { icon: 'Share2', color: 'text-blue-600', text: `Distributed: ${batch?.distribution?.totalDistributed ?? 0}` },
+                //   { icon: 'Plus', color: 'text-green-600', text: `New Jobs: ${batch?.stats?.newJobsAdded ?? 0}` },
+                //   { icon: 'AlertCircle', color: 'text-red-600', text: `Errors: ${batch?.stats?.errorsEncountered ?? 0}` }
+                // ].filter(a => a.text);
+
+                return (
+                  <div key={batch._id || batch.id || batch.batchId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-2 h-2 rounded-full ${batch.status === 'completed' ? 'bg-green-500'
+                        : batch.status === 'processing' ? 'bg-yellow-500'
+                          : 'bg-gray-500'
+                        }`} />
+                      <div>
+                        <p className="font-medium text-gray-900">{label}</p>
+                        <p className="text-sm text-gray-600">
+                          {batch.platform} - {batch.keywords || '—'}
+                        </p>
+
+                        {/* Optional: show extra activity metrics inline */}
+                        {/* {activityItems.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-3 text-xs text-gray-600">
+              {activityItems.map((a, i) => (
+                <span key={i} className="inline-flex items-center gap-1">
+                  <span className={a.color}>•</span>{a.text}
+                </span>
               ))}
+            </div>
+          )} */}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
+                      <Calendar className="h-4 w-4" />
+                      <span>{new Date(batch.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -1678,12 +1914,20 @@ const [location, setLocation] = useState('');
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button
+                            onClick={() => openCompanyPipeline(company)}
+                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                            title="Edit Pipeline"
+                          >
+                            Pipeline
+                          </button>
+                          <button
                             onClick={() => { setSelectedCompany(company); setShowSubscriptionModal(true); }}
                             className="text-blue-600 hover:text-blue-900 transition-colors"
                             title="Edit Subscription"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
+
                           <button
                             onClick={() => handleDeleteCompany(companyId)}
                             className="text-red-600 hover:text-red-900 transition-colors"
@@ -1702,8 +1946,8 @@ const [location, setLocation] = useState('');
         )}
       </div>
 
-                    
-         
+
+
 
       {/* Individual Company Sections */}
       <div className="space-y-6">
@@ -1850,7 +2094,7 @@ const [location, setLocation] = useState('');
                   </div>
                 )} */}
 
-{overview?.userActivity && overview.userActivity.length > 0 && (
+                {overview?.userActivity && overview.userActivity.length > 0 && (
                   <div className="mt-6">
                     <h5 className="text-sm font-semibold text-gray-900 mb-3">User Activity</h5>
                     <div className="bg-gray-50 rounded-lg p-4">
@@ -1901,43 +2145,43 @@ const [location, setLocation] = useState('');
                     ) : (usersByCompany[companyId]?.length ? (
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-  <tr>
-    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active</th>
-    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-  </tr>
-</thead>
-<tbody className="bg-white divide-y divide-gray-200">
-  {usersByCompany[companyId].map((u) => (
-    <tr key={u._id} className="hover:bg-gray-50">
-      <td className="px-4 py-2 text-sm text-gray-900">{u.username}</td>
-      <td className="px-4 py-2 text-sm text-gray-600">{u.email}</td>
-      <td className="px-4 py-2 text-sm">
-        <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
-          {u.role || 'company_user'}
-        </span>
-      </td>
-      <td className="px-4 py-2 text-sm">
-        <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${u.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-          {u.isActive ? 'Yes' : 'No'}
-        </span>
-      </td>
-      <td className="px-4 py-2 text-sm text-gray-500">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
-      <td className="px-4 py-2 text-sm">
-        <button
-          onClick={() => openUserDetails(u._id)}
-          className="px-2 py-1 text-blue-600 hover:text-blue-800"
-        >
-          View
-        </button>
-      </td>
-    </tr>
-  ))}
-</tbody>
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {usersByCompany[companyId].map((u) => (
+                              <tr key={u._id} className="hover:bg-gray-50">
+                                <td className="px-4 py-2 text-sm text-gray-900">{u.username}</td>
+                                <td className="px-4 py-2 text-sm text-gray-600">{u.email}</td>
+                                <td className="px-4 py-2 text-sm">
+                                  <span className="inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    {u.role || 'company_user'}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-2 text-sm">
+                                  <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-full ${u.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                    {u.isActive ? 'Yes' : 'No'}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-2 text-sm text-gray-500">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+                                <td className="px-4 py-2 text-sm">
+                                  <button
+                                    onClick={() => openUserDetails(u._id)}
+                                    className="px-2 py-1 text-blue-600 hover:text-blue-800"
+                                  >
+                                    View
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
                         </table>
                       </div>
                     ) : (
@@ -2051,9 +2295,9 @@ const [location, setLocation] = useState('');
             <span>{googleFetchLoading ? (googleFetchText || 'Fetching...') : 'Fetch Google Jobs'}</span>
           </button>
 
-          
+
           <button
-            onClick={handleDistributeAll}
+            onClick={handleDistributeAllWithLimit}
             disabled={distributionLoading}
             className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
           >
@@ -2093,7 +2337,7 @@ const [location, setLocation] = useState('');
 
       {/* Enhanced Distribution Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        {/* <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+        <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Database className="h-6 w-6 text-blue-600" />
@@ -2119,11 +2363,11 @@ const [location, setLocation] = useState('');
               </p>
             </div>
           </div>
-        </div> */}
+        </div>
 
-        
 
-        {/* <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
+
+         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-500">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <Clock className="h-6 w-6 text-yellow-600" />
@@ -2149,7 +2393,7 @@ const [location, setLocation] = useState('');
               </p>
             </div>
           </div>
-        </div> */}
+        </div> 
 
         <div className="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
           <div className="flex items-center">
@@ -2213,6 +2457,7 @@ const [location, setLocation] = useState('');
               >
                 <option value="linkedin">LinkedIn</option>
                 <option value="upwork">Upwork</option>
+                <option value="google">Google</option>
               </select>
             </div>
             <div className="flex items-end">
@@ -2308,7 +2553,9 @@ const [location, setLocation] = useState('');
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${batch.platform === 'linkedin'
                         ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
+                        : batch.platform === 'upwork'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
                         }`}>
                         {batch.platform}
                       </span>
@@ -2361,7 +2608,7 @@ const [location, setLocation] = useState('');
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDistributeBatch(batch._id || batch.id)}
+                          onClick={() => handleDistributeBatch(batch.batchId || batch.batch._id || batch.id)}
                           className="text-green-600 hover:text-green-900 transition-colors p-1 rounded hover:bg-green-50"
                           title="Distribute Batch"
                         >
@@ -2700,6 +2947,8 @@ const [location, setLocation] = useState('');
       </div>
     );
   };
+
+  
 
   const PlansTab = () => (
     <div className="space-y-6">
@@ -3241,12 +3490,12 @@ const [location, setLocation] = useState('');
         loading={loading}
       />
       <CreateComUserModal
-  isOpen={showCreateUser}
-  onClose={() => setShowCreateUser(false)}
-  onSubmit={handleCreateUser}
-  loading={creatingUser}
-  company={selectedCompanyForUsers}
-/>
+        isOpen={showCreateUser}
+        onClose={() => setShowCreateUser(false)}
+        onSubmit={handleCreateUser}
+        loading={creatingUser}
+        company={selectedCompanyForUsers}
+      />
 
       <EditPlanModal
         isOpen={showEditPlan}
@@ -3270,6 +3519,90 @@ const [location, setLocation] = useState('');
         batchDetails={batchDetails}
         batchId={selectedBatchForDetails}
       />
+
+      {showPipelineModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-2xl">
+            <div className="px-6 py-4 border-b flex justify-between items-center">
+              <h2 className="text-lg font-semibold">
+                Pipeline – {pipelineCompany?.companyName || pipelineCompany?.name || 'Company'}
+              </h2>
+              <button
+                onClick={() => { setShowPipelineModal(false); setPipelineCompany(null); }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  className="w-full border rounded-md px-3 py-2"
+                  value={pipelineForm.name || ''}
+                  onChange={(e) => setPipelineForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Pipeline name (e.g. Custom Pipeline)"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-sm font-semibold text-gray-900">Stages</h3>
+                  <button onClick={addPipelineStage} className="px-3 py-1 bg-gray-100 rounded text-sm" type="button">
+                    Add Stage
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(pipelineForm.statusStages || []).map((s, idx) => (
+                    <div key={s._key || idx} className="grid grid-cols-12 gap-2 items-center">
+                      <input
+                        type="text"
+                        className="col-span-5 border rounded px-3 py-2"
+                        placeholder="Stage key (e.g. applied)"
+                        value={s.name || ''}
+                        onChange={(e) => updatePipelineStage(idx, 'name', slug(e.target.value))}
+                      />
+                      <input
+                        type="text"
+                        className="col-span-6 border rounded px-3 py-2"
+                        placeholder="Display name (e.g. Applied)"
+                        value={s.displayName || ''}
+                        onChange={(e) => updatePipelineStage(idx, 'displayName', e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePipelineStage(idx)}
+                        className="col-span-1 text-red-600 text-sm"
+                      >
+                        X
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t flex justify-end gap-2">
+              <button
+                onClick={() => { setShowPipelineModal(false); setPipelineCompany(null); }}
+                className="px-4 py-2 bg-gray-100 rounded"
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveCompanyPipeline}
+                disabled={pipelineLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+                type="button"
+              >
+                {pipelineLoading ? 'Saving...' : 'Save Pipeline'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Remove duplicate modal instances to avoid conflicting handlers */}
     </Layout>

@@ -10,8 +10,12 @@ const CompanySignup = () => {
     adminUsername: '',
     adminEmail: '',
     adminPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    adminPhone: '',
+    adminLocation: '',
+    pipelineMode: 'default'
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -29,14 +33,17 @@ const CompanySignup = () => {
     setError('');
     setSuccess('');
 
-    // Validation
     if (formData.adminPassword !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
     if (formData.adminPassword.length < 6) {
       setError('Password must be at least 6 characters long');
+      return;
+    }
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.adminEmail);
+    if (!emailOk) {
+      setError('Please enter a valid admin email address');
       return;
     }
 
@@ -52,7 +59,11 @@ const CompanySignup = () => {
           navigate('/login');
         }, 2000);
       } else {
-        setError(result.error);
+        const msg = result.error || 'Company registration failed';
+        const friendly = msg.toLowerCase().includes('already exists') || msg.toLowerCase().includes('duplicate')
+          ? 'An account with this admin email already exists. Please sign in or use a different email.'
+          : msg;
+        setError(friendly);
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
@@ -137,7 +148,6 @@ const CompanySignup = () => {
                 onChange={handleInputChange}
               />
             </div>
-
             <div className="mb-4">
               <label htmlFor="adminPassword" className="block text-sm font-medium text-gray-700 mb-1">
                 Admin Password
@@ -169,6 +179,51 @@ const CompanySignup = () => {
                 onChange={handleInputChange}
               />
             </div>
+
+            <div className="mb-4">
+              <label htmlFor="adminPhone" className="block text-sm font-medium text-gray-700 mb-1">
+                Admin Phone
+              </label>
+              <input
+                id="adminPhone"
+                name="adminPhone"
+                type="tel"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="+1-555-123-4567"
+                value={formData.adminPhone}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="adminLocation" className="block text-sm font-medium text-gray-700 mb-1">
+                Admin Location
+              </label>
+              <input
+                id="adminLocation"
+                name="adminLocation"
+                type="text"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="City, Country"
+                value={formData.adminLocation}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* <div className="mb-2">
+              <label htmlFor="pipelineMode" className="block text-sm font-medium text-gray-700 mb-1">
+                Pipeline Mode
+              </label>
+              <select
+                id="pipelineMode"
+                name="pipelineMode"
+                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                value={formData.pipelineMode}
+                onChange={handleInputChange}
+              >
+                <option value="default">Default</option>
+              </select>
+            </div> */}
           </div>
 
           {error && (

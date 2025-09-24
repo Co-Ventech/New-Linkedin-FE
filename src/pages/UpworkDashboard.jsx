@@ -5,6 +5,7 @@ import UpworkJobCard from "../components/UpworkJobCard";
 import Header from "../components/Header";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
+import { selectStatusOptions, selectPipeline } from "../slices/userSlice";
 import { fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
 import queryString from "query-string";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ import { logoutUser } from "../api/authApi";
 // import { persistor } from './store';
 import { setRange, resetJobsByDate } from "../slices/jobsSlice";
 import { Calendar, Grid3X3, List, Kanban, Users, AlertCircle, Briefcase, Building2, Filter, Download, Search, ChevronDown, Eye, BarChart3, X } from 'lucide-react';
+import { fetchCompanyPipelineThunk } from "../slices/userSlice";
 
 const defaultFilters = {
   level: "",
@@ -36,96 +38,18 @@ const upworkJobTypeOptions = [
 ];
 
 const colors = ["Yellow", "Green", "Red"];
-const statusOptions = [
-  "not_engaged",
-  "applied",
-  "engaged",
-  "interview",
-  "offer",
-  "rejected",
-  "onboard"
-];
-
-
-const statusLabels = {
-  not_engaged: "Not Engaged",
-  applied: "Applied",
-  engaged: "Engaged",
-  interview: "Interview",
-  offer: "Offer",
-  rejected: "Rejected",
-  onboard: "Onboard",
-};
-
-const statusOrder = [
-  "not_engaged",
-  "applied",
-  "engaged",
-  "interview",
-  "offer",
-  "rejected",
-  "onboard",
-];
 
 // Enhanced status configuration with colors
-const statusConfig = {
-  not_engaged: {
-    label: "Not Engaged",
-    color: "bg-gray-50",
-    headerColor: "bg-gray-100",
-    textColor: "text-gray-700",
-    borderColor: "border-gray-200",
-    dotColor: "bg-gray-400"
-  },
-  applied: {
-    label: "Applied",
-    color: "bg-blue-50",
-    headerColor: "bg-blue-100",
-    textColor: "text-blue-700",
-    borderColor: "border-blue-200",
-    dotColor: "bg-blue-400"
-  },
-  engaged: {
-    label: "Engaged",
-    color: "bg-yellow-50",
-    headerColor: "bg-yellow-100",
-    textColor: "text-yellow-700",
-    borderColor: "border-yellow-200",
-    dotColor: "bg-yellow-400"
-  },
-  interview: {
-    label: "Interview",
-    color: "bg-purple-50",
-    headerColor: "bg-purple-100",
-    textColor: "text-purple-700",
-    borderColor: "border-purple-200",
-    dotColor: "bg-purple-400"
-  },
-  offer: {
-    label: "Offer",
-    color: "bg-green-50",
-    headerColor: "bg-green-100",
-    textColor: "text-green-700",
-    borderColor: "border-green-200",
-    dotColor: "bg-green-400"
-  },
-  rejected: {
-    label: "Rejected",
-    color: "bg-red-50",
-    headerColor: "bg-red-100",
-    textColor: "text-red-700",
-    borderColor: "border-red-200",
-    dotColor: "bg-red-400"
-  },
-  onboard: {
-    label: "Onboard",
-    color: "bg-slate-50",
-    headerColor: "bg-slate-100",
-    textColor: "text-slate-700",
-    borderColor: "border-slate-200",
-    dotColor: "bg-slate-400"
-  },
+const KNOWN_COLORS = {
+  not_engaged: { dotColor: "bg-gray-400", headerColor: "bg-gray-100", textColor: "text-gray-700", borderColor: "border-gray-200", color: "bg-gray-50" },
+  applied:     { dotColor: "bg-blue-400", headerColor: "bg-blue-100", textColor: "text-blue-700", borderColor: "border-blue-200", color: "bg-blue-50" },
+  engaged:     { dotColor: "bg-indigo-400", headerColor: "bg-indigo-100", textColor: "text-indigo-700", borderColor: "border-indigo-200", color: "bg-indigo-50" },
+  interview:   { dotColor: "bg-purple-400", headerColor: "bg-purple-100", textColor: "text-purple-700", borderColor: "border-purple-200", color: "bg-purple-50" },
+  offer:       { dotColor: "bg-emerald-400", headerColor: "bg-emerald-100", textColor: "text-emerald-700", borderColor: "border-emerald-200", color: "bg-emerald-50" },
+  rejected:    { dotColor: "bg-red-400", headerColor: "bg-red-100", textColor: "text-red-700", borderColor: "border-red-200", color: "bg-red-50" },
+  onboard:     { dotColor: "bg-teal-400", headerColor: "bg-teal-100", textColor: "text-teal-700", borderColor: "border-teal-200", color: "bg-teal-50" },
 };
+const NEUTRAL = { dotColor: "bg-slate-400", headerColor: "bg-slate-100", textColor: "text-slate-700", borderColor: "border-slate-200", color: "bg-slate-50" };
 // Utility to debounce functions
 function debounce(func, delay) {
   let timeout;
@@ -183,6 +107,36 @@ const UpworkDashboard = () => {
   const [optimisticUpdates, setOptimisticUpdates] = useState(new Set());
   const [failedUpdates, setFailedUpdates] = useState(new Map());
   const user = useSelector((state) => state.user.user);
+  const statusOptions = useSelector(selectStatusOptions) || [];
+  const pipeline = useSelector(selectPipeline);
+  // const authInitializing = useSelector(selectAuthInitializing);
+  const pipelineLoading = useSelector((state) => state.user.pipelineLoading);
+  const [pipelineRequested, setPipelineRequested] = useState(false);
+  // Ensure pipeline is loaded on mount
+  useEffect(() => {
+    if (!pipelineRequested && statusOptions.length === 0) {
+      setPipelineRequested(true);
+      dispatch(fetchCompanyPipelineThunk());
+    }
+  }, [dispatch, statusOptions.length, pipelineRequested]);
+
+  const DEFAULT_STAGES = [
+    { name: "not_engaged", displayName: "Not Engaged", sortOrder: 0 },
+    { name: "applied", displayName: "Applied", sortOrder: 1 },
+    { name: "engaged", displayName: "Engaged", sortOrder: 2 },
+    { name: "interview", displayName: "Interview", sortOrder: 3 },
+    { name: "offer", displayName: "Offer", sortOrder: 4 },
+    { name: "rejected", displayName: "Rejected", sortOrder: 5 },
+    { name: "onboard", displayName: "Onboard", sortOrder: 6 },
+  ];
+
+  const stages = (pipeline?.statusStages?.length
+    ? [...pipeline.statusStages].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    : DEFAULT_STAGES
+  );
+  const statusOrder = stages.map(s => s.name);
+  const statusLabels = stages.reduce((acc, s) => { acc[s.name] = s.displayName || s.name; return acc; }, {});
+  const statusConfig = statusOrder.reduce((acc, name) => { const base = KNOWN_COLORS[name] || NEUTRAL; acc[name] = { label: statusLabels[name] || name, ...base }; return acc; }, {});
   const allJobs = upworkJobsByDate.flatMap(day => day.jobs || []);
 
 
@@ -400,6 +354,11 @@ const UpworkDashboard = () => {
     setFilters(getFiltersFromUrl());
   }, [location.search]);
 
+  useEffect(() => {
+    dispatch(fetchCompanyPipelineThunk())
+
+  }, [])
+
   // Fetch jobs on mount (or when empty) with current range
   // useEffect(() => {
   //   if (!upworkJobsByDate || upworkJobsByDate.length === 0 || upworkJobsByDate.every(day => !day.jobs || day.jobs.length === 0)) {
@@ -423,10 +382,7 @@ const UpworkDashboard = () => {
 
   // Calculate total jobs for stats
   const totalJobs = allJobs.length;
-  const jobStats = statusOrder.reduce((acc, status) => {
-    acc[status] = allJobs.filter(job => job.currentStatus === status).length;
-    return acc;
-  }, {});
+  const jobStats = statusOrder.reduce((acc, status) => { acc[status] = allJobs.filter(job => job.currentStatus === status).length; return acc; }, {});
 
   // after filteredJobs and jobStats
   const [page, setPage] = useState(1);
@@ -726,6 +682,16 @@ const UpworkDashboard = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Pipeline loader */}
+              {(!pipeline ) && (
+                <div className="mt-2 mb-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-green-600 border-top-transparent rounded-full animate-spin"></div>
+                    <span className="text-green-700 text-sm">Loading pipeline...</span>
+                  </div>
+                </div>
+              )}
 
               {/* Kanban User Selection */}
               {kanbanView && (

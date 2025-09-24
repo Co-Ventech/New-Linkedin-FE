@@ -64,7 +64,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchGoogleFileJobsThunk } from "../slices/jobsSlice";
+import { fetchGoogleJobsByDateThunk } from "../slices/jobsSlice";
 import GoogleJobCard from "../components/GoogleJobCard";
 import Header from "../components/Header";
 import { AlertCircle, Search, Grid3X3, List, Filter, Calendar, Briefcase } from "lucide-react";
@@ -74,16 +74,19 @@ import { useNavigate } from "react-router-dom";
 
 const GoogleDashboard = () => {
   const dispatch = useDispatch();
-  const loading = useSelector(s => s.jobs.googleFileLoading);
-  const error = useSelector(s => s.jobs.googleFileError);
+  // const loading = useSelector(s => s.jobs.googleFileLoading);
+  // const error = useSelector(s => s.jobs.googleFileError);
   const user = useSelector((state) => state.user.user); 
   const navigate = useNavigate();
   // Prefer file jobs; future-proof fallback to platform groups if added later
   const fileGroups = useSelector(s => s.jobs.googleFileJobsByDate || []);
-  const groups = fileGroups;
+  // const groups = fileGroups;
 
   const [view, setView] = useState("grid"); // "grid" | "list"
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const { googleJobsByDate: groups, googleLoading: loading, googleError: error } = useSelector(state => state.jobs);
+
 
   const handleExport = () => {
     alert("Exporting jobs...");
@@ -99,27 +102,32 @@ const GoogleDashboard = () => {
   // };
 
   useEffect(() => {
-    dispatch(fetchGoogleFileJobsThunk());
+    dispatch(fetchGoogleJobsByDateThunk());
   }, [dispatch]);
+  
 
   const allJobs = useMemo(
     () => (Array.isArray(groups) ? groups.flatMap(d => d.jobs || []) : []),
     [groups]
   );
 
-  const nonEmptyDays = useMemo(
-    () => (Array.isArray(groups) ? groups : [])
-      .map(d => ({ date: d.date, jobs: (d.jobs || []) }))
-      .filter(d => Array.isArray(d.jobs) && d.jobs.length > 0),
-    [groups]
-  );
+  // const nonEmptyDays = useMemo(
+  //   () => (Array.isArray(groups) ? groups : [])
+  //     .map(d => ({ date: d.date, jobs: (d.jobs || []) }))
+  //     .filter(d => Array.isArray(d.jobs) && d.jobs.length > 0),
+  //   [groups]
+  // );
+
+  
+// If you had a fallback like fileGroups vs platformGroups, simplify to only platform groups:
+const nonEmptyDays = Array.isArray(groups) ? groups.filter(g => Array.isArray(g.jobs) && g.jobs.length > 0) : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="bg-white shadow-sm border-b border-gray-200">
        <Header
          source="google"
-         onRefreshJobs={() => dispatch(fetchGoogleFileJobsThunk())} hideDownloadExcel onExport={handleExport} user={user} onLogout={handleLogout}
+         onRefreshJobs={() => dispatch(fetchGoogleJobsByDateThunk())} hideDownloadExcel onExport={handleExport} user={user} onLogout={handleLogout}
       />
       </div>
 

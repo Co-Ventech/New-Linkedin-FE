@@ -340,7 +340,7 @@ const CreateCompanyModal = ({ isOpen, onClose, onSubmit, loading, plans = [] }) 
           </div>
 
           {/* Pipeline */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Pipeline Mode</label>
             <select
               value={form.pipelineMode || 'default'}
@@ -350,7 +350,7 @@ const CreateCompanyModal = ({ isOpen, onClose, onSubmit, loading, plans = [] }) 
               <option value="default">Default</option>
             </select>
             <p className="text-xs text-gray-500 mt-1">Currently, only the 'default' option is available. The company admin can update or modify the latter as needed.</p>
-          </div>
+          </div> */}
 
           <div className="flex justify-end space-x-3 pt-2">
             <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-md">Cancel</button>

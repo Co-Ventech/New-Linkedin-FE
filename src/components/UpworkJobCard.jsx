@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch,useSelector } from "react-redux";
 import { Edit3, Check, X, ChevronDown } from 'lucide-react';
 import { updateUpworkJobStatusNewThunk, fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
+import { selectStatusOptions } from '../slices/userSlice';
+
 
 const badgeClass = {
   tier: {
@@ -16,17 +18,20 @@ const badgeClass = {
   projectLength: 'bg-gray-100 text-gray-800 border-gray-300',
 };
 
-const STATUS_OPTIONS = [
-  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
-];
+// const STATUS_OPTIONS = [
+//   'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
+// ];
 
 
-const UpworkJobCard = ({ job, view = "grid" }) => {
+
+const UpworkJobCard = ({ job, view = "grid" } ) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showFullDesc, setShowFullDesc] = React.useState(false);
   const [statusOpen, setStatusOpen] = React.useState(false);
   const [selectedStatus, setSelectedStatus] = React.useState(job?.currentStatus || 'not_engaged');
+  
+const STATUS_OPTIONS = useSelector(selectStatusOptions);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
 

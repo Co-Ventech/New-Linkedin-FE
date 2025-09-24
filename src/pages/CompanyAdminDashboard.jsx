@@ -75,7 +75,7 @@
 //     user?.companyId ||
 //     companyState?._id || companyState?.id ||
 //     (jobs && jobs.length > 0 ? jobs[0].companyId : undefined);
-    
+
 
 //   // Form states
 //   const [userForm, setUserForm] = useState({
@@ -432,7 +432,7 @@
 //   useEffect(() => {
 //       loadInitialData();
 //   }, []);
-  
+
 
 //   // Message handling with auto-dismiss
 //   const showMessage = (type, text) => {
@@ -942,7 +942,7 @@
 //       </div>
 //     );
 //   };
- 
+
 //   const UsersTab = () => (
 //     <div className="space-y-6">
 //       <div className="flex justify-between items-center">
@@ -2994,14 +2994,17 @@
 
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { selectUser, isCompanyAdmin, selectCompany } from "../slices/userSlice"
+import { selectUser, isCompanyAdmin, selectCompany, selectPipeline } from "../slices/userSlice"
+import { fetchCompanyPipelineThunk, updateCompanyPipelineThunk } from "../slices/userSlice"
 // import { CreateUserModal } from "../components/CreateUserModal"
 import { EditUserModal } from "../components/EditUserModal"
 import { AssignJobsModal } from "../components/AssignJobsModal"
 import { useNavigate } from "react-router-dom"
 import { logoutUser } from "../api/authApi"
 import CreateComUserModal from "../components/CreateComUserModal"
+import CreateCompanyModal from "../components/CreateCompanyModal"
 // import {  isCompanyAdmin, selectCompany } from '../slices/userSlice';
+import { userAPI } from "../services/api";
 import {
   BarChart3,
   Users,
@@ -3028,12 +3031,152 @@ const CompanyAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ type: "", text: "" })
-
+  const currentCompany = companyState || { _id: user?.companyId, companyName: user?.companyName || user?.company };
   // Data states
   const [users, setUsers] = useState([])
   const [jobs, setJobs] = useState([])
   const [stats, setStats] = useState({})
   const [activities, setActivities] = useState([])
+  const pipeline = useSelector(selectPipeline)
+  const [pipelineForm, setPipelineForm] = useState({
+    name: "Custom Pipeline",
+    statusStages: [
+      { name: "not_engaged", displayName: "Not Engaged", sortOrder: 0 },
+      { name: "applied", displayName: "Applied", sortOrder: 1 },
+      { name: "interview", displayName: "Interview", sortOrder: 2 },
+      { name: "offer", displayName: "Offer", sortOrder: 3 },
+    ],
+    useCustomPipeline: true,
+    settings: {
+      allowSkipStages: true,
+      defaultInitialStatus: "not_engaged",
+      enableAutoProgressions: false,
+      requireCommentOnStatusChange: false,
+    },
+  })
+
+  useEffect(() => {
+    setPipelineForm(prev => {
+      let list = (prev?.statusStages || []).map((s, i) => s?._key ? s : { ...s, _key: genKey(), sortOrder: s.sortOrder ?? i });
+      if (!list.some(s => s.name === 'not_engaged')) {
+        list = [{ _key: genKey(), name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 }, ...list]
+          .map((s, i) => ({ ...s, sortOrder: i }));
+      } else {
+        list = list.map((s, i) => ({ ...s, sortOrder: i }));
+      }
+      return { ...prev, statusStages: list };
+    });
+    // run once on mount or when you first open the modal/section
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!pipeline) {
+      dispatch(fetchCompanyPipelineThunk())
+    } else {
+      // Prime form with existing pipeline
+      const stages = Array.isArray(pipeline?.statusStages)
+        ? pipeline.statusStages.map((s, i) => ({
+            _key: genKey(),
+            name: s.name,
+            displayName: s.displayName || s.name,
+            sortOrder: Number(s.sortOrder) || i,
+          }))
+        : [];
+      const hasNotEngaged = stages.some(s => s.name === 'not_engaged');
+      const normalized = hasNotEngaged
+        ? stages.map((s, i) => ({ ...s, sortOrder: i }))
+        : [{ _key: genKey(), name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 }, ...stages]
+            .map((s, i) => ({ ...s, sortOrder: i }));
+      setPipelineForm(prev => ({
+        name: pipeline?.name || "Custom Pipeline",
+        statusStages: normalized.length > 0 ? normalized : prev.statusStages,
+        useCustomPipeline: pipeline?.useCustomPipeline ?? true,
+        settings: {
+          allowSkipStages: pipeline?.settings?.allowSkipStages ?? true,
+          defaultInitialStatus: pipeline?.settings?.defaultInitialStatus ?? "not_engaged",
+          enableAutoProgressions: pipeline?.settings?.enableAutoProgressions ?? false,
+          requireCommentOnStatusChange: pipeline?.settings?.requireCommentOnStatusChange ?? false,
+        },
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pipeline])
+
+  useEffect(() => {
+    dispatch(fetchCompanyPipelineThunk())
+
+  }, [])
+
+  const handleAddStage = () => {
+    setPipelineForm(prev => ({
+      ...prev,
+      statusStages: (() => {
+        const nextIndex = (prev.statusStages?.length || 0);
+        const withNew = [
+          ...(prev.statusStages || []),
+          { _key: genKey(), name: 'new_stage', displayName: 'New Stage', sortOrder: nextIndex }
+        ];
+        // Ensure 'not_engaged' exists
+        const hasNotEngaged = withNew.some(s => s.name === 'not_engaged');
+        const list = hasNotEngaged
+          ? withNew
+          : [{ _key: genKey(), name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 }, ...withNew];
+        return list.map((s, i) => ({ ...s, sortOrder: i }));
+      })()
+    }));
+  };
+  const handleStageChange = (idx, field, value) => {
+    setPipelineForm(prev => {
+      const list = [...(prev.statusStages || [])];
+      if (!list[idx]) return prev;
+      list[idx] = {
+        ...list[idx],
+        [field]: field === 'sortOrder' ? Number(value) : (field === 'name' ? slug(value) : value)
+      };
+      return { ...prev, statusStages: list };
+    });
+  };
+  const handleRemoveStage = (idx) => {
+    setPipelineForm(prev => {
+      const list = [...(prev.statusStages || [])];
+      list.splice(idx, 1);
+      // reindex sortOrder to keep order consistent
+      const normalized = list.map((s, i) => ({ ...s, sortOrder: i }));
+      return { ...prev, statusStages: normalized };
+    });
+  };
+  const handleSavePipeline = async () => {
+    try {
+      setLoading(true)
+      // basic validation: unique names and positive sort orders
+      const names = new Set()
+      let stages = [...(pipelineForm.statusStages || [])];
+      if (!stages.some(s => s.name === 'not_engaged')) {
+        stages = [
+          { _key: genKey(), name: 'not_engaged', displayName: 'Not Engaged', sortOrder: 0 },
+          ...stages
+        ].map((s, i) => ({ ...s, sortOrder: i }));
+      } else {
+        stages = stages.map((s, i) => ({ ...s, sortOrder: i }));
+      }
+      for (const s of stages) {
+        if (!s.name) throw new Error('Stage name is required')
+        if (names.has(s.name)) throw new Error('Duplicate stage name: ' + s.name)
+        names.add(s.name)
+      }
+      await dispatch(updateCompanyPipelineThunk({
+        ...pipelineForm,
+        statusStages: stages.map(s => ({ name: s.name, displayName: s.displayName || s.name, sortOrder: s.sortOrder }))
+      })).unwrap()
+      await dispatch(fetchCompanyPipelineThunk()).unwrap()
+      setMessage({ type: 'success', text: 'Pipeline updated successfully' })
+    } catch (e) {
+      setMessage({ type: 'error', text: e.message || 'Failed to update pipeline' })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Modal states
   const [showCreateUser, setShowCreateUser] = useState(false)
@@ -3089,7 +3232,7 @@ const CompanyAdminDashboard = () => {
       if (cid) {
         fetchCompanySubscription(cid)
           .then(setSubscription)
-          .catch(() => {})
+          .catch(() => { })
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -3102,44 +3245,44 @@ const CompanyAdminDashboard = () => {
   // Replace the incorrect API calls with the correct ones
 
   // 1. Fix the createUser function (around line 140)
-// inside CompanyAdminDashboard.jsx
-const createUser = async (userData) => {
-  try {
-    const response = await fetch(`${API_BASE}/api/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-      body: JSON.stringify({
-        username: userData.username,
-        email: userData.email,
-        password: userData.password,
-        ...(userData.companyId ? { companyId: userData.companyId } : {})
-      }),
-    });
+  // inside CompanyAdminDashboard.jsx
+  const createUser = async (userData) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify({
+          username: userData.username,
+          email: userData.email,
+          password: userData.password,
+          ...(userData.companyId ? { companyId: userData.companyId } : {})
+        }),
+      });
 
-    const isJson = response.headers.get("content-type")?.includes("application/json");
-    const payload = isJson ? await response.json() : null;
+      const isJson = response.headers.get("content-type")?.includes("application/json");
+      const payload = isJson ? await response.json() : null;
 
-    if (!response.ok) {
-      const backendMsg = payload?.error || payload?.message;
-      // Normalize known errors → friendlier copy
-      if (backendMsg?.toLowerCase().includes("already exists")) {
-        throw new Error("A user with this email already exists. Try a different email.");
+      if (!response.ok) {
+        const backendMsg = payload?.error || payload?.message;
+        // Normalize known errors → friendlier copy
+        if (backendMsg?.toLowerCase().includes("already exists")) {
+          throw new Error("A user with this email already exists. Try a different email.");
+        }
+        throw new Error(backendMsg || `Request failed (${response.status}). Please try again.`);
       }
-      throw new Error(backendMsg || `Request failed (${response.status}). Please try again.`);
-    }
 
-    return payload;
-  } catch (error) {
-    // Network or parsing error
-    const friendly = error?.message?.includes("already exists")
-      ? error.message
-      : (error?.message || "Something went wrong. Please try again.");
-    throw new Error(friendly);
-  }
-};
+      return payload;
+    } catch (error) {
+      // Network or parsing error
+      const friendly = error?.message?.includes("already exists")
+        ? error.message
+        : (error?.message || "Something went wrong. Please try again.");
+      throw new Error(friendly);
+    }
+  };
 
   // 2. Fix the updateUser function (around line 160)
   const updateUser = async (userId, userData) => {
@@ -3497,48 +3640,48 @@ const createUser = async (userData) => {
   //     setLoading(false)
   //   }
   // }
-// inside CompanyAdminDashboard.jsx
-const handleCreateUser = async (userData) => {
-  // Basic client-side validation
-  if (!userData.username || !userData.email || !userData.password) {
-    setMessage({ type: "error", text: "All fields are required." });
-    return;
-  }
-  
-  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email);
-  if (!emailOk) {
-    setMessage({ type: "error", text: "Please enter a valid email address." });
-    return;
-  }
-
-  try {
-    setLoading(true);
-    
-    // Use the userAPI.create instead of the old createUser function
-    const result = await userAPI.create({
-      username: userData.username,
-      email: userData.email,
-      password: userData.password,
-      phone: userData.phone,
-      location: userData.location,
-      companyId: userData.companyId // This should be the current company's ID
-    });
-
-    if (result?.message === "User created successfully") {
-      setMessage({ type: "success", text: "User created successfully!" });
-      setUserForm({ username: "", email: "", password: "", phone: "", location: "", role: "company_user" });
-      setShowCreateUser(false);
-      await loadInitialData();
-    } else {
-      setMessage({ type: "error", text: result?.message || "Failed to create user." });
+  // inside CompanyAdminDashboard.jsx
+  const handleCreateUser = async (userData) => {
+    // Basic client-side validation
+    if (!userData.username || !userData.email || !userData.password) {
+      setMessage({ type: "error", text: "All fields are required." });
+      return;
     }
-  } catch (error) {
-    // This will now show the user-friendly error message
-    setMessage({ type: "error", text: error.message });
-  } finally {
-    setLoading(false);
-  }
-};
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email);
+    if (!emailOk) {
+      setMessage({ type: "error", text: "Please enter a valid email address." });
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Use the userAPI.create instead of the old createUser function
+      const result = await userAPI.create({
+        username: userData.username,
+        email: userData.email,
+        password: userData.password,
+        phone: userData.phone,
+        location: userData.location,
+        companyId: userData.companyId // This should be the current company's ID
+      });
+
+      if (result?.message === "User created successfully") {
+        setMessage({ type: "success", text: "User created successfully!" });
+        setUserForm({ username: "", email: "", password: "", phone: "", location: "", role: "company_user" });
+        setShowCreateUser(false);
+        await loadInitialData();
+      } else {
+        setMessage({ type: "error", text: result?.message || "Failed to create user." });
+      }
+    } catch (error) {
+      // This will now show the user-friendly error message
+      setMessage({ type: "error", text: error.message });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUpdateUser = async (userId, userData) => {
     try {
@@ -3656,6 +3799,18 @@ const handleCreateUser = async (userData) => {
     }
   }
 
+  const genKey = () =>
+    (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `stage_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+  const slug = (v) =>
+    String(v || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+
+
   const toggleJobSelection = (jobId) => {
     setSelectedJobs((prev) => (prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]))
   }
@@ -3727,7 +3882,7 @@ const handleCreateUser = async (userData) => {
     const filteredUsers = Array.isArray(overview.users)
       ? overview.users.filter(u => (u.username || u._id) !== "system")
       : []
-    
+
 
     const toYmd = (d) => {
       const dt = new Date(d)
@@ -3761,13 +3916,13 @@ const handleCreateUser = async (userData) => {
     const normalizedDaily =
       datesInData.length > 0
         ? datesInData.map((ymd) => {
-            const v = dailyMap[ymd] || {}
-            return {
-              date: ymd,
-              total_engagement: Number(v.total_engagement) || 0,
-              ...statusKeys.reduce((o, k) => ({ ...o, [k]: Number(v[k]) || 0 }), {}),
-            }
-          })
+          const v = dailyMap[ymd] || {}
+          return {
+            date: ymd,
+            total_engagement: Number(v.total_engagement) || 0,
+            ...statusKeys.reduce((o, k) => ({ ...o, [k]: Number(v[k]) || 0 }), {}),
+          }
+        })
         : []
 
     const maxDaily = Math.max(1, ...normalizedDaily.map((d) => d.total_engagement))
@@ -4348,7 +4503,7 @@ const handleCreateUser = async (userData) => {
                 <div className="text-slate-500 text-lg">No performance data available</div>
               </div>
             ) : (
-              <div className="overflow-x-auto"> 
+              <div className="overflow-x-auto">
                 <table className="min-w-full">
                   <thead>
                     <tr className="bg-gradient-to-r from-slate-50 to-slate-100">
@@ -4436,12 +4591,11 @@ const handleCreateUser = async (userData) => {
         </div>
 
         {message?.text && (
-  <div className={`mt-3 px-4 py-2 rounded ${
-    message.type === "error" ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"
-  }`}>
-    {message.text}
-  </div>
-)} 
+          <div className={`mt-3 px-4 py-2 rounded ${message.type === "error" ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"
+            }`}>
+            {message.text}
+          </div>
+        )}
 
         {loading ? (
           <div className="flex justify-center py-8">
@@ -4485,18 +4639,16 @@ const handleCreateUser = async (userData) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.role === "company_admin" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
-                        }`}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === "company_admin" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+                          }`}
                       >
                         {user.role === "company_admin" ? "Admin" : "User"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }`}
                       >
                         {user.isActive ? "Active" : "Inactive"}
                       </span>
@@ -4738,6 +4890,124 @@ const handleCreateUser = async (userData) => {
         return <OverviewTab />
       case "users":
         return <UsersTab />
+      case "pipeline":
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Pipeline Settings</h2>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => dispatch(fetchCompanyPipelineThunk())}
+                  disabled={loading}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50"
+                >
+                  Refresh
+                </button>
+                <button
+                  onClick={handleSavePipeline}
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {loading ? 'Saving...' : 'Save Pipeline'}
+                </button>
+              </div>
+            </div>
+
+            {message?.text && (
+              <div className={`px-4 py-2 rounded ${message.type === 'error' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                {message.text}
+              </div>
+            )}
+
+            <div className="bg-white rounded-lg shadow p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  value={pipelineForm.name}
+                  onChange={(e) => setPipelineForm({ ...pipelineForm, name: e.target.value })}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                />
+              </div>
+              {/* 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={pipelineForm.useCustomPipeline}
+                    onChange={(e) => setPipelineForm({ ...pipelineForm, useCustomPipeline: e.target.checked })}
+                  />
+                  <span className="text-sm text-gray-700">Use custom pipeline</span>
+                </label>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Default Initial Status</label>
+                  <input
+                    type="text"
+                    value={pipelineForm.settings.defaultInitialStatus}
+                    onChange={(e) => setPipelineForm({ ...pipelineForm, settings: { ...pipelineForm.settings, defaultInitialStatus: e.target.value } })}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={pipelineForm.settings.allowSkipStages}
+                    onChange={(e) => setPipelineForm({ ...pipelineForm, settings: { ...pipelineForm.settings, allowSkipStages: e.target.checked } })}
+                  />
+                  <span className="text-sm text-gray-700">Allow skip stages</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={pipelineForm.settings.enableAutoProgressions}
+                    onChange={(e) => setPipelineForm({ ...pipelineForm, settings: { ...pipelineForm.settings, enableAutoProgressions: e.target.checked } })}
+                  />
+                  <span className="text-sm text-gray-700">Enable auto progressions</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={pipelineForm.settings.requireCommentOnStatusChange}
+                    onChange={(e) => setPipelineForm({ ...pipelineForm, settings: { ...pipelineForm.settings, requireCommentOnStatusChange: e.target.checked } })}
+                  />
+                  <span className="text-sm text-gray-700">Require comment on status change</span>
+                </label>
+              </div> */}
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-sm font-semibold text-gray-900">Stages</h3>
+                  <button onClick={handleAddStage} className="px-3 py-1 bg-gray-100 rounded-md text-sm">Add Stage</button>
+                </div>
+                <div className="space-y-2">
+                  {(pipelineForm.statusStages || []).map((s, idx) => (
+                    <div key={s._key || idx} className="grid grid-cols-12 gap-2 items-center">
+                      <input
+                        type="text"
+                        className="col-span-4 border border-gray-300 rounded-md px-3 py-1"
+                        placeholder="Stage key (e.g. applied)"
+                        value={s.name || ''}
+                        onChange={(e) => handleStageChange(idx, 'name', e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="col-span-5 border border-gray-300 rounded-md px-3 py-1"
+                        placeholder="Display name (e.g. Applied)"
+                        value={s.displayName || ''}
+                        onChange={(e) => handleStageChange(idx, 'displayName', e.target.value)}
+                      />
+                      <button type="button" onClick={() => handleRemoveStage(idx)} className="col-span-1 text-red-600 text-sm">X</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )
       // case 'jobs': return <JobsTab />;
       case "subscription":
         return <SubscriptionTab />
@@ -4816,7 +5086,7 @@ const handleCreateUser = async (userData) => {
             {[
               { id: "overview", label: "Overview", icon: BarChart3 },
               { id: "users", label: "Users", icon: Users },
-              // { id: 'jobs', label: 'Jobs', icon: Database },
+              { id: "pipeline", label: "Pipeline", icon: Database },
               { id: "subscription", label: "Subscription", icon: CreditCard },
             ].map((tab) => {
               const Icon = tab.icon
@@ -4826,11 +5096,10 @@ const handleCreateUser = async (userData) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    isActive
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
+                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${isActive
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
                 >
                   <Icon size={18} />
                   <span>{tab.label}</span>
@@ -4863,14 +5132,29 @@ const handleCreateUser = async (userData) => {
         setFormData={setUserForm}
         user={selectedUser}
       />
+      {/* <CreateCompanyModal
+  isOpen={showCreateUser}
+  onClose={() => setShowCreateUser(false)}
+  onSubmit={handleCreateUser}
+  loading={loading}
+  // company={currentCompany} // Make sure this has the company ID
+/> */}
 
-<CreateComUserModal
+      {/* <CreateComUserModal
   isOpen={showCreateUser}
   onClose={() => setShowCreateUser(false)}
   onSubmit={handleCreateUser}
   loading={loading}
   company={currentCompany} // Make sure this has the company ID
-/>
+/> */}
+
+      <CreateComUserModal
+        isOpen={showCreateUser}
+        onClose={() => setShowCreateUser(false)}
+        loading={loading}
+        company={currentCompany}
+        onSubmit={(payload) => handleCreateUser({ ...payload, companyId: cid })}
+      />
 
       <AssignJobsModal
         isOpen={showAssignJobs}

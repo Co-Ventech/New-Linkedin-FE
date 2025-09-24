@@ -102,7 +102,11 @@ export const companySignup = async (companyData) => {
     });
     const data = await res.json();
     if (!res.ok) {
-      return { success: false, error: data.message || "Company registration failed" };
+      const raw = data.message || data.error || "Company registration failed";
+      const friendly = raw.toLowerCase().includes('already exists') || raw.toLowerCase().includes('duplicate')
+        ? 'An account with this admin email already exists.'
+        : raw;
+      return { success: false, error: friendly };
     }
     return { success: true, data };
   } catch (err) {

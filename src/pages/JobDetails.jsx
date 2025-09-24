@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { selectStatusOptions } from "../slices/userSlice";
 // import { updateJobStatusThunk,
 //  updateEstimatedBudgetThunk, updateAePitchedThunk, updateAeScoreThunk , generateProposalThunk , updateProposalThunk} from "../slices/jobsSlice";
 // import { setProposalLoading } from "../slices/jobsSlice"; // You'll add this action
@@ -72,9 +73,7 @@ const getKpiBadge = (score) => {
 //   });
 //   return res.data;
 // }
-const STATUS_OPTIONS = [
-  'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
-];
+// Use company pipeline-driven statuses
 
 const USER_LIST = ["khubaib", "Taha", "Basit", "huzaifa", "abdulrehman"];
 const SERVICE_CATEGORIES = [
@@ -106,6 +105,7 @@ const JobDetails = () => {
   const [commentLoading, setCommentLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("not_engaged");
+  const STATUS_OPTIONS = useSelector(selectStatusOptions);
   const [saving, setSaving] = useState(false);
   const [aeSaving, setAeSaving] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(job?.currentStatus || "not_engaged");

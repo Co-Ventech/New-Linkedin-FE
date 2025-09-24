@@ -79,15 +79,77 @@ import { useNavigate } from "react-router-dom";
 
 const GoogleJobCard = ({ job, view = "grid" }) => {
   const navigate = useNavigate();
+  // const cid = job._id || job.companyJobId || job.id || job.jobId;
 
   // const handleCardClick = () => {
   //   if (!job?._id) return;
   //   navigate(`/google-jobs/${encodeURIComponent(job._id)}`, { state: { job } });
   // };
 
-    const handleCardClick = () => {
-    navigate(`/google-job-details/${job._id}`, { state: { job } }); // Navigate to details page
+  // helpers at top of component
+  const toText = (v) => {
+    if (!v) return '';
+    if (typeof v === 'string') return v;
+    if (Array.isArray(v)) return v.filter(Boolean).join(', ');
+    if (typeof v === 'object') return v.name || v.title || v.label || '';
+    return String(v);
   };
+
+  const getCompanyName = (job) =>
+    toText(job.company) || job.companyName || toText(job.employer) || 'Unknown';
+
+  const getLocation = (job) => {
+    // try common fields first
+    const direct =
+      toText(job.location) ||
+      toText(job.city) ||
+      toText(job.country) ||
+      (Array.isArray(job.locations) ? job.locations.map(toText).filter(Boolean).join(', ') : '') ||
+      toText(job.company?.locations?.[0]);
+    return direct || 'Remote';
+  };
+
+  const getTitle = (job) =>
+    toText(job.title) || toText(job.job_title) || 'Untitled';
+
+  const getSalaryTag = (job) => {
+    // support extensions or pay fields
+    const ext = Array.isArray(job.extensions) ? job.extensions.find((e) => typeof e === 'string' && /salary|compensation|pay/i.test(e)) : '';
+    return ext || toText(job.compensation) || '';
+  };
+
+  const getPostedTag = (job) => {
+    const ext = Array.isArray(job.extensions) ? job.extensions.find((e) => typeof e === 'string' && /posted/i.test(e)) : '';
+    return ext || (job.ts_publish ? new Date(job.ts_publish).toDateString() : '');
+  };
+
+  const getSummary = (job) => {
+    const highlights = Array.isArray(job.job_highlights) ? job.job_highlights : [];
+    // prefer "Qualifications" or "Job Summary"
+    const byTitle = (t) => highlights.find(h => (h.title || '').toLowerCase().includes(t));
+    const qual = byTitle('qualification') || byTitle('summary');
+    if (qual?.items?.length) return toText(qual.items[0]);
+    // fallback short description
+    return (toText(job.description) || '').slice(0, 200);
+  };
+
+  const firstApply = (job) => {
+    const opts = Array.isArray(job.apply_options) ? job.apply_options : [];
+    const link = opts.find((o) => o?.link || o?.url) || {};
+    return link.link || link.url || job.url || job.share_link || '';
+  };
+
+  
+  // const handleCardClick = () => {
+  //   navigate(`/google-job-details/${cid}`, { state: { job } }); // Navigate to details page
+  // };
+
+  // inside the card component
+const cid = job?._id || job?.companyJobId || job?.id || job?.jobId;
+const handleClick = () => {
+  if (!cid) return;
+    navigate(`/google-job-details/${encodeURIComponent(cid)}`);
+};
 
   const title = job?.title || "Job Title";
   const company = job?.company_name || job?.company || "Company";
@@ -115,7 +177,7 @@ const GoogleJobCard = ({ job, view = "grid" }) => {
   return (
     <div
       className={`${cardBase} ${view === "list" ? listLayout : gridLayout} p-2`}
-      onClick={handleCardClick}
+      onClick={handleClick}
     >
       <div className={view === "list" ? "flex-1" : "flex-1 flex flex-col"}>
         <div className="mb-2">
@@ -138,21 +200,11 @@ const GoogleJobCard = ({ job, view = "grid" }) => {
               </span>
             ))}
           </div>
-
-          <div className="text-xs text-gray-500 mb-1">
-            {location}
-          </div>
-
-          <div className={`text-gray-700 text-sm ${view === "list" ? "" : "line-clamp-3"} min-h-[40px]`}>
-            {summary || "Not specified"}
-          </div>
-        </div>
-
-        <div className="mb-2">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-bold text-xs text-gray-700">Company:</span>
-            <span className="text-xs text-gray-800 font-semibold truncate">{company}</span>
-          </div>
+          <div className="text-sm text-gray-600">{getCompanyName(job)}</div>
+          <div className="text-xs text-gray-500">{getLocation(job)}</div>
+          {getSalaryTag(job) && <span className="chip">{getSalaryTag(job)}</span>}
+          {getPostedTag(job) && <span className="chip">{getPostedTag(job)}</span>}
+          <p className="text-sm text-gray-700">{getSummary(job)}</p>
         </div>
       </div>
     </div>

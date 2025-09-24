@@ -216,7 +216,7 @@ const SubscriptionModal = ({ isOpen, onClose, company, plans = [], onSubmit, loa
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             >
               <option value="active">Active</option>
-              <option value="paused">Paused</option>
+              {/* <option value="paused">Paused</option> */}
               <option value="expired">Expired</option>
             </select>
           </div>

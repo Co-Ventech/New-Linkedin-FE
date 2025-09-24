@@ -853,6 +853,7 @@ import {
   fetchUpworkJobsByDateThunk, updateUpworkAeCommentThunk, addUpworkJobCommentThunk, upworkfetchJobByIdThunk, updateUpworkAeScoreThunk,
   updateUpworkAePitchedThunk, updateUpworkEstimatedBudgetThunk, generateUpworkProposalThunk, updateUpworkProposalThunk, setUpworkProposalLoading, updateJobStatusNewThunk, updateUpworkJobStatusNewThunk
 } from "../slices/jobsSlice";
+import { selectStatusOptions } from "../slices/userSlice";
 import axios from "axios";
 
 const REMOTE_HOST = import.meta.env.VITE_REMOTE_HOST;
@@ -910,7 +911,7 @@ const UpworkJobDetails = () => {
   const [isEditingProposal, setIsEditingProposal] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
-
+  const STATUS_OPTIONS = useSelector(selectStatusOptions);
 
   // Always resolve the company job _id (24-char) from the route first,
   // falling back to the loaded job's _id

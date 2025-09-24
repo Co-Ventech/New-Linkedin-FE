@@ -199,20 +199,39 @@ export const masterJobAPI = {
     }
   },
 
-  distributeBatchToCompanies: async (batchId, companyIds) => {
+  // distributeBatchToCompanies: async (batchId, companyIds) => {
+  //   try {
+  //     const response = await axios.post(`${API_BASE}/jobadmin/distribute/batch/${batchId}/companies`, { companyIds }, {
+  //       headers: getAuthHeaders()
+  //     });
+  //     return response.data;
+  //   } catch (error) {
+  //     throw new Error(error.response?.data?.message || 'Failed to distribute batch to companies');
+  //   }
+  // },
+
+//distribute batch to companies 
+
+  distributeBatchToCompanies: async (batchId, companyIds, perCompanyLimit) => {
     try {
-      const response = await axios.post(`${API_BASE}/jobadmin/distribute/batch/${batchId}/companies`, { companyIds }, {
-        headers: getAuthHeaders()
-      });
+      const body = { companyIds };
+      if (Number.isFinite(perCompanyLimit) && perCompanyLimit > 0) {
+        body.perCompanyLimit = Number(perCompanyLimit);
+      }
+      const response = await axios.post(
+        `${API_BASE}/jobadmin/distribute/batch/${batchId}/companies`,
+        body,
+        { headers: getAuthHeaders() }
+      );
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to distribute batch to companies');
     }
   },
 
-  distributeAll: async () => {
+  distributeAll: async (perCompanyLimit) => {
     try {
-      const response = await axios.post(`${API_BASE}/jobadmin/distribute/all`, {}, {
+      const response = await axios.post(`${API_BASE}/jobadmin/distribute/all`, perCompanyLimit? {perCompanyLimit:Number(perCompanyLimit)} : {}, {
         headers: getAuthHeaders()
       });
       return response.data;
@@ -546,11 +565,45 @@ export const userAPI = {
   }
 };
 
+export const companyPipelineAPI = {
+  get: async () => {
+    const res = await axios.get(`${API_BASE}/company-pipeline`, { headers: getAuthHeaders() });
+    return res.data; // { pipeline, isCustom }
+  },
+  update: async (payload) => {
+    const res = await axios.put(`${API_BASE}/company-pipeline`, payload, { headers: getAuthHeaders() });
+    return res.data; // updated { pipeline, isCustom }
+  }
+};
 
+export const adminCompanyPipelineAPI = {
+  async getByCompany(companyId) {
+    const res = await fetch(`${API_BASE}/company-pipeline/company/${companyId}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error || data?.message || 'Failed to fetch pipeline');
+    return data?.pipeline || data || null;
+  },
+  async updateForCompany(companyId, payload) {
+    const res = await fetch(`${API_BASE}/company-pipeline/company/${companyId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error || data?.message || 'Failed to update pipeline');
+    return data?.pipeline || data || null;
+  }
+};
 export default {
   companyAPI,
   masterJobAPI,
   subscriptionAPI,
   analyticsAPI,
-  userAPI
+  userAPI,
+  companyPipelineAPI
 };

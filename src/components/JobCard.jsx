@@ -527,15 +527,20 @@
 
 import { useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Edit3, Check, X, ChevronDown } from 'lucide-react';
 import { updateJobStatusNewThunk, fetchUpworkJobsByDateThunk } from "../slices/jobsSlice";
 import { fetchJobsByDateThunk } from "../slices/jobsSlice";
+import { selectStatusOptions } from '../slices/userSlice';
 
 
-const STATUS_OPTIONS = [
+
+
+const DEFAULT_STATUS_OPTIONS = [
   'not_engaged', 'applied', 'engaged', 'interview', 'offer', 'rejected', 'onboard'
 ];
+
+// const statusOptions = useSelector(selectStatusOptions);
 
 const badgeClass = {
   tier: {
@@ -550,19 +555,20 @@ const badgeClass = {
   views: 'bg-orange-100 text-orange-800 border-orange-300',
 };
 
-const JobCard = ({ job, onClick, view = "grid" }) => {
+const JobCard = ({ job, onClick, view = "grid", statusOptions=DEFAULT_STATUS_OPTIONS }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showFullDesc, setShowFullDesc] = React.useState(false);
 
   const [statusOpen, setStatusOpen] = React.useState(false);
   const [selectedStatus, setSelectedStatus] = React.useState(job?.currentStatus || 'not_engaged');
+  // const STATUS_OPTIONS = useSelector(selectStatusOptions);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState("");
 
 
   const [displayStatus, setDisplayStatus] = React.useState(job?.currentStatus || 'not_engaged');
-
+  const STATUS_OPTIONS = useSelector(selectStatusOptions);
   const statusLabels = {
     not_engaged: 'Not Engaged',
     applied: 'Applied',
