@@ -3799,6 +3799,28 @@ const CompanyAdminDashboard = () => {
     }
   }
 
+  const updateSingleJobStatus = async (jobId, status) => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/company/jobs/bulk-update", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify({ jobIds: [jobId], status }),
+      });
+      if (!response.ok) throw new Error("Failed to update job");
+      showMessage("success", `Job updated to ${status}`);
+      await loadInitialData();
+    } catch (error) {
+      console.error("Job update error:", error);
+      showMessage("error", error.message || "Failed to update job");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const genKey = () =>
     (typeof crypto !== 'undefined' && crypto.randomUUID)
       ? crypto.randomUUID()
@@ -4884,12 +4906,331 @@ const CompanyAdminDashboard = () => {
     )
   }
 
+  // const JobsTab = () => {
+  //   const [filter, setFilter] = useState('all');
+  //   const [localLoading, setLocalLoading] = useState(false);
+  
+  //   const filteredJobs = Array.isArray(jobs)
+  //     ? jobs.filter(j => filter === 'all' ? true : (j.currentStatus || j.status) === filter)
+  //     : [];
+  
+  //   const updateJobInline = async (job, newStatus) => {
+  //     try {
+  //       setLocalLoading(true);
+  //       // Minimal inline update call: reuse bulk endpoint for single
+  //       await handleBulkUpdateJobs(newStatus, [job.id || job._id]);
+  //       await loadInitialData();
+  //     } finally {
+  //       setLocalLoading(false);
+  //     }
+  //   };
+  
+  //   return (
+  //     <div className="space-y-6">
+  //       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  //         <h2 className="text-2xl font-bold text-gray-900">Company Jobs</h2>
+  //         <div className="flex flex-wrap items-center gap-2">
+  //           <select
+  //             value={filter}
+  //             onChange={(e) => setFilter(e.target.value)}
+  //             className="border rounded px-3 py-1.5 text-sm"
+  //           >
+  //             <option value="all">All</option>
+  //             <option value="not_engaged">Not Engaged</option>
+  //             <option value="applied">Applied</option>
+  //             <option value="engaged">Engaged</option>
+  //             <option value="interview">Interview</option>
+  //             <option value="offer">Offer</option>
+  //             <option value="rejected">Rejected</option>
+  //             <option value="onboard">Onboard</option>
+  //           </select>
+  
+  //           <button
+  //             onClick={() => setShowAssignJobs(true)}
+  //             disabled={selectedJobs.length === 0}
+  //             className="px-3 py-1.5 bg-green-600 text-white rounded-md disabled:opacity-50"
+  //           >
+  //             Assign Selected ({selectedJobs.length})
+  //           </button>
+  
+  //           <button
+  //             onClick={() => handleBulkUpdateJobs('in_progress')}
+  //             disabled={selectedJobs.length === 0}
+  //             className="px-3 py-1.5 bg-yellow-600 text-white rounded-md disabled:opacity-50"
+  //           >
+  //             Mark In Progress
+  //           </button>
+  
+  //           <button
+  //             onClick={() => handleBulkUpdateJobs('completed')}
+  //             disabled={selectedJobs.length === 0}
+  //             className="px-3 py-1.5 bg-blue-600 text-white rounded-md disabled:opacity-50"
+  //           >
+  //             Mark Completed
+  //           </button>
+  
+  //           <button
+  //             onClick={() => navigate('/dashboard/linkedin')}
+  //             className="px-3 py-1.5 border rounded-md"
+  //           >
+  //             View LinkedIn Dashboard
+  //           </button>
+  //           <button
+  //             onClick={() => navigate('/dashboard/upwork')}
+  //             className="px-3 py-1.5 border rounded-md"
+  //           >
+  //             View Upwork Dashboard
+  //           </button>
+  //           <button
+  //             onClick={() => navigate('/dashboard/google')}
+  //             className="px-3 py-1.5 border rounded-md"
+  //           >
+  //             View Google Dashboard
+  //           </button>
+  //         </div>
+  //       </div>
+  
+  //       <div className="bg-white rounded-lg shadow overflow-hidden">
+  //         {localLoading || loading ? (
+  //           <div className="flex justify-center py-8">
+  //             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  //           </div>
+  //         ) : filteredJobs.length === 0 ? (
+  //           <div className="p-8 text-center text-gray-500">
+  //             <Database className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+  //             <p>No jobs found.</p>
+  //           </div>
+  //         ) : (
+  //           <div className="overflow-x-auto">
+  //             <table className="min-w-full divide-y divide-gray-200">
+  //               <thead className="bg-gray-50">
+  //                 <tr>
+  //                   <th className="px-6 py-3">
+  //                     <input
+  //                       type="checkbox"
+  //                       checked={selectedJobs.length === filteredJobs.length && filteredJobs.length > 0}
+  //                       onChange={(e) => {
+  //                         if (e.target.checked) {
+  //                           setSelectedJobs(filteredJobs.map(j => j.id || j._id));
+  //                         } else {
+  //                           setSelectedJobs([]);
+  //                         }
+  //                       }}
+  //                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+  //                     />
+  //                   </th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Job</th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Company</th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Platform</th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current Status</th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+  //                 </tr>
+  //               </thead>
+  //               <tbody className="bg-white divide-y divide-gray-200">
+  //                 {filteredJobs.map((job) => {
+  //                   const id = job.id || job._id;
+  //                   const status = job.currentStatus || job.status || 'not_engaged';
+  //                   return (
+  //                     <tr key={id} className="hover:bg-gray-50">
+  //                       <td className="px-6 py-3">
+  //                         <input
+  //                           type="checkbox"
+  //                           checked={selectedJobs.includes(id)}
+  //                           onChange={() => toggleJobSelection(id)}
+  //                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+  //                         />
+  //                       </td>
+  //                       <td className="px-6 py-3 text-sm text-gray-900">{job.company?.title || '—'}</td>
+  //                       <td className="px-6 py-3 text-sm text-gray-600">{job.company?.name || job.companyName || '—'}</td>
+  //                       <td className="px-6 py-3 text-sm capitalize">{job.company?.platform || '—'}</td>
+  //                       <td className="px-6 py-3 text-sm">
+  //                         <select
+  //                           value={status}
+  //                           onChange={(e) => updateJobInline(job, e.target.value)}
+  //                           className="border rounded px-2 py-1 text-sm"
+  //                         >
+  //                           <option value="not_engaged">Not Engaged</option>
+  //                           <option value="applied">Applied</option>
+  //                           <option value="engaged">Engaged</option>
+  //                           <option value="interview">Interview</option>
+  //                           <option value="offer">Offer</option>
+  //                           <option value="rejected">Rejected</option>
+  //                           <option value="onboard">Onboard</option>
+  //                           <option value="in_progress">In Progress</option>
+  //                           <option value="completed">Completed</option>
+  //                         </select>
+  //                       </td>
+  //                       <td className="px-6 py-3 text-sm">
+  //                         <button
+  //                           onClick={() => navigate(`/company-jobs/${id}`)}
+  //                           className="text-blue-600 hover:text-blue-900"
+  //                         >
+  //                           View
+  //                         </button>
+  //                       </td>
+  //                     </tr>
+  //                   );
+  //                 })}
+  //               </tbody>
+  //             </table>
+  //           </div>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  // const JobsTab = () => {
+  //   const [filter, setFilter] = useState('all');
+  //   const filtered = Array.isArray(jobs)
+  //     ? jobs.filter(j => filter === 'all' ? true : (j.currentStatus || j.status || 'not_engaged') === filter)
+  //     : [];
+  
+  //   return (
+  //     <div className="space-y-6">
+  //       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  //         <h2 className="text-2xl font-bold text-gray-900">Company Jobs</h2>
+  //         <div className="flex flex-wrap items-center gap-2">
+  //           <select
+  //             value={filter}
+  //             onChange={(e) => setFilter(e.target.value)}
+  //             className="border rounded px-3 py-1.5 text-sm"
+  //           >
+  //             <option value="all">All</option>
+  //             <option value="not_engaged">Not Engaged</option>
+  //             <option value="applied">Applied</option>
+  //             <option value="engaged">Engaged</option>
+  //             <option value="interview">Interview</option>
+  //             <option value="offer">Offer</option>
+  //             <option value="rejected">Rejected</option>
+  //             <option value="onboard">Onboard</option>
+  //             <option value="in_progress">In Progress</option>
+  //             <option value="completed">Completed</option>
+  //           </select>
+  
+  //           <button
+  //             onClick={() => setShowAssignJobs(true)}
+  //             disabled={selectedJobs.length === 0}
+  //             className="px-3 py-1.5 bg-green-600 text-white rounded-md disabled:opacity-50"
+  //           >
+  //             Assign Selected ({selectedJobs.length})
+  //           </button>
+  
+  //           <button
+  //             onClick={() => handleBulkUpdateJobs('in_progress')}
+  //             disabled={selectedJobs.length === 0}
+  //             className="px-3 py-1.5 bg-yellow-600 text-white rounded-md disabled:opacity-50"
+  //           >
+  //             Mark In Progress
+  //           </button>
+  
+  //           <button
+  //             onClick={() => handleBulkUpdateJobs('completed')}
+  //             disabled={selectedJobs.length === 0}
+  //             className="px-3 py-1.5 bg-blue-600 text-white rounded-md disabled:opacity-50"
+  //           >
+  //             Mark Completed
+  //           </button>
+  //         </div>
+  //       </div>
+  
+  //       <div className="bg-white rounded-lg shadow overflow-hidden">
+  //         {loading ? (
+  //           <div className="flex justify-center py-8">
+  //             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+  //           </div>
+  //         ) : filtered.length === 0 ? (
+  //           <div className="p-8 text-center text-gray-500">
+  //             <Database className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+  //             <p>No jobs found.</p>
+  //           </div>
+  //         ) : (
+  //           <div className="overflow-x-auto">
+  //             <table className="min-w-full divide-y divide-gray-200">
+  //               <thead className="bg-gray-50">
+  //                 <tr>
+  //                   <th className="px-6 py-3">
+  //                     <input
+  //                       type="checkbox"
+  //                       checked={selectedJobs.length === filtered.length && filtered.length > 0}
+  //                       onChange={(e) => {
+  //                         if (e.target.checked) setSelectedJobs(filtered.map(j => j.id || j._id));
+  //                         else setSelectedJobs([]);
+  //                       }}
+  //                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+  //                     />
+  //                   </th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Job</th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Company</th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Platform</th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Current Status</th>
+  //                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+  //                 </tr>
+  //               </thead>
+  //               <tbody className="bg-white divide-y divide-gray-200">
+  //                 {filtered.map((job) => {
+  //                   const id = job.id || job._id;
+  //                   const status = job.currentStatus || job.status || 'not_engaged';
+  //                   return (
+  //                     <tr key={id} className="hover:bg-gray-50">
+  //                       <td className="px-6 py-3">
+  //                         <input
+  //                           type="checkbox"
+  //                           checked={selectedJobs.includes(id)}
+  //                           onChange={() => toggleJobSelection(id)}
+  //                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+  //                         />
+  //                       </td>
+  //                       <td className="px-6 py-3 text-sm text-gray-900">{job.company?.title || '—'}</td>
+  //                       <td className="px-6 py-3 text-sm text-gray-600">{job.company?.company || job.companyName || '—'}</td>
+  //                       <td className="px-6 py-3 text-sm capitalize">{job.platform || '—'}</td>
+  //                       <td className="px-6 py-3 text-sm">
+  //                         <select
+  //                           value={status}
+  //                           onChange={(e) => updateSingleJobStatus(id, e.target.value)}
+  //                           className="border rounded px-2 py-1 text-sm"
+  //                         >
+  //                           <option value="not_engaged">Not Engaged</option>
+  //                           <option value="applied">Applied</option>
+  //                           <option value="engaged">Engaged</option>
+  //                           <option value="interview">Interview</option>
+  //                           <option value="offer">Offer</option>
+  //                           <option value="rejected">Rejected</option>
+  //                           <option value="onboard">Onboard</option>
+  //                           <option value="in_progress">In Progress</option>
+  //                           <option value="completed">Completed</option>
+  //                         </select>
+  //                       </td>
+  //                       <td className="px-6 py-3 text-sm">
+  //                         <button
+  //                           onClick={() => navigate(`/company-jobs/${id}`)}
+  //                           className="text-blue-600 hover:text-blue-900"
+  //                         >
+  //                           View
+  //                         </button>
+  //                       </td>
+  //                     </tr>
+  //                   );
+  //                 })}
+  //               </tbody>
+  //             </table>
+  //           </div>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
         return <OverviewTab />
+        case "jobs":
+          return <JobsTab />;  
       case "users":
         return <UsersTab />
+  //       case "jobs":
+  // return <JobsTab />;
       case "pipeline":
         return (
           <div className="space-y-6">
@@ -5044,6 +5385,12 @@ const CompanyAdminDashboard = () => {
               <p className="text-gray-600 mt-1">Manage your company's users and jobs</p>
             </div>
             <div className="flex items-center space-x-4">
+            <button
+  onClick={() => navigate('/dashboard/linkedin')}
+  className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+>
+Act as User
+</button>
               <div className="text-right">
                 <p className="text-sm text-gray-500">Company</p>
                 <p className="font-medium">{user?.companyName || "Your Company"}</p>
@@ -5066,6 +5413,13 @@ const CompanyAdminDashboard = () => {
                   </span>
                 </div>
               )} */}
+              {/* <button
+  onClick={() => setActiveTab('jobs')}
+  className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+>
+  Jobs
+</button> */}
+
               <button
                 onClick={() => {
                   logoutUser(dispatch)
@@ -5076,6 +5430,7 @@ const CompanyAdminDashboard = () => {
               >
                 <LogOut size={18} />
               </button>
+
             </div>
           </div>
         </div>
@@ -5086,6 +5441,7 @@ const CompanyAdminDashboard = () => {
             {[
               { id: "overview", label: "Overview", icon: BarChart3 },
               { id: "users", label: "Users", icon: Users },
+              // { id: "jobs", label: "Jobs", icon: Database },
               { id: "pipeline", label: "Pipeline", icon: Database },
               { id: "subscription", label: "Subscription", icon: CreditCard },
             ].map((tab) => {

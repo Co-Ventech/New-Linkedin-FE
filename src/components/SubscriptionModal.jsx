@@ -153,12 +153,26 @@
 import React, { useEffect, useState } from 'react';
 
 const SubscriptionModal = ({ isOpen, onClose, company, plans = [], onSubmit, loading }) => {
-  const [form, setForm] = useState({
-    subscriptionPlan: '',
-    subscriptionStatus: 'active',
-    jobsQuota: '',
-    customEndDate: ''
-  });
+  const [form, setForm] = useState({ subscriptionPlanId: '' });
+  // useEffect(() => {
+  //   if (plans?.length && !form.subscriptionPlanId) {
+  //     setForm(f => ({ ...f, subscriptionPlanId: plans[0]._id || plans[0].id }));
+  //   }
+  // }, [plans]);
+
+  // Auto-select first plan when available
+  useEffect(() => {
+    if (!form.subscriptionPlanId && Array.isArray(plans) && plans.length > 0) {
+      setForm(prev => ({ ...prev, subscriptionPlanId: plans[0]._id || plans[0].id }));
+    }
+  }, [plans]);
+
+  // const [form, setForm] = useState({
+  //   subscriptionPlan: '',
+  //   subscriptionStatus: 'active',
+  //   jobsQuota: '',
+  //   customEndDate: ''
+  // });
 
   useEffect(() => {
     if (company) {
@@ -173,15 +187,28 @@ const SubscriptionModal = ({ isOpen, onClose, company, plans = [], onSubmit, loa
 
   if (!isOpen || !company) return null;
 
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!form.subscriptionPlanId) {
+      // block empty payloads and let parent show a friendly message if desired
+      alert('Please select a subscription plan');
+      return;
+    }
     onSubmit(company._id || company.id, {
-      subscriptionPlan: form.subscriptionPlan,
-      subscriptionStatus: form.subscriptionStatus,
-      jobsQuota: Number(form.jobsQuota),
-      customEndDate: form.customEndDate
+      subscriptionPlanId: form.subscriptionPlanId,
     });
   };
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   onSubmit(company._id || company.id, {
+  //     subscriptionPlan: form.subscriptionPlan,
+  //     subscriptionStatus: form.subscriptionStatus,
+  //     jobsQuota: Number(form.jobsQuota),
+  //     customEndDate: form.customEndDate
+  //   });
+  // };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -192,7 +219,7 @@ const SubscriptionModal = ({ isOpen, onClose, company, plans = [], onSubmit, loa
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Plan</label>
             <select
               value={form.subscriptionPlan}
@@ -202,13 +229,13 @@ const SubscriptionModal = ({ isOpen, onClose, company, plans = [], onSubmit, loa
             >
               <option value="" disabled>Select plan</option>
               <option value="trial">Trial (Free - 7 days)</option>
-                <option value="basic">Basic ($29/month)</option>
-                <option value="premium">Premium ($99/month)</option>
-                <option value="enterprise">Enterprise ($199/month)</option>
+              <option value="basic">Basic ($29/month)</option>
+              <option value="premium">Premium ($99/month)</option>
+              <option value="enterprise">Enterprise ($199/month)</option>
             </select>
-          </div>
+          </div> */}
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
               value={form.subscriptionStatus}
@@ -216,7 +243,7 @@ const SubscriptionModal = ({ isOpen, onClose, company, plans = [], onSubmit, loa
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             >
               <option value="active">Active</option>
-              {/* <option value="paused">Paused</option> */}
+           
               <option value="expired">Expired</option>
             </select>
           </div>
@@ -241,7 +268,20 @@ const SubscriptionModal = ({ isOpen, onClose, company, plans = [], onSubmit, loa
               onChange={(e) => setForm({ ...form, customEndDate: e.target.value })}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             />
-          </div>
+          </div> */}
+          <label className="block text-sm font-medium text-gray-700 mb-2">Plan</label>
+          <select
+  value={form.subscriptionPlanId}
+  onChange={e => setForm({ ...form, subscriptionPlanId: e.target.value })}
+  className="w-full border border-gray-300 rounded-md px-3 py-2"
+  required
+>
+  {Array.isArray(plans) && plans.map(p => (
+    <option key={p._id || p.id} value={p._id || p.id}>
+      {p.displayName || p.name}
+    </option>
+  ))}
+</select>
 
           <div className="flex justify-end space-x-3 pt-2">
             <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-md">Cancel</button>

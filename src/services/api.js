@@ -328,17 +328,12 @@ export const subscriptionAPI = {
     }
   },
 
-  getAllPlans: async () => {
-    try {
-      const response = await axios.get(`${API_BASE}/subscriptions/plans`, {
-        headers: getAuthHeaders()
-      });
+     getAllPlans: async () => {
+         const response = await axios.get(`${API_BASE}/subscriptions/plans`, {
+           headers: getAuthHeaders()
+         });
       return response.data;
-    } catch (error) {
-      console.error('Plans fetch error:', error.response?.status, error.message);
-      return [];
-    }
-  },
+    },
 
   getPlanById: async (identifier) => {
     try {
@@ -393,25 +388,39 @@ export const subscriptionAPI = {
     }
   },
 
-  updateSubscription: async (companyId, subscriptionData) => {
-    try {
-      const payload = {
-        subscriptionPlan: subscriptionData.subscriptionPlan,
-        subscriptionStatus: subscriptionData.subscriptionStatus,
-        jobsQuota: Number(subscriptionData.jobsQuota),
-        ...(subscriptionData.customEndDate ? { customEndDate: subscriptionData.customEndDate } : {})
-      };
+  // updateSubscription: async (companyId, subscriptionData) => {
+  //   try {
+  //     const payload = {
+  //       subscriptionPlan: subscriptionData.subscriptionPlan,
+  //       subscriptionStatus: subscriptionData.subscriptionStatus,
+  //       jobsQuota: Number(subscriptionData.jobsQuota),
+  //       ...(subscriptionData.customEndDate ? { customEndDate: subscriptionData.customEndDate } : {})
+  //     };
 
-      const response = await axios.put(
-        `${API_BASE}/companies/${companyId}/subscription`,
-        payload,
-        { headers: getAuthHeaders() }
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to update subscription');
-    }
-  },
+  //     const response = await axios.put(
+  //       `${API_BASE}/companies/${companyId}/subscription`,
+  //       payload,
+  //       { headers: getAuthHeaders() }
+  //     );
+  //     return response.data;
+  //   } catch (error) {
+  //     throw new Error(error.response?.data?.message || 'Failed to update subscription');
+  //   }
+  // },
+// inside subscriptionAPI
+updateSubscription: async (companyId, { subscriptionPlanId }) => {
+  try {
+    const response = await axios.put(
+            `${API_BASE}/companies/${companyId}/subscription`,
+            { subscriptionPlanId },
+            { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } }
+          );
+    return response.data;
+  } catch (error) {
+    const msg = error?.response?.data?.message || error?.response?.data?.error;
+    throw new Error(msg || 'Failed to update subscription');
+  }
+},
 
   getCompanySubscription: async (companyId) => {
     try {

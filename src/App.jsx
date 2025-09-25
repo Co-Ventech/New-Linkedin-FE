@@ -559,7 +559,7 @@ function App() {
         <Route
           path="/dashboard/linkedin"
           element={
-            <ProtectedRoute roles={['company_user']}>
+            <ProtectedRoute roles={['company_admin','company_user']}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -569,7 +569,7 @@ function App() {
         <Route
           path="/dashboard/upwork"
           element={
-            <ProtectedRoute roles={['company_user']}>
+            <ProtectedRoute roles={['company_admin','company_user']}>
               <UpworkDashboard />
             </ProtectedRoute>
           }
@@ -606,7 +606,7 @@ function App() {
 <Route
   path="/dashboard/google"
   element={
-    <ProtectedRoute roles={['company_user']}>
+    <ProtectedRoute roles={['company_admin','company_user']}>
       <GoogleDashboard />
     </ProtectedRoute>
   }
@@ -618,7 +618,7 @@ function App() {
     <ProtectedRoute roles={['company_admin', 'company_user']}>
       <GoogleJobDetails />
     </ProtectedRoute>
-  }
+  } 
 />
      
         

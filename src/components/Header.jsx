@@ -136,23 +136,23 @@ const Header = ({ onExport, onLogout, user,source, onRefreshJobs , hideDownloadE
        
         <div className="flex items-center gap-4">
           {/* Role-based navigation links */}
-          {isCompanyAdmin(currentUser) && (
-            <button
-              onClick={() => navigate("/user-management")}
-              className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Manage Users
-            </button>
-          )}
-          
-          {isSuperAdmin(currentUser) && (
-            <button
-              onClick={() => navigate("/admin-dashboard")}
-              className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Admin Panel
-            </button>
-          )}
+            {isCompanyAdmin(currentUser) && (
+              <button
+                onClick={() => navigate("/user-management")}
+                className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Manage Users
+              </button>
+            )}
+            
+            {isSuperAdmin(currentUser) && (
+              <button
+                onClick={() => navigate("/admin-dashboard")}
+                className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                Admin Panel
+              </button>
+            )}
           
         <Menu as="div" className="relative inline-block text-left mr-4">
             <Menu.Button className="px-3 py-1 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100">

@@ -780,26 +780,46 @@ const SuperAdminDashboard = () => {
     }
   };
 
-  const handleUpdateSubscription = async (companyId, subscriptionData) => {
+  const handleUpdateSubscription = async (companyId, { subscriptionPlanId }) => {
     try {
       setLoading(true);
-      await subscriptionAPI.updateSubscription(companyId, {
-        subscriptionPlan: subscriptionData.subscriptionPlan,
-        subscriptionStatus: subscriptionData.subscriptionStatus,
-        jobsQuota: subscriptionData.jobsQuota,
-        customEndDate: subscriptionData.customEndDate || ''
-      });
+      if (!subscriptionPlanId) {
+        showMessage('error', 'Please select a subscription plan');
+        return;
+      }
+      await subscriptionAPI.updateSubscription(companyId, { subscriptionPlanId });
       showMessage('success', 'Subscription updated successfully!');
       setShowSubscriptionModal(false);
       setSelectedCompany(null);
       await loadInitialData();
     } catch (error) {
       console.error('Error updating subscription:', error);
-      showMessage('error', error.message || 'Failed to update subscription');
+      const msg = error?.message || 'Failed to update subscription';
+      showMessage('error', msg.includes('subscriptionPlanId') ? 'Please select a subscription plan' : msg);
     } finally {
       setLoading(false);
     }
   };
+  // const handleUpdateSubscription = async (companyId, subscriptionData) => {
+  //   try {
+  //     setLoading(true);
+  //     await subscriptionAPI.updateSubscription(companyId, {
+  //       subscriptionPlan: subscriptionData.subscriptionPlan,
+  //       subscriptionStatus: subscriptionData.subscriptionStatus,
+  //       jobsQuota: subscriptionData.jobsQuota,
+  //       customEndDate: subscriptionData.customEndDate || ''
+  //     });
+  //     showMessage('success', 'Subscription updated successfully!');
+  //     setShowSubscriptionModal(false);
+  //     setSelectedCompany(null);
+  //     await loadInitialData();
+  //   } catch (error) {
+  //     console.error('Error updating subscription:', error);
+  //     showMessage('error', error.message || 'Failed to update subscription');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Stable id generator (fallback if crypto.randomUUID not available)
   const genKey = () =>
@@ -3393,6 +3413,8 @@ const SuperAdminDashboard = () => {
       </div>
     );
   };
+
+  
 
 
 
