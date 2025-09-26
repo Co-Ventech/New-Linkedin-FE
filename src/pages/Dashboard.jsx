@@ -789,6 +789,34 @@ const handleDateRangeChange = (e) => {
                       <Kanban className="h-4 w-4" />
                       Pipeline
                     </button>
+                      {/* Quick AI filter */}
+                <div className="flex items-center gap-2">
+                  {/* <span className="text-sm font-medium text-gray-700">AI Recommended:</span> */}
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    <button
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                        !filters?.color || filters?.color === ''
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                      onClick={() => setFilters(prev => ({ ...prev, color: '' }))}
+                      // onClick={() => onFilterChange('color', '')}
+                    >
+                      All
+                    </button>
+                    <button
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                        filters?.color === 'Green'
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                       onClick={() => setFilters(prev => ({ ...prev, color: 'Green' }))}
+                      // onClick={() => onFilterChange('color', 'Green')}
+                    >
+                      AI Recommended
+                    </button>
+                  </div>
+                </div>
                   </div>
                 </div>
 

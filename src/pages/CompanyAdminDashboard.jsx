@@ -3038,6 +3038,7 @@ const CompanyAdminDashboard = () => {
   const [stats, setStats] = useState({})
   const [activities, setActivities] = useState([])
   const pipeline = useSelector(selectPipeline)
+
   const [pipelineForm, setPipelineForm] = useState({
     name: "Custom Pipeline",
     statusStages: [
@@ -3046,6 +3047,7 @@ const CompanyAdminDashboard = () => {
       { name: "interview", displayName: "Interview", sortOrder: 2 },
       { name: "offer", displayName: "Offer", sortOrder: 3 },
     ],
+    // useCustomPipeline: true,
     useCustomPipeline: true,
     settings: {
       allowSkipStages: true,
@@ -3107,6 +3109,10 @@ const CompanyAdminDashboard = () => {
     dispatch(fetchCompanyPipelineThunk())
 
   }, [])
+  const stagesDisabled = !pipelineForm.useCustomPipeline;
+  // <input disabled={stagesDisabled} ... />
+  // <button disabled={stagesDisabled} ... />
+
 
   const handleAddStage = () => {
     setPipelineForm(prev => ({
@@ -3167,14 +3173,16 @@ const CompanyAdminDashboard = () => {
       }
       await dispatch(updateCompanyPipelineThunk({
         ...pipelineForm,
+        useCustomPipeline: true, // enforce 'true' in outgoing payload
         statusStages: stages.map(s => ({ name: s.name, displayName: s.displayName || s.name, sortOrder: s.sortOrder }))
       })).unwrap()
       await dispatch(fetchCompanyPipelineThunk()).unwrap()
       setMessage({ type: 'success', text: 'Pipeline updated successfully' })
     } catch (e) {
-      setMessage({ type: 'error', text: e.message || 'Failed to update pipeline' })
+      const msg = e?.message || 'Failed to update pipeline';
+      setMessage({ type: 'error', text: msg.includes('useCustomPipeline') ? 'Please enable the custom pipeline' : msg });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -3452,6 +3460,10 @@ const CompanyAdminDashboard = () => {
     }
   }
 
+  useEffect(() => {
+    dispatch(fetchJobsOverview)
+
+  }, [])
   // Load initial data with improved error handling
   // replace your loadInitialData with:
   const loadInitialData = async () => {
@@ -3543,35 +3555,23 @@ const CompanyAdminDashboard = () => {
       return {
         grandTotal: {
           total_engagement: data?.grandTotal?.total_engagement ?? 0,
-          not_engaged: data?.grandTotal?.not_engaged ?? 0,
-          applied: data?.grandTotal?.applied ?? 0,
-          engaged: data?.grandTotal?.engaged ?? 0,
-          interview: data?.grandTotal?.interview ?? 0,
-          offer: data?.grandTotal?.offer ?? 0,
-          rejected: data?.grandTotal?.rejected ?? 0,
-          onboard: data?.grandTotal?.onboard ?? 0,
+          ...data?.grandTotal
         },
         dailyTotals: Array.isArray(data?.dailyTotals) ? data.dailyTotals : [],
         users: Array.isArray(data?.users) ? data.users : [],
+        stages: Array.isArray(data?.stages) ? data.stages : []
       }
     } catch (err) {
       console.error("Overview stats fetch error:", err)
       return {
-        grandTotal: {
-          total_engagement: 0,
-          not_engaged: 0,
-          applied: 0,
-          engaged: 0,
-          interview: 0,
-          offer: 0,
-          rejected: 0,
-          onboard: 0,
-        },
+        grandTotal: { total_engagement: 0 },
         dailyTotals: [],
         users: [],
+        stages: []
       }
     }
   }
+
   // 4. Add the missing fetchCompanyStats function
   // Company stats
 
@@ -3837,14 +3837,55 @@ const CompanyAdminDashboard = () => {
     setSelectedJobs((prev) => (prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]))
   }
 
+
   const OverviewTab = () => {
+      // Build dynamic stage list from API; fallback to pipeline config
+const pipelineStages = (Array.isArray(pipeline?.statusStages) ? pipeline.statusStages : (pipelineForm.statusStages || []))
+.map((s, i) => ({ name: s.name, displayName: s.displayName || s.name, sortOrder: Number(s.sortOrder ?? i) }));
+
+const apiStages = Array.isArray(overview?.stages) ? overview.stages : [];
+const mergedStageNames = (apiStages.length > 0 ? apiStages : pipelineStages.map(s => s.name));
+
+// Ensure not_engaged first and unique
+const stageSet = new Set();
+const normalizedStageNames = ['not_engaged', ...mergedStageNames].filter(n => {
+if (stageSet.has(n)) return false; stageSet.add(n); return true;
+});
+
+// Map to objects with display names (from pipeline if available)
+const displayNameByName = pipelineStages.reduce((m, s) => (m[s.name] = s.displayName, m), {});
+const stagesList = normalizedStageNames.map(n => ({
+name: n,
+label: displayNameByName[n] || n.replace(/_/g, ' ')
+}));
+
+// Keys list used everywhere else
+const statusKeys = stagesList.map(s => s.name);
+
+// Grand totals with safe defaults
+const gt = statusKeys.reduce((acc, k) => {
+acc[k] = Number(overview?.grandTotal?.[k]) || 0;
+return acc;
+}, { total_engagement: Number(overview?.grandTotal?.total_engagement) || 0 });
+
+const statusMeta = {
+  not_engaged: 'bg-slate-500',
+  applied: 'bg-blue-500',
+  engaged: 'bg-indigo-500',
+  interview: 'bg-purple-500',
+  offer: 'bg-emerald-500',
+  rejected: 'bg-red-500',
+  onboard: 'bg-teal-500',
+};
+const colorFor = (name) => statusMeta[name] || 'bg-gray-500';
+const totalUserEngagement = (s) => statusKeys.reduce((sum, k) => sum + (Number(s[k]) || 0), 0);
     const totalUsers = users.length
     const activeUsers = users.filter((u) => u.isActive).length
     const totalJobs = jobs.length
     const assignedJobs =
       typeof stats.assignedJobs === "number" ? stats.assignedJobs : jobs.filter((j) => !!j.assignee).length
 
-    const gt = overview.grandTotal || {}
+    // const gt = overview.grandTotal || {}
     const statusCards = [
       {
         key: "not_engaged",
@@ -3890,16 +3931,16 @@ const CompanyAdminDashboard = () => {
       },
     ]
 
-    const statusKeys = ["not_engaged", "applied", "engaged", "interview", "offer", "rejected", "onboard"]
-    const statusMeta = {
-      applied: { color: "bg-gradient-to-t from-blue-500 to-blue-400", shadow: "shadow-blue-200" },
-      engaged: { color: "bg-gradient-to-t from-indigo-500 to-indigo-400", shadow: "shadow-indigo-200" },
-      interview: { color: "bg-gradient-to-t from-purple-500 to-purple-400", shadow: "shadow-purple-200" },
-      offer: { color: "bg-gradient-to-t from-emerald-500 to-emerald-400", shadow: "shadow-emerald-200" },
-      rejected: { color: "bg-gradient-to-t from-red-500 to-red-400", shadow: "shadow-red-200" },
-      onboard: { color: "bg-gradient-to-t from-teal-500 to-teal-400", shadow: "shadow-teal-200" },
-      not_engaged: { color: "bg-gradient-to-t from-slate-400 to-slate-300", shadow: "shadow-slate-200" },
-    }
+    // const statusKeys = ["not_engaged", "applied", "engaged", "interview", "offer", "rejected", "onboard"]
+    // const statusMeta = {
+      // applied: { color: "bg-gradient-to-t from-blue-500 to-blue-400", shadow: "shadow-blue-200" },
+      // engaged: { color: "bg-gradient-to-t from-indigo-500 to-indigo-400", shadow: "shadow-indigo-200" },
+      // interview: { color: "bg-gradient-to-t from-purple-500 to-purple-400", shadow: "shadow-purple-200" },
+      // offer: { color: "bg-gradient-to-t from-emerald-500 to-emerald-400", shadow: "shadow-emerald-200" },
+      // rejected: { color: "bg-gradient-to-t from-red-500 to-red-400", shadow: "shadow-red-200" },
+      // onboard: { color: "bg-gradient-to-t from-teal-500 to-teal-400", shadow: "shadow-teal-200" },
+      // not_engaged: { color: "bg-gradient-to-t from-slate-400 to-slate-300", shadow: "shadow-slate-200" },
+    // }
 
     const filteredUsers = Array.isArray(overview.users)
       ? overview.users.filter(u => (u.username || u._id) !== "system")
@@ -4034,6 +4075,45 @@ const CompanyAdminDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+  {stagesList.map((item) => {
+    const value = gt[item.name] ?? 0;
+    const total = gt.total_engagement || 0;
+    const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+    return (
+      <div key={item.name} className="bg-white rounded-xl shadow p-5 border hover:shadow-md transition-all">
+        <div className="text-sm font-medium text-slate-600 mb-2">{item.label}</div>
+        <div className="flex items-center justify-between">
+          <div className="text-2xl font-bold text-slate-900">{value}</div>
+          <div className="text-xs text-slate-500">{pct}%</div>
+        </div>
+        <div className="mt-2 h-1 bg-slate-200 rounded-full overflow-hidden">
+          <div className={`h-full ${colorFor(item.name)} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+{/* <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+  {stagesList.map((item) => {
+    const value = gt[item.name] ?? 0;
+    const total = gt.total_engagement || 0;
+    const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+    return (
+      <div key={item.name} className="bg-white rounded-xl shadow p-5 border hover:shadow-md transition-all">
+        <div className="text-sm font-medium text-slate-600 mb-2">{item.label}</div>
+        <div className="flex items-center justify-between">
+          <div className="text-2xl font-bold text-slate-900">{value}</div>
+          <div className="text-xs text-slate-500">{pct}%</div>
+        </div>
+        <div className="mt-2 h-1 bg-slate-200 rounded-full overflow-hidden">
+          <div className={`h-full ${colorFor(item.name)} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+    );
+  })}
+</div> */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
           {statusCards.map((item) => (
             <div
               key={item.key}
@@ -4054,7 +4134,7 @@ const CompanyAdminDashboard = () => {
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* <div className="bg-gradient-to-br from-white to-slate-50 rounded-xl shadow-xl border border-slate-200 overflow-hidden">
           <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-6 py-4">
@@ -4180,9 +4260,9 @@ const CompanyAdminDashboard = () => {
                         <div className="text-right">
                           <div className="text-xs text-slate-500 mb-1">Top Status</div>
                           <div
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${statusCards.find((sc) => sc.key === topStatus)?.color || "bg-slate-100 text-slate-700"}`}
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${colorFor(topStatus)} text-white`}
                           >
-                            {topStatus.replace("_", " ")}
+                            {topStatus.replace(/_/g, " ")}
                           </div>
                         </div>
                       </div>
@@ -4199,7 +4279,7 @@ const CompanyAdminDashboard = () => {
                                 {val} ({percentage}%)
                               </div>
                               <div
-                                className={`w-full ${statusMeta[k].color} rounded-t-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105`}
+                                className={`w-full ${colorFor(k)} rounded-t-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105`}
                                 style={{ height: `${Math.max(4, hPx)}px`, minWidth: "16px" }}
                               />
                               <div className="mt-2 text-xs text-slate-600 font-medium text-center leading-tight">
@@ -4274,7 +4354,7 @@ const CompanyAdminDashboard = () => {
                                 </div>
                               )}
                               <div
-                                className={`w-full ${statusMeta[k].color} rounded-t-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105`}
+                                className={`w-full ${colorFor(k)} rounded-t-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105`}
                                 style={{ height: `${Math.max(2, hPx)}px`, minWidth: "12px" }}
                               />
                             </div>
@@ -4381,30 +4461,29 @@ const CompanyAdminDashboard = () => {
           </div>
 
           <div className="p-6">
-            {/* Summary Cards Row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              {statusKeys.map((k) => {
-                const statusTotal = normalizedDaily.reduce((sum, d) => sum + (Number(d[k]) || 0), 0)
-                const statusCard = statusCards.find((sc) => sc.key === k)
-                const percentage = totalEngagement > 0 ? Math.round((statusTotal / totalEngagement) * 100) : 0
+{/* Summary Cards Row */}
+<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  {statusKeys.map((k) => {
+    const statusTotal = normalizedDaily.reduce((sum, d) => sum + (Number(d[k]) || 0), 0);
+    const percentage = totalEngagement > 0 ? Math.round((statusTotal / totalEngagement) * 100) : 0;
 
-                return (
-                  <div
-                    key={k}
-                    className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all duration-300 group"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className={`w-3 h-3 rounded-full ${statusMeta[k].color.replace("bg-", "bg-")}`}></div>
-                      <span className="text-xs text-slate-500">{percentage}%</span>
-                    </div>
-                    <div className="text-2xl font-bold text-slate-800 mb-1">{statusTotal}</div>
-                    <div className="text-xs font-medium text-slate-600 uppercase tracking-wide">
-                      {k.replace("_", " ")}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+    return (
+      <div
+        key={k}
+        className="bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all duration-300 group"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className={`w-3 h-3 rounded-full ${colorFor(k)}`}></div>
+          <span className="text-xs text-slate-500">{percentage}%</span>
+        </div>
+        <div className="text-2xl font-bold text-slate-800 mb-1">{statusTotal}</div>
+        <div className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+          {k.replace("_", " ")}
+        </div>
+      </div>
+    );
+  })}
+</div>
 
             {/* Combined Stacked Area Chart */}
             <div className="bg-white rounded-lg border border-slate-200 p-4">
@@ -4445,9 +4524,10 @@ const CompanyAdminDashboard = () => {
                               const val = Number(d[k]) || 0
                               return val > 0 ? (
                                 <div key={k} className="flex items-center space-x-1">
-                                  <div
+                                  <div className={`w-2 h-2 rounded-full ${colorFor(k)}`}></div>
+                                  {/* <div
                                     className={`w-2 h-2 rounded-full ${statusMeta[k].color.replace("bg-", "bg-")}`}
-                                  ></div>
+                                  ></div> */}
                                   <span>
                                     {k.replace("_", " ")}: {val}
                                   </span>
@@ -4468,7 +4548,7 @@ const CompanyAdminDashboard = () => {
                               return (
                                 <div
                                   key={k}
-                                  className={`w-full ${statusMeta[k].color} transition-all duration-300 hover:brightness-110 first:rounded-t-lg last:rounded-b-lg`}
+                                  className={`w-full ${colorFor(k)} transition-all duration-300 hover:brightness-110 first:rounded-t-lg last:rounded-b-lg`}
                                   style={{
                                     height: `${Math.max(2, segmentHeight)}px`,
                                     minWidth: "16px",
@@ -4494,7 +4574,7 @@ const CompanyAdminDashboard = () => {
                       const statusTotal = normalizedDaily.reduce((sum, d) => sum + (Number(d[k]) || 0), 0)
                       return (
                         <div key={k} className="flex items-center space-x-2">
-                          <div className={`w-3 h-3 rounded-full ${statusMeta[k].color.replace("bg-", "bg-")}`}></div>
+                          <div className={`w-3 h-3 rounded-full ${colorFor(k)}`}></div>
                           <span className="text-sm text-slate-700 font-medium">
                             {k.replace("_", " ")} ({statusTotal})
                           </span>
@@ -5270,6 +5350,13 @@ const CompanyAdminDashboard = () => {
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                 />
               </div>
+              {/* <input disabled={stagesDisabled} /> */}
+              {/* <button disabled={stagesDisabled} /> */}
+              <span className={`px-2 py-1 rounded text-xs font-semibold ${pipelineForm.useCustomPipeline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+  {pipelineForm.useCustomPipeline ? 'Custom pipeline enabled' : 'Custom pipeline disabled'}
+</span>
+<input disabled={stagesDisabled} />
+<button disabled={stagesDisabled} />
               {/* 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <label className="flex items-center space-x-2">
@@ -5318,6 +5405,14 @@ const CompanyAdminDashboard = () => {
                   <span className="text-sm text-gray-700">Require comment on status change</span>
                 </label>
               </div> */}
+              <label className="flex items-center space-x-2">
+  <input
+    type="checkbox"
+    checked={!!pipelineForm.useCustomPipeline}
+    onChange={(e) => setPipelineForm({ ...pipelineForm, useCustomPipeline: e.target.checked })}
+  />
+  <span className="text-sm text-gray-700">Use custom pipeline</span>
+</label>
 
               <div>
                 <div className="flex justify-between items-center mb-2">

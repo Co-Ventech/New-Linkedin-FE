@@ -583,6 +583,7 @@ export const companyPipelineAPI = {
     const res = await axios.put(`${API_BASE}/company-pipeline`, payload, { headers: getAuthHeaders() });
     return res.data; // updated { pipeline, isCustom }
   }
+  
 };
 
 export const adminCompanyPipelineAPI = {

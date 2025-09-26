@@ -112,6 +112,7 @@ const UpworkDashboard = () => {
   // const authInitializing = useSelector(selectAuthInitializing);
   const pipelineLoading = useSelector((state) => state.user.pipelineLoading);
   const [pipelineRequested, setPipelineRequested] = useState(false);
+  const [triedRange, setTriedRange] = useState({}); // e.g., { '1d': true, '7d': true }
   // Ensure pipeline is loaded on mount
   useEffect(() => {
     if (!pipelineRequested && statusOptions.length === 0) {
@@ -380,6 +381,7 @@ const UpworkDashboard = () => {
 
 
 
+
   // Calculate total jobs for stats
   const totalJobs = allJobs.length;
   const jobStats = statusOrder.reduce((acc, status) => { acc[status] = allJobs.filter(job => job.currentStatus === status).length; return acc; }, {});
@@ -399,14 +401,28 @@ const UpworkDashboard = () => {
 
   // Update the useEffect for pagination
 
-  // Effect for dateRange change (add loading/data check)
+  // // Effect for dateRange change (add loading/data check)
+  // useEffect(() => {
+  //   if (loading || (upworkJobsByDate.length > 0 && dateRange === range)) return; // Skip if loading or data exists for this range
+  //   setPage(1);
+  //   setHasMoreLocal(true);
+  //   dispatch(resetJobsByDate());
+  //   debouncedFetch({ range: dateRange || '1d', page: 1, limit: 100 });
+  // }, [dateRange, dispatch, loading, upworkJobsByDate.length, range]);
   useEffect(() => {
-    if (loading || (upworkJobsByDate.length > 0 && dateRange === range)) return; // Skip if loading or data exists for this range
+    if (!dateRange) return;
+    if (triedRange[dateRange]) return; // already attempted this range; don't re-hit
+    if (loading) return;
+  
     setPage(1);
     setHasMoreLocal(true);
     dispatch(resetJobsByDate());
     debouncedFetch({ range: dateRange || '1d', page: 1, limit: 100 });
-  }, [dateRange, dispatch, loading, upworkJobsByDate.length, range]);
+  
+    // mark tried so we won't refetch repeatedly for the same range
+    setTriedRange(prev => ({ ...prev, [dateRange]: true }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRange, loading, dispatch]);
 
 
   // useEffect(() => {
@@ -679,8 +695,37 @@ const UpworkDashboard = () => {
                       <Kanban className="h-4 w-4" />
                       Pipeline
                     </button>
+                       {/* Quick AI filter */}
+                <div className="flex items-center gap-2">
+                  {/* <span className="text-sm font-medium text-gray-700">AI Recommended:</span> */}
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    <button
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                        !filters?.color || filters?.color === ''
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                      onClick={() => setFilters(prev => ({ ...prev, color: '' }))}
+                      // onClick={() => onFilterChange('color', '')}
+                    >
+                      All
+                    </button>
+                    <button
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                        filters?.color === 'Green'
+                          ? "bg-white text-blue-600 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                      onClick={() => setFilters(prev => ({ ...prev, color: 'Green' }))}
+                      // onClick={() => onFilterChange('color', 'Green')}
+                    >
+                      AI Recommended
+                    </button>
                   </div>
                 </div>
+                  </div>
+                </div>
+             
               </div>
 
               {/* Pipeline loader */}
